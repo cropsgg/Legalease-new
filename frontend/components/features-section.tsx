@@ -17,35 +17,35 @@ export default function FeaturesSection() {
       title: "Parse & Explain Agreements",
       description:
         "Upload any legal document and get AI-powered analysis, risk assessment, and plain English explanations.",
-      image: "/images/document-analysis.jpg",
+      image: "/images/image2.jpeg",
       fallback: "Document analysis dashboard with highlighted terms",
     },
     {
       icon: Calendar,
       title: "Deadline Tracking",
       description: "Never miss GST, MCA, ISO, or labor law deadlines with intelligent calendar integration and alerts.",
-      image: "/images/deadline-tracking.jpg",
+      image: "/images/image6.jpeg",
       fallback: "Calendar interface showing compliance deadlines",
     },
     {
       icon: Shield,
       title: "PAN/Aadhaar Verification",
       description: "Instant identity verification and KYC compliance using government APIs and secure data handling.",
-      image: "/images/verification-system.jpg",
+      image: "/images/image3.jpeg",
       fallback: "Identity verification interface with security badges",
     },
     {
       icon: MessageSquare,
       title: "Vernacular Alerts",
       description: "Get notifications and document summaries in Hindi, Tamil, and other regional languages.",
-      image: "/images/multilingual-support.jpg",
+      image: "/images/image4.jpeg",
       fallback: "Multi-language notification interface",
     },
     {
       icon: CreditCard,
       title: "Smart Secure Payment Flows",
       description: "Integrated payment processing with invoice generation, tax calculations, and compliance tracking.",
-      image: "/images/payment-system.jpg",
+      image: "/images/image5.jpeg",
       fallback: "Payment processing dashboard with security features",
     },
   ]
@@ -58,21 +58,7 @@ export default function FeaturesSection() {
           alt={alt}
           fill
           className="object-cover transition-transform duration-300 hover:scale-105"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement
-            target.style.display = "none"
-            const fallbackDiv = target.nextElementSibling as HTMLElement
-            if (fallbackDiv) fallbackDiv.style.display = "flex"
-          }}
         />
-        <div className="image-fallback absolute inset-0 hidden">
-          <div className="text-center p-8">
-            <div className="w-16 h-16 bg-slate-300 dark:bg-gray-600 rounded-lg mx-auto mb-4 flex items-center justify-center">
-              <FileText className="w-8 h-8 text-slate-500 dark:text-gray-400" />
-            </div>
-            <p className="text-sm text-slate-500 dark:text-gray-400">{fallback}</p>
-          </div>
-        </div>
       </div>
     )
   }
