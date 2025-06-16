@@ -1,3 +1,5 @@
+"use client"
+
 import { FileText, Search, Calendar, Shield, MessageSquare, CreditCard } from "lucide-react"
 import Image from "next/image"
 

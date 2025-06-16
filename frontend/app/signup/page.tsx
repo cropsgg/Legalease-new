@@ -9,30 +9,90 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Scale, Eye, EyeOff, Mail, Lock, User, Building, UserCheck } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+import { Scale, Eye, EyeOff, Mail, Lock, User, Building, UserCheck, AlertCircle } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
+import { useForm, useToast } from "@/hooks/use-api"
+import { RegisterData } from "@/lib/auth-store"
+
+interface SignupFormData extends RegisterData {
+  confirmPassword: string
+  agreeToTerms: boolean
+  subscribeNewsletter: boolean
+}
+
+const signupValidation = (values: SignupFormData) => {
+  const errors: Record<string, string> = {}
+  
+  if (!values.firstName) {
+    errors.firstName = "First name is required"
+  }
+  
+  if (!values.lastName) {
+    errors.lastName = "Last name is required"
+  }
+  
+  if (!values.email) {
+    errors.email = "Email is required"
+  } else if (!/\S+@\S+\.\S+/.test(values.email)) {
+    errors.email = "Email is invalid"
+  }
+  
+  if (!values.companyName) {
+    errors.companyName = "Company name is required"
+  }
+  
+  if (!values.companySize) {
+    errors.companySize = "Company size is required"
+  }
+  
+  if (!values.role) {
+    errors.role = "Role is required"
+  }
+  
+  if (!values.password) {
+    errors.password = "Password is required"
+  } else if (values.password.length < 6) {
+    errors.password = "Password must be at least 6 characters"
+  }
+  
+  if (!values.confirmPassword) {
+    errors.confirmPassword = "Confirm password is required"
+  } else if (values.password !== values.confirmPassword) {
+    errors.confirmPassword = "Passwords don't match"
+  }
+  
+  if (!values.agreeToTerms) {
+    errors.agreeToTerms = "You must agree to the terms and conditions"
+  }
+  
+  return errors
+}
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [isUpgrade, setIsUpgrade] = useState(false)
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    companyName: "",
-    companySize: "",
-    role: "",
-    agreeToTerms: false,
-    subscribeNewsletter: false,
-  })
-
-  const { signup, upgradeGuestToUser, loginAsGuest, user } = useAuth()
+  
+  const { register, upgradeGuestToUser, loginAsGuest, user, isLoading, error, clearError } = useAuth()
+  const { showToast } = useToast()
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  const form = useForm<SignupFormData>(
+    {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      companyName: "",
+      companySize: "",
+      role: "",
+      agreeToTerms: false,
+      subscribeNewsletter: false,
+    },
+    signupValidation
+  )
 
   useEffect(() => {
     const upgrade = searchParams.get("upgrade")
@@ -43,47 +103,47 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match")
-      setIsLoading(false)
+    
+    if (!form.validate()) {
+      showToast("Please fix the errors in the form", "error")
       return
     }
 
     try {
-      if (isUpgrade && user?.isGuest) {
-        await upgradeGuestToUser(formData)
-      } else {
-        await signup(formData)
+      clearError()
+      
+      const userData: RegisterData = {
+        email: form.values.email,
+        password: form.values.password,
+        firstName: form.values.firstName,
+        lastName: form.values.lastName,
+        companyName: form.values.companyName,
+        companySize: form.values.companySize,
+        role: form.values.role,
       }
+
+      if (isUpgrade && user?.isGuest) {
+        await upgradeGuestToUser(userData)
+        showToast("Account upgraded successfully!", "success")
+      } else {
+        await register(userData)
+        showToast("Account created successfully!", "success")
+      }
+      
       router.push("/dashboard")
-    } catch (error) {
-      console.error("Signup failed:", error)
-    } finally {
-      setIsLoading(false)
+    } catch (error: any) {
+      showToast("Registration failed. Please try again.", "error")
     }
   }
 
   const handleGuestLogin = () => {
-    loginAsGuest()
-    router.push("/dashboard")
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }))
-  }
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    try {
+      loginAsGuest()
+      showToast("Welcome! You're now browsing as a guest.", "success")
+      router.push("/dashboard")
+    } catch (error: any) {
+      showToast("Failed to start guest session", "error")
+    }
   }
 
   return (
@@ -114,12 +174,21 @@ export default function SignupPage() {
 
           {/* Signup Form */}
           <div className="enhanced-card p-8">
+            {/* Error Display */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              </div>
+            )}
+
             {!isUpgrade && (
               <>
                 {/* Guest Login Option */}
                 <div className="mb-6">
                   <Button
                     onClick={handleGuestLogin}
+                    disabled={isLoading}
                     className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     <UserCheck className="w-5 h-5 mr-2" />
@@ -158,12 +227,18 @@ export default function SignupPage() {
                       name="firstName"
                       type="text"
                       required
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                      value={form.values.firstName}
+                      onChange={form.handleInputChange}
+                      onBlur={() => form.setFieldTouched('firstName')}
+                      className={`pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                        form.errors.firstName && form.touched.firstName ? 'border-red-500 dark:border-red-400' : ''
+                      }`}
                       placeholder="John"
                     />
                   </div>
+                  {form.errors.firstName && form.touched.firstName && (
+                    <p className="text-red-500 text-sm">{form.errors.firstName}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -175,11 +250,17 @@ export default function SignupPage() {
                     name="lastName"
                     type="text"
                     required
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                    value={form.values.lastName}
+                    onChange={form.handleInputChange}
+                    onBlur={() => form.setFieldTouched('lastName')}
+                    className={`bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                      form.errors.lastName && form.touched.lastName ? 'border-red-500 dark:border-red-400' : ''
+                    }`}
                     placeholder="Doe"
                   />
+                  {form.errors.lastName && form.touched.lastName && (
+                    <p className="text-red-500 text-sm">{form.errors.lastName}</p>
+                  )}
                 </div>
               </div>
 
@@ -195,12 +276,18 @@ export default function SignupPage() {
                     name="email"
                     type="email"
                     required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                    value={form.values.email}
+                    onChange={form.handleInputChange}
+                    onBlur={() => form.setFieldTouched('email')}
+                    className={`pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                      form.errors.email && form.touched.email ? 'border-red-500 dark:border-red-400' : ''
+                    }`}
                     placeholder="john@example.com"
                   />
                 </div>
+                {form.errors.email && form.touched.email && (
+                  <p className="text-red-500 text-sm">{form.errors.email}</p>
+                )}
               </div>
 
               {/* Company Information */}
@@ -216,20 +303,28 @@ export default function SignupPage() {
                       name="companyName"
                       type="text"
                       required
-                      value={formData.companyName}
-                      onChange={handleInputChange}
-                      className="pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                      value={form.values.companyName}
+                      onChange={form.handleInputChange}
+                      onBlur={() => form.setFieldTouched('companyName')}
+                      className={`pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                        form.errors.companyName && form.touched.companyName ? 'border-red-500 dark:border-red-400' : ''
+                      }`}
                       placeholder="Your Company"
                     />
                   </div>
+                  {form.errors.companyName && form.touched.companyName && (
+                    <p className="text-red-500 text-sm">{form.errors.companyName}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="companySize" className="text-slate-700 dark:text-gray-300 font-medium">
                     Company Size
                   </Label>
-                  <Select onValueChange={(value) => handleSelectChange("companySize", value)}>
-                    <SelectTrigger className="bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white">
+                  <Select onValueChange={(value) => form.handleSelectChange("companySize", value)}>
+                    <SelectTrigger className={`bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white ${
+                      form.errors.companySize && form.touched.companySize ? 'border-red-500 dark:border-red-400' : ''
+                    }`}>
                       <SelectValue placeholder="Select size" />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600">
@@ -239,6 +334,9 @@ export default function SignupPage() {
                       <SelectItem value="200+">200+ employees</SelectItem>
                     </SelectContent>
                   </Select>
+                  {form.errors.companySize && form.touched.companySize && (
+                    <p className="text-red-500 text-sm">{form.errors.companySize}</p>
+                  )}
                 </div>
               </div>
 
@@ -247,8 +345,10 @@ export default function SignupPage() {
                 <Label htmlFor="role" className="text-slate-700 dark:text-gray-300 font-medium">
                   Your Role
                 </Label>
-                <Select onValueChange={(value) => handleSelectChange("role", value)}>
-                  <SelectTrigger className="bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white">
+                <Select onValueChange={(value) => form.handleSelectChange("role", value)}>
+                  <SelectTrigger className={`bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white ${
+                    form.errors.role && form.touched.role ? 'border-red-500 dark:border-red-400' : ''
+                  }`}>
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600">
@@ -259,6 +359,9 @@ export default function SignupPage() {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+                {form.errors.role && form.touched.role && (
+                  <p className="text-red-500 text-sm">{form.errors.role}</p>
+                )}
               </div>
 
               {/* Password Fields */}
@@ -274,9 +377,12 @@ export default function SignupPage() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="pl-10 pr-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                      value={form.values.password}
+                      onChange={form.handleInputChange}
+                      onBlur={() => form.setFieldTouched('password')}
+                      className={`pl-10 pr-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                        form.errors.password && form.touched.password ? 'border-red-500 dark:border-red-400' : ''
+                      }`}
                       placeholder="Create password"
                     />
                     <button
@@ -287,6 +393,9 @@ export default function SignupPage() {
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
+                  {form.errors.password && form.touched.password && (
+                    <p className="text-red-500 text-sm">{form.errors.password}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -300,9 +409,12 @@ export default function SignupPage() {
                       name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       required
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      className="pl-10 pr-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                      value={form.values.confirmPassword}
+                      onChange={form.handleInputChange}
+                      onBlur={() => form.setFieldTouched('confirmPassword')}
+                      className={`pl-10 pr-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                        form.errors.confirmPassword && form.touched.confirmPassword ? 'border-red-500 dark:border-red-400' : ''
+                      }`}
                       placeholder="Confirm password"
                     />
                     <button
@@ -313,6 +425,9 @@ export default function SignupPage() {
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
+                  {form.errors.confirmPassword && form.touched.confirmPassword && (
+                    <p className="text-red-500 text-sm">{form.errors.confirmPassword}</p>
+                  )}
                 </div>
               </div>
 
@@ -322,10 +437,8 @@ export default function SignupPage() {
                   <Checkbox
                     id="agreeToTerms"
                     name="agreeToTerms"
-                    checked={formData.agreeToTerms}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, agreeToTerms: checked as boolean }))
-                    }
+                    checked={form.values.agreeToTerms}
+                    onCheckedChange={(checked) => form.setValue('agreeToTerms', checked as boolean)}
                     className="border-slate-300 dark:border-gray-600 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 mt-1"
                     required
                   />
@@ -342,16 +455,17 @@ export default function SignupPage() {
                       Privacy Policy
                     </Link>
                   </Label>
+                  {form.errors.agreeToTerms && (
+                    <p className="text-red-500 text-sm">{form.errors.agreeToTerms}</p>
+                  )}
                 </div>
 
                 <div className="flex items-start space-x-2">
                   <Checkbox
                     id="subscribeNewsletter"
                     name="subscribeNewsletter"
-                    checked={formData.subscribeNewsletter}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, subscribeNewsletter: checked as boolean }))
-                    }
+                    checked={form.values.subscribeNewsletter}
+                    onCheckedChange={(checked) => form.setValue('subscribeNewsletter', checked as boolean)}
                     className="border-slate-300 dark:border-gray-600 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 mt-1"
                   />
                   <Label
@@ -366,7 +480,7 @@ export default function SignupPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isLoading || !formData.agreeToTerms}
+                disabled={isLoading || !form.values.agreeToTerms}
                 className="w-full btn-primary py-3 text-base font-semibold"
               >
                 {isLoading
@@ -394,7 +508,7 @@ export default function SignupPage() {
 
                   {/* Social Signup */}
                   <div className="grid grid-cols-2 gap-3">
-                    <Button type="button" variant="outline" className="btn-outline py-3">
+                    <Button type="button" variant="outline" className="btn-outline py-3" disabled={isLoading}>
                       <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                         <path
                           fill="currentColor"
@@ -415,7 +529,7 @@ export default function SignupPage() {
                       </svg>
                       Google
                     </Button>
-                    <Button type="button" variant="outline" className="btn-outline py-3">
+                    <Button type="button" variant="outline" className="btn-outline py-3" disabled={isLoading}>
                       <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.024-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.347-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.017z" />
                       </svg>

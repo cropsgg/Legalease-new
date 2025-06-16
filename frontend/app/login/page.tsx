@@ -8,46 +8,75 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Scale, Eye, EyeOff, Mail, Lock, UserCheck } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+import { Scale, Eye, EyeOff, Mail, Lock, UserCheck, AlertCircle } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
+import { useForm, useToast } from "@/hooks/use-api"
+
+interface LoginFormData {
+  email: string
+  password: string
+  rememberMe: boolean
+}
+
+const loginValidation = (values: LoginFormData) => {
+  const errors: Record<string, string> = {}
+  
+  if (!values.email) {
+    errors.email = "Email is required"
+  } else if (!/\S+@\S+\.\S+/.test(values.email)) {
+    errors.email = "Email is invalid"
+  }
+  
+  if (!values.password) {
+    errors.password = "Password is required"
+  } else if (values.password.length < 6) {
+    errors.password = "Password must be at least 6 characters"
+  }
+  
+  return errors
+}
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  })
-
-  const { login, loginAsGuest } = useAuth()
+  const { login, loginAsGuest, isLoading, error, clearError } = useAuth()
+  const { showToast } = useToast()
   const router = useRouter()
+
+  const form = useForm<LoginFormData>(
+    {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+    loginValidation
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    
+    if (!form.validate()) {
+      showToast("Please fix the errors in the form", "error")
+      return
+    }
 
     try {
-      await login(formData.email, formData.password)
+      clearError()
+      await login(form.values.email, form.values.password)
+      showToast("Login successful!", "success")
       router.push("/dashboard")
-    } catch (error) {
-      console.error("Login failed:", error)
-    } finally {
-      setIsLoading(false)
+    } catch (error: any) {
+      showToast("Login failed. Please check your credentials.", "error")
     }
   }
 
   const handleGuestLogin = () => {
-    loginAsGuest()
-    router.push("/dashboard")
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }))
+    try {
+      loginAsGuest()
+      showToast("Welcome! You're now browsing as a guest.", "success")
+      router.push("/dashboard")
+    } catch (error: any) {
+      showToast("Failed to start guest session", "error")
+    }
   }
 
   return (
@@ -72,10 +101,19 @@ export default function LoginPage() {
 
           {/* Login Form */}
           <div className="enhanced-card p-8">
+            {/* Error Display */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              </div>
+            )}
+
             {/* Guest Login Option */}
             <div className="mb-6">
               <Button
                 onClick={handleGuestLogin}
+                disabled={isLoading}
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <UserCheck className="w-5 h-5 mr-2" />
@@ -111,12 +149,18 @@ export default function LoginPage() {
                     name="email"
                     type="email"
                     required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                    value={form.values.email}
+                    onChange={form.handleInputChange}
+                    onBlur={() => form.setFieldTouched('email')}
+                    className={`pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                      form.errors.email && form.touched.email ? 'border-red-500 dark:border-red-400' : ''
+                    }`}
                     placeholder="Enter your email"
                   />
                 </div>
+                {form.errors.email && form.touched.email && (
+                  <p className="text-red-500 text-sm">{form.errors.email}</p>
+                )}
               </div>
 
               {/* Password Field */}
@@ -131,9 +175,12 @@ export default function LoginPage() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="pl-10 pr-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                    value={form.values.password}
+                    onChange={form.handleInputChange}
+                    onBlur={() => form.setFieldTouched('password')}
+                    className={`pl-10 pr-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
+                      form.errors.password && form.touched.password ? 'border-red-500 dark:border-red-400' : ''
+                    }`}
                     placeholder="Enter your password"
                   />
                   <button
@@ -144,6 +191,9 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {form.errors.password && form.touched.password && (
+                  <p className="text-red-500 text-sm">{form.errors.password}</p>
+                )}
               </div>
 
               {/* Remember Me & Forgot Password */}
@@ -152,8 +202,8 @@ export default function LoginPage() {
                   <Checkbox
                     id="rememberMe"
                     name="rememberMe"
-                    checked={formData.rememberMe}
-                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, rememberMe: checked as boolean }))}
+                    checked={form.values.rememberMe}
+                    onCheckedChange={(checked) => form.setValue('rememberMe', checked as boolean)}
                     className="border-slate-300 dark:border-gray-600 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
                   />
                   <Label htmlFor="rememberMe" className="text-sm text-slate-600 dark:text-gray-400 cursor-pointer">
@@ -169,7 +219,11 @@ export default function LoginPage() {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" disabled={isLoading} className="w-full btn-primary py-3 text-base font-semibold">
+              <Button 
+                type="submit" 
+                disabled={isLoading || !form.isValid} 
+                className="w-full btn-primary py-3 text-base font-semibold"
+              >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
 
@@ -187,7 +241,7 @@ export default function LoginPage() {
 
               {/* Social Login */}
               <div className="grid grid-cols-2 gap-3">
-                <Button type="button" variant="outline" className="btn-outline py-3">
+                <Button type="button" variant="outline" className="btn-outline py-3" disabled={isLoading}>
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -208,7 +262,7 @@ export default function LoginPage() {
                   </svg>
                   Google
                 </Button>
-                <Button type="button" variant="outline" className="btn-outline py-3">
+                <Button type="button" variant="outline" className="btn-outline py-3" disabled={isLoading}>
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.024-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.347-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.017z" />
                   </svg>
