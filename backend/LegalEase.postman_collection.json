@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "legalease-api-collection",
+    "name": "LegalEase API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/auth/register", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "auth", "register"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"stringpassword\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"uuid\",\n  \"email\": \"user@example.com\",\n  \"role\": \"user\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"created_at\": \"2024-06-01T12:00:00\",\n  \"updated_at\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "Auth - JWT Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/auth/jwt/login", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "auth", "jwt", "login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"user@example.com\",\n  \"password\": \"stringpassword\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"access_token\": \"jwt_token\",\n  \"token_type\": \"bearer\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Users - Get Current User",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/users/me", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "users", "me"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"uuid\",\n  \"email\": \"user@example.com\",\n  \"role\": \"user\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"created_at\": \"2024-06-01T12:00:00\",\n  \"updated_at\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "Companies - Create Company",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/companies/", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "companies", ""] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Acme Corp\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"uuid\",\n  \"name\": \"Acme Corp\",\n  \"owner_id\": \"uuid\",\n  \"created_at\": \"2024-06-01T12:00:00\",\n  \"updated_at\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "Companies - List Companies",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/companies/", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "companies", ""] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "[{\n  \"id\": \"uuid\",\n  \"name\": \"Acme Corp\",\n  \"owner_id\": \"uuid\",\n  \"created_at\": \"2024-06-01T12:00:00\",\n  \"updated_at\": null\n}]"
+        }
+      ]
+    },
+    {
+      "name": "Companies - Get Company",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/companies/{{company_id}}", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "companies", "{{company_id}}"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"uuid\",\n  \"name\": \"Acme Corp\",\n  \"owner_id\": \"uuid\",\n  \"created_at\": \"2024-06-01T12:00:00\",\n  \"updated_at\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "Companies - Update Company",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/companies/{{company_id}}", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "companies", "{{company_id}}"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Acme Corp Updated\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"uuid\",\n  \"name\": \"Acme Corp Updated\",\n  \"owner_id\": \"uuid\",\n  \"created_at\": \"2024-06-01T12:00:00\",\n  \"updated_at\": \"2024-06-01T13:00:00\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Companies - Delete Company",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": { "raw": "http://localhost:8000/api/v1/companies/{{company_id}}", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "companies", "{{company_id}}"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Company deleted successfully\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Root",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8000/", "protocol": "http", "host": ["localhost"], "port": "8000", "path": [""] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Welcome to LegalEase API\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8000/health", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["health"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"healthy\",\n  \"database\": \"connected\"\n}"
+        }
+      ]
+    }
+  ]
+} 
