@@ -45,10 +45,6 @@ const signupValidation = (values: SignupFormData) => {
     errors.companySize = "Company size is required"
   }
   
-  if (!values.role) {
-    errors.role = "Role is required"
-  }
-  
   if (!values.password) {
     errors.password = "Password is required"
   } else if (values.password.length < 6) {
@@ -87,7 +83,6 @@ export default function SignupPage() {
       confirmPassword: "",
       companyName: "",
       companySize: "",
-      role: "",
       agreeToTerms: false,
       subscribeNewsletter: false,
     },
@@ -119,7 +114,6 @@ export default function SignupPage() {
         lastName: form.values.lastName,
         companyName: form.values.companyName,
         companySize: form.values.companySize,
-        role: form.values.role,
       }
 
       if (isUpgrade && user?.isGuest) {
@@ -338,30 +332,6 @@ export default function SignupPage() {
                     <p className="text-red-500 text-sm">{form.errors.companySize}</p>
                   )}
                 </div>
-              </div>
-
-              {/* Role */}
-              <div className="space-y-2">
-                <Label htmlFor="role" className="text-slate-700 dark:text-gray-300 font-medium">
-                  Your Role
-                </Label>
-                <Select onValueChange={(value) => form.handleSelectChange("role", value)}>
-                  <SelectTrigger className={`bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white ${
-                    form.errors.role && form.touched.role ? 'border-red-500 dark:border-red-400' : ''
-                  }`}>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600">
-                    <SelectItem value="founder">Founder/CEO</SelectItem>
-                    <SelectItem value="legal">Legal Team</SelectItem>
-                    <SelectItem value="operations">Operations</SelectItem>
-                    <SelectItem value="finance">Finance/Accounting</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                {form.errors.role && form.touched.role && (
-                  <p className="text-red-500 text-sm">{form.errors.role}</p>
-                )}
               </div>
 
               {/* Password Fields */}

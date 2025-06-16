@@ -67,7 +67,7 @@ export default function StorySection() {
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-500/20 dark:to-purple-500/20 rounded-2xl p-8 shadow-lg">
               <div className="relative w-full h-96 rounded-xl overflow-hidden">
                 <Image
-                  src="/images/entrepreneur-story.jpg"
+                  src="/images/img1.jpeg"
                   alt="Rahul - Entrepreneur facing legal challenges"
                   fill
                   className="object-cover"
@@ -78,14 +78,14 @@ export default function StorySection() {
                     if (fallbackDiv) fallbackDiv.style.display = "flex"
                   }}
                 />
-                <div className="image-fallback absolute inset-0 hidden">
+                {/* <div className="image-fallback absolute inset-0 hidden">
                   <div className="text-center p-8">
                     <div className="w-20 h-20 bg-slate-300 dark:bg-gray-600 rounded-full mx-auto mb-4 flex items-center justify-center">
                       <span className="text-2xl">👨‍💼</span>
                     </div>
                     <p className="text-slate-500 dark:text-gray-400">Entrepreneur Story Illustration</p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

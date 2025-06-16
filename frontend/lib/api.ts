@@ -110,6 +110,37 @@ export const companiesAPI = {
   },
 }
 
+// New API endpoint for Groq chat completions
+export const groqAPI = {
+  chatCompletion: async (
+    messages: Array<{ role: string; content: string }>,
+    apiKey: string
+  ) => {
+    if (!apiKey) {
+      throw new Error("Groq API key is not provided.");
+    }
+    const response = await axios.post(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        model: 'llama3-8b-8192', // Or another suitable Groq model
+        messages: messages,
+        temperature: 0.2,
+        max_tokens: 1000,
+        top_p: 0.9,
+        presence_penalty: 0.0,
+        frequency_penalty: 0.0,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+    return response.data
+  },
+}
+
 // Health check
 export const healthAPI = {
   check: async () => {

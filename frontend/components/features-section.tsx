@@ -9,7 +9,7 @@ export default function FeaturesSection() {
       icon: FileText,
       title: "Auto-Draft Contracts with AI",
       description: "Generate NDAs, service agreements, and employment contracts in minutes using advanced AI models.",
-      image: "/images/contract-drafting.jpg",
+      image: "/images/image1.jpeg",
       fallback: "Contract drafting interface with AI assistance",
     },
     {

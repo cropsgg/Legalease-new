@@ -24,6 +24,47 @@ import {
   RefreshCw,
   Sparkles,
 } from "lucide-react"
+import { groqAPI } from "@/lib/api"
+
+const LEGAL_SYSTEM_PROMPT = `
+YouYou are a highly knowledgeable, professional, and experienced legal advisor and lawyer specializing in Indian law, as well as familiar with international law. You have expertise in criminal law, civil law, property law, contract law, corporate law, cyber law, intellectual property law, and constitutional law.
+
+Your responses should always:
+- Be **factually accurate** and **legally sound**.
+- Cite relevant **acts, sections, and case laws** (e.g., IPC, CrPC, IT Act, etc.).
+- Clarify when a topic **requires a licensed human legal professional**.
+- Maintain a **neutral, formal, and respectful tone**.
+- Avoid casual expressions, opinions, or speculative advice.
+- Present answers clearly, possibly using **bullet points**, **examples**, or **legal clauses**.
+
+Whenever the user's query is vague or insufficient, ask clarifying legal questions to proceed further.
+
+If the question is beyond the scope of this model, respond with:
+> "This situation requires specific legal interpretation. I recommend consulting a qualified legal professional."
+
+Always include:
+> ⚠️ Disclaimer: This response is for informational purposes only and does not constitute legal advice.
+
+Assume every user query is seeking real legal help. Never break character.
+`;
+
+const getWrappedUserPrompt = (userQuery: string) => `
+Act strictly as a professional Indian lawyer.
+
+The user asked:
+"${userQuery}"
+
+Your job:
+- Understand the legal context.
+- Mention applicable laws or acts.
+- Give detailed yet clear legal reasoning.
+- Include relevant examples or case references if appropriate.
+- Never make assumptions without legal basis.
+- Use legal terminology and cite acts (e.g., IPC, IT Act) as needed.
+- Warn if legal consultation is required.
+
+Respond in a professional and formal tone only.
+`;
 
 export default function AssistantPage() {
   const { user } = useAuth()
@@ -81,34 +122,40 @@ export default function AssistantPage() {
     setPrompt("")
     setIsGenerating(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const groqMessages = [
+        { role: "system", content: LEGAL_SYSTEM_PROMPT },
+        ...messages.map(msg => ({
+          role: msg.type === "user" ? "user" : "assistant",
+          content: msg.content
+        })),
+        { role: "user", content: getWrappedUserPrompt(prompt) }
+      ];
+
+      const response = await groqAPI.chatCompletion(
+        groqMessages,
+        process.env.NEXT_PUBLIC_GROQ_API_KEY as string
+      );
+      const aiContent = response.choices[0]?.message?.content || "No response from AI.";
+
       const aiResponse = {
         id: messages.length + 2,
         type: "assistant",
-        content: `I understand you're asking about "${prompt}". Here's a comprehensive response:
-
-**Key Points:**
-1. This is a detailed analysis of your query
-2. I've considered relevant legal frameworks and regulations
-3. Here are the recommended next steps
-
-**Legal Considerations:**
-- Compliance with applicable laws
-- Risk assessment and mitigation
-- Documentation requirements
-
-**Recommendations:**
-- Consult with a qualified legal professional for specific advice
-- Review relevant documentation
-- Consider implementation timeline
-
-Would you like me to elaborate on any specific aspect or help you with related questions?`,
+        content: aiContent,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, aiResponse])
+    } catch (error) {
+      console.error("Error fetching AI response from Groq:", error);
+      setMessages((prev) => [...prev, {
+        id: messages.length + 2,
+        type: "assistant",
+        content: "I'm sorry, I couldn't get a response from the AI. Please try again later.",
+        timestamp: new Date(),
+      }]);
+    } finally {
       setIsGenerating(false)
-    }, 2000)
+    }
   }
 
   const handleQuickPrompt = (promptText: string) => {
