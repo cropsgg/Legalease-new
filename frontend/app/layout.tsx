@@ -1,3 +1,4 @@
+// layout.tsx
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
@@ -22,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body >
         <ThemeProvider defaultTheme="dark" storageKey="legalease-ui-theme">
           <AuthProvider>
             <LayoutWrapper>{children}</LayoutWrapper>

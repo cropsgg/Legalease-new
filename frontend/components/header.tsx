@@ -1,5 +1,5 @@
 "use client"
-
+// header.tsx
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
@@ -112,11 +112,14 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-[#0d1117]/95 backdrop-blur-sm border-b border-amber-200 dark:border-amber-800 transition-colors duration-300">
+    <header className="sticky top-0 z-50 bg-inherit text-[#151008] backdrop-blur-sm  transition-colors duration-300">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href={user ? "/dashboard" : "/"} className="flex items-center space-x-2">
+          <Link
+            href={user ? "/dashboard" : "/"}
+            className="flex items-center space-x-2"
+          >
             <div className="w-8 h-8 legal-icon-bg rounded-lg flex items-center justify-center">
               <Scale className="w-5 h-5 text-white" />
             </div>
@@ -128,7 +131,7 @@ export default function Header() {
             // Authenticated User Navigation
             <nav className="hidden lg:flex items-center space-x-1">
               {authenticatedNavItems.map((item) => {
-                const Icon = item.icon
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.name}
@@ -136,15 +139,15 @@ export default function Header() {
                     className={cn(
                       "flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-50 dark:hover:bg-amber-900/20",
                       isActivePage(item.href)
-                        ? "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800"
-                        : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200",
+                        ? "bg-amber-50 dark:bg-amber-900/20 text-[#151008] border border-amber-200 dark:border-amber-800"
+                        : "text-[#151008] hover:text-amber-800 dark:hover:text-amber-200"
                     )}
                     title={item.description}
                   >
                     <Icon className="w-4 h-4" />
                     <span className="hidden xl:inline">{item.name}</span>
                   </Link>
-                )
+                );
               })}
             </nav>
           ) : (
@@ -157,8 +160,8 @@ export default function Header() {
                   className={cn(
                     "text-sm font-medium transition-colors",
                     isActivePage(item.href)
-                      ? "text-amber-800 dark:text-amber-200"
-                      : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200",
+                      ? "text-[#151008]"
+                      : "text-[#151008] hover:text-amber-800 dark:hover:text-amber-200"
                   )}
                 >
                   {item.name}
@@ -175,7 +178,10 @@ export default function Header() {
               // User Menu
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2 h-9">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center space-x-2 h-9"
+                  >
                     <div className="w-7 h-7 legal-icon-bg rounded-full flex items-center justify-center">
                       <User className="w-4 h-4 text-white" />
                     </div>
@@ -183,7 +189,11 @@ export default function Header() {
                       <span className="text-sm font-medium legal-text">
                         {user.firstName} {user.lastName}
                       </span>
-                      {user.isGuest && <span className="text-xs text-amber-700 dark:text-amber-300">Guest Mode</span>}
+                      {user.isGuest && (
+                        <span className="text-xs text-amber-700 dark:text-amber-300">
+                          Guest Mode
+                        </span>
+                      )}
                     </div>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
@@ -193,10 +203,12 @@ export default function Header() {
                     <p className="text-sm font-medium legal-text">
                       {user.firstName} {user.lastName}
                     </p>
-                    <p className="text-xs legal-text-muted">{user.email || "Guest User"}</p>
+                    <p className="text-xs legal-text-muted">
+                      {user.email || "Guest User"}
+                    </p>
                     {user.isGuest && (
                       <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-100 dark:bg-amber-900/20 text-[#151008]">
                           Guest Session
                         </span>
                       </div>
@@ -222,14 +234,22 @@ export default function Header() {
                   {user.isGuest && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleUpgradeAccount} className="cursor-pointer">
-                        <span className="text-amber-700 dark:text-amber-300 font-medium">⭐ Upgrade Account</span>
+                      <DropdownMenuItem
+                        onClick={handleUpgradeAccount}
+                        className="cursor-pointer"
+                      >
+                        <span className="text-amber-700 dark:text-amber-300 font-medium">
+                          ⭐ Upgrade Account
+                        </span>
                       </DropdownMenuItem>
                     </>
                   )}
 
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 dark:text-red-400">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-red-600 dark:text-red-400"
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     {user.isGuest ? "End Session" : "Logout"}
                   </DropdownMenuItem>
@@ -238,7 +258,11 @@ export default function Header() {
             ) : (
               // Login/Signup Buttons
               <div className="flex items-center space-x-3">
-                <Button variant="ghost" asChild className="h-9 btn-legal-secondary">
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="h-9 btn-legal-secondary"
+                >
                   <Link href="/login">Login</Link>
                 </Button>
                 <Button className="btn-legal-primary h-9">
@@ -251,8 +275,15 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
             <ThemeToggle />
-            <button className="text-amber-900 dark:text-amber-100 p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            <button
+              className="text-[#151008] p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
@@ -265,7 +296,7 @@ export default function Header() {
                 // Mobile Authenticated Navigation
                 <>
                   {authenticatedNavItems.map((item) => {
-                    const Icon = item.icon
+                    const Icon = item.icon;
                     return (
                       <Link
                         key={item.name}
@@ -273,18 +304,20 @@ export default function Header() {
                         className={cn(
                           "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActivePage(item.href)
-                            ? "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200"
-                            : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-900/20",
+                            ? "bg-amber-50 dark:bg-amber-900/20 text-[#151008]"
+                            : "text-[#151008] hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                         )}
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <Icon className="w-4 h-4" />
                         <div>
                           <div>{item.name}</div>
-                          <div className="text-xs legal-text-muted">{item.description}</div>
+                          <div className="text-xs legal-text-muted">
+                            {item.description}
+                          </div>
                         </div>
                       </Link>
-                    )
+                    );
                   })}
                 </>
               ) : (
@@ -297,8 +330,8 @@ export default function Header() {
                       className={cn(
                         "px-3 py-2 text-sm font-medium transition-colors rounded-lg",
                         isActivePage(item.href)
-                          ? "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200"
-                          : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-900/20",
+                          ? "bg-amber-50 dark:bg-amber-900/20 text-[#151008]"
+                          : "text-[#151008] hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                       )}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -320,9 +353,11 @@ export default function Header() {
                         <div className="text-sm font-medium legal-text">
                           {user.firstName} {user.lastName}
                         </div>
-                        <div className="text-xs legal-text-muted">{user.email || "Guest User"}</div>
+                        <div className="text-xs legal-text-muted">
+                          {user.email || "Guest User"}
+                        </div>
                         {user.isGuest && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 mt-1">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-100 dark:bg-amber-900/20 text-[#151008] mt-1">
                             Guest Mode
                           </span>
                         )}
@@ -330,7 +365,10 @@ export default function Header() {
                     </div>
 
                     {user.isGuest && (
-                      <Button onClick={handleUpgradeAccount} className="btn-legal-primary justify-start">
+                      <Button
+                        onClick={handleUpgradeAccount}
+                        className="btn-legal-primary justify-start"
+                      >
                         ⭐ Upgrade Account
                       </Button>
                     )}
@@ -346,7 +384,11 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Button variant="ghost" asChild className="justify-start btn-legal-secondary">
+                    <Button
+                      variant="ghost"
+                      asChild
+                      className="justify-start btn-legal-secondary"
+                    >
                       <Link href="/login">Login</Link>
                     </Button>
                     <Button className="btn-legal-primary justify-start">
@@ -360,5 +402,5 @@ export default function Header() {
         )}
       </div>
     </header>
-  )
+  );
 }

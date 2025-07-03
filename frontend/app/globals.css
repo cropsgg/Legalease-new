@@ -38,28 +38,7 @@
     --legal-border: 40 12% 85%;
   }
 
-  .dark {
-    /* Legal Theme - Dark Mode (Professional dark) */
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 100%; /* Pure white text for dark mode */
-    --card: 24 9.8% 10%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 30 70% 25%;
-    --primary-foreground: 38 20% 96%;
-    --secondary: 12 6.5% 15.1%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 12 6.5% 15.1%;
-    --muted-foreground: 0 0% 100%;
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 38 20% 96%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 38 20% 96%;
-    --border: 12 6.5% 15.1%;
-    --input: 12 6.5% 15.1%;
-    --ring: 30 70% 25%;
-  }
+
 }
 
 @layer base {
@@ -141,9 +120,9 @@
 
 /* Enhanced Legal Professional Layout */
 .legal-hero-bg {
-  background: linear-gradient(135deg, 
-    hsl(var(--legal-cream)) 0%, 
-    hsl(var(--legal-beige)) 25%, 
+  background: linear-gradient(135deg,
+    hsl(var(--legal-cream)) 0%,
+    hsl(var(--legal-beige)) 25%,
     hsl(var(--legal-warm-white)) 50%,
     hsl(var(--legal-beige)) 75%,
     hsl(var(--legal-cream)) 100%
