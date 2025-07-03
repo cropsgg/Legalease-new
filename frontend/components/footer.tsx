@@ -1,165 +1,178 @@
 import Link from "next/link"
-import { Scale, Twitter, Linkedin, Github, Mail } from "lucide-react"
+import { Scale, Twitter, Linkedin, Github, Mail, Phone, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
+    <footer className="legal-section-alternate border-t border-amber-200 dark:border-amber-800 transition-colors duration-300">
       <div className="container mx-auto px-4 py-16">
         {/* Main Footer Content */}
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Company Info */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 legal-icon-bg rounded-lg flex items-center justify-center">
                 <Scale className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">LegalEase</span>
+              <span className="text-xl font-bold legal-heading">LegalEase</span>
             </Link>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-              AI-powered legal compliance and paperwork automation for Indian startups and SMEs. Focus on growth while
-              we handle the legal complexity.
+            <p className="legal-text mb-6 max-w-md">
+              Professional legal services with a commitment to excellence. Our experienced attorneys provide comprehensive legal solutions tailored to your needs.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-amber-700 dark:text-amber-300" />
+                <span className="legal-text">+1 (555) 123-4567</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Mail className="w-5 h-5 text-amber-700 dark:text-amber-300" />
+                <span className="legal-text">contact@legalease.com</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <MapPin className="w-5 h-5 text-amber-700 dark:text-amber-300" />
+                <span className="legal-text">123 Legal Street, Suite 100<br />New York, NY 10001</span>
+              </div>
+            </div>
+            <div className="flex space-x-4 mt-6">
               <Link
                 href="#"
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
+                className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
               >
                 <Twitter className="w-5 h-5" />
               </Link>
               <Link
                 href="#"
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
+                className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
               >
                 <Linkedin className="w-5 h-5" />
               </Link>
               <Link
                 href="#"
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
+                className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
               >
                 <Github className="w-5 h-5" />
               </Link>
               <Link
                 href="#"
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
+                className="text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
               >
                 <Mail className="w-5 h-5" />
               </Link>
             </div>
           </div>
 
-          {/* Company Links */}
+          {/* Practice Areas */}
           <div>
-            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Company</h3>
+            <h3 className="legal-subheading mb-4">Practice Areas</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/business-law"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                >
+                  Business Law
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/criminal-law"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                >
+                  Criminal Law
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/family-law"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                >
+                  Family Law
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/civil-litigation"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                >
+                  Civil Litigation
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="legal-subheading mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/about"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
                 >
-                  About
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/attorneys"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                >
+                  Our Attorneys
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/testimonials"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                >
+                  Testimonials
                 </Link>
               </li>
               <li>
                 <Link
                   href="/careers"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
                 >
                   Careers
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/blog"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/press"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Press
-                </Link>
-              </li>
             </ul>
           </div>
 
-          {/* Legal Links */}
+          {/* Contact & Support */}
           <div>
-            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/refund"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/compliance"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Compliance
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support Links */}
-          <div>
-            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Support</h3>
+            <h3 className="legal-subheading mb-4">Contact & Support</h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/contact"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
                 >
                   Contact Us
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/help"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  href="/consultation"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
                 >
-                  Help Center
+                  Free Consultation
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/whatsapp"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  href="/faq"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
                 >
-                  WhatsApp Support
+                  FAQ
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/status"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  href="/resources"
+                  className="legal-text hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
                 >
-                  System Status
+                  Legal Resources
                 </Link>
               </li>
             </ul>
@@ -167,29 +180,37 @@ export default function Footer() {
         </div>
 
         {/* Footer CTA */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-500/10 dark:to-purple-500/10 rounded-2xl p-8 text-center mb-12 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Ready to Automate Your Legal Work?</h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Join 500+ startups already using LegalEase to stay compliant and focus on growth.
+        <div className="legal-professional-card text-center mb-12">
+          <h3 className="text-2xl legal-heading mb-4">Need Legal Assistance?</h3>
+          <p className="legal-text mb-6">
+            Schedule a free consultation with our experienced attorneys to discuss your legal matters.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="btn-primary">
-              <Link href="/demo">Try Demo</Link>
+            <Button className="btn-legal-primary">
+              <Link href="/consultation">Schedule Consultation</Link>
             </Button>
-            <Button size="lg" className="btn-secondary">
-              <Link href="/contact">Book a Call</Link>
+            <Button className="btn-legal-secondary">
+              <Link href="/contact">Contact Us</Link>
             </Button>
           </div>
         </div>
 
         {/* Bottom Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            © 2024 LegalEase. All rights reserved. Made with ❤️ for Indian startups.
+        <div className="border-t border-amber-200 dark:border-amber-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="legal-text-muted text-sm">
+            © 2024 LegalEase. All rights reserved. Professional Legal Services.
           </p>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-4 md:mt-0">
-            🇮🇳 Proudly serving the Indian startup ecosystem
-          </p>
+          <div className="flex space-x-4 mt-4 md:mt-0">
+            <Link href="/terms" className="legal-text-muted text-sm hover:text-amber-800 dark:hover:text-amber-200">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="legal-text-muted text-sm hover:text-amber-800 dark:hover:text-amber-200">
+              Privacy Policy
+            </Link>
+            <Link href="/disclaimer" className="legal-text-muted text-sm hover:text-amber-800 dark:hover:text-amber-200">
+              Legal Disclaimer
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
