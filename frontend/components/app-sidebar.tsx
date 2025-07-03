@@ -4,7 +4,6 @@ import type * as React from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { ThemeToggle } from "@/components/theme-toggle"
 import {
   LayoutDashboard,
   Workflow,
@@ -122,23 +121,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   if (!user) return null
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="legal-sidebar" {...props}>
+      <SidebarHeader className="border-b border-legal-border">
         <div className="flex items-center justify-between px-2 py-1">
-          <SidebarTrigger className="h-8 w-8 p-0 hover:bg-sidebar-accent rounded-md transition-colors">
+          <SidebarTrigger className="h-8 w-8 p-0 hover:bg-legal-beige rounded-md transition-colors text-legal-secondary hover:text-legal-dark-text">
             <PanelLeft className="h-4 w-4" />
           </SidebarTrigger>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild className="hover:bg-legal-beige">
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg legal-icon-bg">
                   <Scale className="size-4 text-white" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">LegalEase</span>
-                  <span className="truncate text-xs text-muted-foreground">AI Legal Platform</span>
+                  <span className="truncate font-playfair font-semibold text-legal-dark-text">LegalEase</span>
+                  <span className="truncate text-xs text-legal-secondary">AI Legal Platform</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -146,7 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="legal-bg-primary">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -160,14 +159,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       isActive={isActive}
                       tooltip={item.description}
                       className={cn(
-                        "transition-all duration-200",
+                        "transition-all duration-200 hover:bg-legal-beige text-legal-secondary hover:text-legal-dark-text",
                         isActive &&
-                          "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-r-2 border-blue-500",
+                          "bg-legal-beige text-legal-dark-text border-r-2 border-legal-brown shadow-legal",
                       )}
                     >
                       <Link href={item.url}>
                         <Icon className="size-4" />
-                        <span>{item.title}</span>
+                        <span className="font-medium">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -178,14 +177,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        <div className="flex items-center justify-between p-2 border-t border-sidebar-border group-data-[collapsible=icon]:justify-center">
-          <div className="group-data-[collapsible=icon]:hidden">
-            <ThemeToggle />
-          </div>
-          <div className="hidden group-data-[collapsible=icon]:block">
-            <ThemeToggle />
-          </div>
+      <SidebarFooter className="border-t border-legal-border legal-bg-primary">
+        <div className="flex items-center justify-center p-2">{/* Theme toggle removed - using legal theme only */}
 
           <SidebarMenu>
             <SidebarMenuItem>
@@ -193,70 +186,70 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    className="data-[state=open]:bg-legal-beige data-[state=open]:text-legal-dark-text hover:bg-legal-beige"
                   >
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
-                        src={user.profileImage || "/placeholder.svg"}
+                        src="/placeholder.svg"
                         alt={`${user.firstName} ${user.lastName}`}
                       />
-                      <AvatarFallback className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                      <AvatarFallback className="rounded-lg legal-icon-bg text-white">
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
+                      <span className="truncate font-playfair font-semibold text-legal-dark-text">
                         {user.isGuest ? "Guest User" : `${user.firstName} ${user.lastName}`}
                       </span>
-                      <span className="truncate text-xs text-muted-foreground">
+                      <span className="truncate text-xs text-legal-secondary">
                         {user.isGuest ? "Guest Mode" : user.email}
                       </span>
                     </div>
-                    {user.isGuest && <Crown className="size-4 text-yellow-500" />}
-                    <ChevronUp className="ml-auto size-4" />
+                    {user.isGuest && <Crown className="size-4 text-warning" />}
+                    <ChevronUp className="ml-auto size-4 text-legal-secondary" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                  className="legal-card w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
                   side="bottom"
                   align="end"
                   sideOffset={4}
                 >
-                  <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                  <div className="p-2 border-b border-legal-border">
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage
-                          src={user.profileImage || "/placeholder.svg"}
+                          src="/placeholder.svg"
                           alt={`${user.firstName} ${user.lastName}`}
                         />
-                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                        <AvatarFallback className="legal-icon-bg text-white">
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        <p className="text-sm font-medium text-legal-dark-text truncate">
                           {user.isGuest ? "Guest User" : `${user.firstName} ${user.lastName}`}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        <p className="text-xs text-legal-secondary truncate">
                           {user.isGuest ? "Temporary Session" : user.email}
                         </p>
                         {user.isGuest && (
                           <div className="mt-1">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400">
+                            <span className="legal-badge">
                               <Crown className="w-3 h-3 mr-1" />
                               Guest Mode
                             </span>
                           </div>
                         )}
                         {user.companyName && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">{user.companyName}</p>
+                          <p className="text-xs text-legal-secondary truncate mt-1">{user.companyName}</p>
                         )}
                       </div>
                     </div>
                   </div>
 
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">
+                    <Link href="/dashboard" className="cursor-pointer text-legal-dark-text hover:text-legal-dark-text">
                       <LayoutDashboard className="size-4 mr-2" />
                       Dashboard
                     </Link>
@@ -265,13 +258,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {!user.isGuest && (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link href="/settings" className="cursor-pointer">
+                        <Link href="/settings" className="cursor-pointer text-legal-dark-text hover:text-legal-dark-text">
                           <Settings className="size-4 mr-2" />
                           Account Settings
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/billing" className="cursor-pointer">
+                        <Link href="/billing" className="cursor-pointer text-legal-dark-text hover:text-legal-dark-text">
                           <CreditCard className="size-4 mr-2" />
                           Billing & Plans
                         </Link>
@@ -283,14 +276,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleUpgradeAccount} className="cursor-pointer">
-                        <Crown className="size-4 mr-2 text-yellow-500" />
-                        <span className="text-blue-600 dark:text-blue-400 font-medium">Upgrade to Full Account</span>
+                        <Crown className="size-4 mr-2 text-warning" />
+                        <span className="text-legal-accent font-medium">Upgrade to Full Account</span>
                       </DropdownMenuItem>
                     </>
                   )}
 
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 dark:text-red-400">
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
                     <LogOut className="size-4 mr-2" />
                     {user.isGuest ? "End Guest Session" : "Sign Out"}
                   </DropdownMenuItem>

@@ -1,41 +1,57 @@
 "use client"
 
-import type React from "react"
-
 import { useAuth } from "@/lib/auth-context"
-import { AppSidebar } from "@/components/app-sidebar"
 import Header from "@/components/header"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { usePathname } from "next/navigation"
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, isLoading } = useAuth()
+  const pathname = usePathname()
+  
+  // Check if we're on a page that should show the sidebar
+  const showSidebar = user && pathname && ![
+    "/", 
+    "/features", 
+    "/how-it-works", 
+    "/technology", 
+    "/market", 
+    "/pricing", 
+    "/login", 
+    "/signup"
+  ].includes(pathname)
 
-  // Show loading state while checking authentication
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen legal-bg-primary flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-legal-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-legal-secondary legal-body">Loading...</p>
+        </div>
       </div>
     )
   }
 
-  // Authenticated users get sidebar layout
-  if (user) {
+  if (showSidebar) {
     return (
-      <SidebarProvider defaultOpen={true}>
-        <AppSidebar />
-        <SidebarInset>
-          <main className="flex-1 overflow-auto">{children}</main>
-        </SidebarInset>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full legal-bg-primary">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col">
+            <main className="flex-1 overflow-auto">
+              {children}
+            </main>
+          </div>
+        </div>
       </SidebarProvider>
     )
   }
 
-  // Unauthenticated users get header layout
   return (
-    <>
+    <div className="min-h-screen legal-bg-primary">
       <Header />
       <main>{children}</main>
-    </>
+    </div>
   )
 }

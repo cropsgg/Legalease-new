@@ -80,32 +80,36 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-blue-950/20 dark:to-purple-950/20 transition-colors duration-300">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-purple-100/40 dark:from-blue-500/10 dark:via-transparent dark:to-purple-500/10" />
+    <div className="min-h-screen legal-bg-primary">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+      </div>
 
-      <div className="flex items-center justify-center p-4 pt-20 pb-12">
-        <div className="w-full max-w-md relative z-10">
-          {/* Welcome Section */}
+      <div className="flex items-center justify-center p-6 pt-20 pb-12 relative z-10">
+        <div className="w-full max-w-md">
+          {/* Header Section */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Scale className="w-6 h-6 text-white" />
+            <div className="flex items-center justify-center space-x-3 mb-6">
+              <div className="w-12 h-12 legal-icon-bg rounded-2xl flex items-center justify-center">
+                <Scale className="w-7 h-7 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">LegalEase</h1>
+              <h1 className="text-3xl legal-heading">LegalEase</h1>
             </div>
 
-            <h2 className="text-xl font-semibold text-slate-800 dark:text-gray-200 mb-2">Welcome back</h2>
-            <p className="text-slate-600 dark:text-gray-400">Sign in to your account to continue</p>
+            <h2 className="text-2xl legal-heading mb-3">Welcome back</h2>
+            <p className="text-legal-secondary legal-body">Sign in to your account to continue your legal journey</p>
           </div>
 
           {/* Login Form */}
-          <div className="enhanced-card p-8">
+          <div className="legal-form-section">
             {/* Error Display */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-red-500" />
-                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-destructive" />
+                <p className="text-destructive text-sm legal-body">{error}</p>
               </div>
             )}
 
@@ -114,12 +118,12 @@ export default function LoginPage() {
               <Button
                 onClick={handleGuestLogin}
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full bg-success hover:bg-success/90 text-white font-semibold py-4 text-base shadow-legal hover:shadow-legal-lg transition-all duration-300 rounded-2xl"
               >
                 <UserCheck className="w-5 h-5 mr-2" />
                 Continue as Guest
               </Button>
-              <p className="text-xs text-slate-500 dark:text-gray-400 text-center mt-2">
+              <p className="text-xs text-legal-secondary text-center mt-2 legal-body">
                 Explore all features without creating an account
               </p>
             </div>
@@ -127,10 +131,10 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-300 dark:border-gray-600" />
+                <div className="w-full border-t border-legal-border" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400">
+                <span className="px-3 legal-bg-primary text-legal-secondary legal-body">
                   Or sign in with your account
                 </span>
               </div>
@@ -139,11 +143,11 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-700 dark:text-gray-300 font-medium">
+                <Label htmlFor="email" className="text-legal-dark-text font-medium legal-body">
                   Email Address
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-gray-500" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-legal-secondary" />
                   <Input
                     id="email"
                     name="email"
@@ -152,24 +156,24 @@ export default function LoginPage() {
                     value={form.values.email}
                     onChange={form.handleInputChange}
                     onBlur={() => form.setFieldTouched('email')}
-                    className={`pl-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
-                      form.errors.email && form.touched.email ? 'border-red-500 dark:border-red-400' : ''
+                    className={`legal-input pl-12 py-3 ${
+                      form.errors.email && form.touched.email ? 'border-destructive' : ''
                     }`}
                     placeholder="Enter your email"
                   />
                 </div>
                 {form.errors.email && form.touched.email && (
-                  <p className="text-red-500 text-sm">{form.errors.email}</p>
+                  <p className="text-destructive text-sm legal-body">{form.errors.email}</p>
                 )}
               </div>
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-700 dark:text-gray-300 font-medium">
+                <Label htmlFor="password" className="text-legal-dark-text font-medium legal-body">
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-gray-500" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-legal-secondary" />
                   <Input
                     id="password"
                     name="password"
@@ -178,21 +182,21 @@ export default function LoginPage() {
                     value={form.values.password}
                     onChange={form.handleInputChange}
                     onBlur={() => form.setFieldTouched('password')}
-                    className={`pl-10 pr-10 bg-white dark:bg-gray-800 border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 ${
-                      form.errors.password && form.touched.password ? 'border-red-500 dark:border-red-400' : ''
+                    className={`legal-input pl-12 pr-12 py-3 ${
+                      form.errors.password && form.touched.password ? 'border-destructive' : ''
                     }`}
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-legal-secondary hover:text-legal-dark-text transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {form.errors.password && form.touched.password && (
-                  <p className="text-red-500 text-sm">{form.errors.password}</p>
+                  <p className="text-destructive text-sm legal-body">{form.errors.password}</p>
                 )}
               </div>
 
@@ -204,15 +208,15 @@ export default function LoginPage() {
                     name="rememberMe"
                     checked={form.values.rememberMe}
                     onCheckedChange={(checked) => form.setValue('rememberMe', checked as boolean)}
-                    className="border-slate-300 dark:border-gray-600 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                    className="border-legal-border data-[state=checked]:bg-legal-brown data-[state=checked]:border-legal-brown"
                   />
-                  <Label htmlFor="rememberMe" className="text-sm text-slate-600 dark:text-gray-400 cursor-pointer">
+                  <Label htmlFor="rememberMe" className="text-sm text-legal-secondary cursor-pointer legal-body">
                     Remember me
                   </Label>
                 </div>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  className="text-sm text-legal-accent hover:text-legal-brown transition-colors legal-body"
                 >
                   Forgot password?
                 </Link>
@@ -222,7 +226,7 @@ export default function LoginPage() {
               <Button 
                 type="submit" 
                 disabled={isLoading || !form.isValid} 
-                className="w-full btn-primary py-3 text-base font-semibold"
+                className="btn-legal-primary w-full py-4 text-base font-semibold"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
@@ -230,18 +234,18 @@ export default function LoginPage() {
               {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-300 dark:border-gray-600" />
+                  <div className="w-full border-t border-legal-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400">
+                  <span className="px-3 legal-bg-primary text-legal-secondary legal-body">
                     Or continue with
                   </span>
                 </div>
               </div>
 
               {/* Social Login */}
-              <div className="grid grid-cols-2 gap-3">
-                <Button type="button" variant="outline" className="btn-outline py-3" disabled={isLoading}>
+              <div className="grid grid-cols-2 gap-4">
+                <Button type="button" className="btn-legal-secondary py-3" disabled={isLoading}>
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -260,24 +264,24 @@ export default function LoginPage() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Google
+                  <span className="legal-body">Google</span>
                 </Button>
-                <Button type="button" variant="outline" className="btn-outline py-3" disabled={isLoading}>
+                <Button type="button" className="btn-legal-secondary py-3" disabled={isLoading}>
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.024-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.347-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.017z" />
                   </svg>
-                  GitHub
+                  <span className="legal-body">GitHub</span>
                 </Button>
               </div>
             </form>
 
             {/* Sign Up Link */}
-            <div className="mt-6 text-center">
-              <p className="text-slate-600 dark:text-gray-400">
+            <div className="mt-8 text-center">
+              <p className="text-legal-secondary legal-body">
                 Don't have an account?{" "}
                 <Link
                   href="/signup"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-colors"
+                  className="text-legal-accent hover:text-legal-brown font-semibold transition-colors"
                 >
                   Sign up
                 </Link>

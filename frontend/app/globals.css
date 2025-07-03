@@ -2,49 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Google Fonts for Legal Theme */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Serif+Pro:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
 @layer base {
   :root {
-    /* Legal Theme - Light Mode Colors */
-    --background: 38 20% 96%; /* Warm cream background */
-    --foreground: 0 0% 0%; /* Pure black text */
-    --card: 41 25% 94%; /* Light beige cards */
-    --card-foreground: 0 0% 0%;
-    --popover: 41 25% 94%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 30 70% 25%; /* Rich brown */
-    --primary-foreground: 38 20% 96%;
-    --secondary: 41 25% 88%; /* Warm beige */
-    --secondary-foreground: 0 0% 0%;
-    --muted: 40 18% 90%;
-    --muted-foreground: 0 0% 0%;
-    --accent: 27 65% 45%; /* Golden brown accent */
-    --accent-foreground: 38 20% 96%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 38 20% 96%;
-    --border: 30 71.4% 20%;
-    --input: 30 71.4% 20%;
-    --ring: 30 70% 25%;
+    /* Legal Theme Color Palette */
+    --legal-bg-primary: #F8F3EE;           /* Warm cream background */
+    --legal-bg-secondary: #E8DDD1;         /* Light beige for cards */
+    --legal-dark-text: #2A2A2A;            /* Dark charcoal for headings */
+    --legal-secondary: #8B7355;            /* Warm brown for secondary text */
+    --legal-accent: #8B4513;               /* Rich brown for accents */
+    --legal-brown: #8B4513;                /* Primary brown */
+    --legal-border: #D1C4B8;               /* Soft brown borders */
+    --legal-gold: #D4AF37;                 /* Gold highlights */
+    --legal-beige: #E8DDD1;                /* Same as secondary bg */
+    --legal-warm-text: #8B7355;            /* Same as secondary text */
+
+    /* Semantic Colors */
+    --background: var(--legal-bg-primary);
+    --foreground: var(--legal-dark-text);
+    --card: var(--legal-bg-secondary);
+    --card-foreground: var(--legal-dark-text);
+    --popover: var(--legal-bg-secondary);
+    --popover-foreground: var(--legal-dark-text);
+    --primary: var(--legal-brown);
+    --primary-foreground: #FFFFFF;
+    --secondary: var(--legal-bg-secondary);
+    --secondary-foreground: var(--legal-dark-text);
+    --muted: var(--legal-bg-secondary);
+    --muted-foreground: var(--legal-secondary);
+    --accent: var(--legal-accent);
+    --accent-foreground: #FFFFFF;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: var(--legal-border);
+    --input: var(--legal-bg-secondary);
+    --ring: var(--legal-accent);
     --radius: 0.75rem;
 
-    /* Custom Legal Theme Variables */
-    --legal-cream: 38 20% 96%;
-    --legal-beige: 41 25% 88%;
-    --legal-brown: 30 70% 25%;
-    --legal-dark-brown: 25 70% 15%;
-    --legal-gold: 35 85% 55%;
-    --legal-warm-white: 40 25% 98%;
-    --legal-text-primary: 25 15% 15%;
-    --legal-text-secondary: 25 8% 35%;
-    --legal-border: 40 12% 85%;
+    /* Success/Warning/Error Colors */
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+    --info: #0284C7;
   }
 
-
-}
-
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground font-serif;
     font-family: "Playfair Display", "Georgia", serif;
@@ -148,6 +155,22 @@
   50% { transform: rotate(1deg); }
 }
 
-.justice-scale {
-  animation: gentle-sway 4s ease-in-out infinite;
+.table-legal tr:hover {
+  background-color: rgba(232, 221, 209, 0.5);
+}
+
+/* Modal and overlay styles */
+.modal-overlay-legal {
+  background-color: rgba(42, 42, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content-legal {
+  background-color: var(--legal-bg-primary);
+  border: 1px solid var(--legal-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(139, 69, 19, 0.08);
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
 }
