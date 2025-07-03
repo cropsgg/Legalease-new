@@ -14,14 +14,14 @@ const config: Config = {
       colors: {
         // Legal Theme Colors
         'legal-bg-primary': '#F8F3EE',
-        'legal-bg-secondary': '#E8DDD1', 
+        'legal-bg-secondary': '#E8DDD1',
         'legal-dark-text': '#2A2A2A',
         'legal-secondary': '#8B7355',
         'legal-accent': '#8B4513',
         'legal-brown': '#8B4513',
         'legal-border': '#D1C4B8',
         'legal-gold': '#D4AF37',
-        
+
         // Semantic colors
         background: 'var(--background)',
         foreground: 'var(--foreground)',
@@ -65,7 +65,7 @@ const config: Config = {
         },
         // Status colors
         success: '#059669',
-        warning: '#D97706', 
+        warning: '#D97706',
         error: '#DC2626',
         info: '#0284C7',
       },

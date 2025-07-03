@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import TrueFocus from "@/app/components/TrueFocus/TrueFocus";
 import { Baskervville } from "next/font/google";
+import { cn } from "@/lib/utils";
 
 const baskervville = Baskervville({
   subsets: ["latin"],
@@ -16,10 +17,10 @@ const baskervville = Baskervville({
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen bg-[#F8F3EE] overflow-hidden">
+    <section className={baskervville.className+" relative min-h-screen bg-[#F8F3EE] overflow-hidden"}>
       {/* Faded Background Text */}
       <div className="absolute top-36 inset-0 flex items-center justify-center pointer-events-none">
-        <h1 className="text-[8rem] font-baskervville md:text-[12rem] lg:text-[19rem] opacity-50 font-light bg-gradient-to-b from-[#efe6d3] via-[#ede6d3] to-[#f2ebde] text-transparent bg-clip-text tracking-widest select-none whitespace-nowrap">
+        <h1 className={`text-[8rem] font-baskervville md:text-[12rem] lg:text-[19rem] opacity-50 font-light bg-gradient-to-b from-[#efe6d3] via-[#ede6d3] to-[#f2ebde] text-transparent bg-clip-text tracking-widest select-none whitespace-nowrap`}>
           LAWYER
         </h1>
       </div>
@@ -38,7 +39,7 @@ export default function HeroSection() {
               animationDuration={0.9}
               pauseBetweenAnimations={0.7}
             />{" "}
-            <span className="italic">let AI handle the legal work.</span>
+            <span className={cn(" italic font-baskervville", baskervville.className)}>let AI handle the legal work.</span>
           </h1>
         </div>
 
