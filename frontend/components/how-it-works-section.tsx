@@ -1,4 +1,5 @@
 import { Scale, FileText, Phone, Users, MessageSquare } from "lucide-react"
+import Image from "next/image"
 
 export default function HowItWorksSection() {
   const consultationSteps = [
@@ -30,117 +31,126 @@ export default function HowItWorksSection() {
   ]
 
   return (
-    <section className="py-20 legal-section-bg">
+    <section className="py-16 bg-[#F8F3EE]">
       <div className="container mx-auto px-4">
+        {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl legal-heading mb-4">Our Legal Consultation Process</h2>
-          <div className="legal-divider mb-6"></div>
-          <p className="text-xl legal-text max-w-2xl mx-auto">
-            A systematic approach to handling your legal matters with expertise and professionalism
-          </p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-[#2A2A2A] mb-8 tracking-wide leading-tight">
+            MEET OUR MOST TALENTED AND
+            <br />
+            QUALIFIED ATTORNEYS
+          </h2>
         </div>
 
-        <div className="relative">
-          {/* Connection Line */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-600 to-amber-800 -translate-y-1/2" />
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {/* Left Side - Attorney Info */}
+          <div className="lg:col-span-1">
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-4">
+                LEAD COUNSEL
+                <br />
+                VERIFIED ATTORNEYS
+              </h3>
+              <p className="text-[#8B7355] leading-relaxed mb-6">
+                When looking for an attorney, you want a professional who has experience dealing with 
+                cases like your case and maintains the highest ethical and customer service.
+              </p>
+              <button className="bg-[#8B7355] hover:bg-[#7A6449] text-white px-6 py-2 rounded text-sm font-medium transition-colors duration-300">
+                Learn More
+              </button>
+            </div>
 
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-8">
-            {consultationSteps.map((step, index) => {
-              const IconComponent = step.icon
-              return (
-                <div key={index} className="relative text-center">
-                  {/* Step Circle */}
-                  <div className="w-20 h-20 legal-icon-bg rounded-full flex items-center justify-center mx-auto mb-4 relative z-10">
-                    <IconComponent className="w-10 h-10 text-white" />
-                  </div>
-
-                  {/* Step Number */}
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-amber-700 rounded-full flex items-center justify-center text-white font-bold text-sm z-20">
-                    {index + 1}
-                  </div>
-
-                  <h3 className="text-lg legal-subheading mb-2">{step.title}</h3>
-                  <p className="legal-text-muted text-sm">{step.description}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Additional Information */}
-        <div className="mt-20 grid md:grid-cols-2 gap-12">
-          <div className="legal-professional-card">
-            <h3 className="text-2xl legal-heading mb-4">Why Choose Our Process?</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start space-x-3">
-                <div className="w-6 h-6 legal-icon-bg rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Scale className="w-3 h-3 text-white" />
-                </div>
-                <div>
-                  <h4 className="legal-subheading mb-1">Professional Excellence</h4>
-                  <p className="legal-text-muted text-sm">Our team maintains the highest standards of legal practice</p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-3">
-                <div className="w-6 h-6 legal-icon-bg rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Users className="w-3 h-3 text-white" />
-                </div>
-                <div>
-                  <h4 className="legal-subheading mb-1">Client-Focused Approach</h4>
-                  <p className="legal-text-muted text-sm">Your needs and objectives are our top priority</p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-3">
-                <div className="w-6 h-6 legal-icon-bg rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <MessageSquare className="w-3 h-3 text-white" />
-                </div>
-                <div>
-                  <h4 className="legal-subheading mb-1">Clear Communication</h4>
-                  <p className="legal-text-muted text-sm">Regular updates and transparent communication throughout</p>
-                </div>
-              </li>
-            </ul>
+            {/* Attorney Image */}
+            <div className="bg-[#E8DDD1] rounded-2xl p-6">
+              <div className="relative w-full h-80 rounded-xl overflow-hidden">
+                <Image
+                  src="/images/img1.jpeg"
+                  alt="Professional Attorney"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="legal-professional-card">
-            <h3 className="text-2xl legal-heading mb-4">What to Expect</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start space-x-3">
-                <div className="w-6 h-6 legal-icon-bg rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <FileText className="w-3 h-3 text-white" />
+          {/* Center - Stats */}
+          <div className="lg:col-span-1 flex flex-col justify-center items-center">
+            <div className="text-center space-y-8">
+              <div>
+                <div className="text-5xl font-light text-[#2A2A2A] mb-2">90%</div>
+                <div className="text-[#8B7355] text-sm">
+                  Legal
+                  <br />
+                  Execution
                 </div>
-                <div>
-                  <h4 className="legal-subheading mb-1">Thorough Documentation</h4>
-                  <p className="legal-text-muted text-sm">Comprehensive handling of all legal documentation</p>
+              </div>
+              <div>
+                <div className="text-5xl font-light text-[#2A2A2A] mb-2">98%</div>
+                <div className="text-[#8B7355] text-sm">
+                  Project
+                  <br />
+                  Success
                 </div>
-              </li>
-              <li className="flex items-start space-x-3">
-                <div className="w-6 h-6 legal-icon-bg rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Scale className="w-3 h-3 text-white" />
-                </div>
-                <div>
-                  <h4 className="legal-subheading mb-1">Strategic Advocacy</h4>
-                  <p className="legal-text-muted text-sm">Strong representation of your legal interests</p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-3">
-                <div className="w-6 h-6 legal-icon-bg rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Phone className="w-3 h-3 text-white" />
-                </div>
-                <div>
-                  <h4 className="legal-subheading mb-1">Ongoing Support</h4>
-                  <p className="legal-text-muted text-sm">Continuous legal guidance and assistance</p>
-                </div>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <button className="btn-legal-primary">
-            Schedule Your Consultation
-          </button>
+          {/* Right Side - Benefits Card */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#8B4513] text-white p-8 rounded-2xl h-full">
+              <h3 className="text-2xl font-bold mb-6">
+                WHAT BENEFITS
+                <br />
+                WILL YOU GET
+                <br />
+                FROM US?
+              </h3>
+              
+              <p className="text-white/90 mb-8 leading-relaxed">
+                We provide high quality law service for you with professional experience.
+              </p>
+
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-semibold mb-2">Legal representation</h4>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    We provide efficient client service and we ensure that we are available.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Allegations</h4>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    We are going to to please clients and we ensure all the allegations.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Support</h4>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    Our team is available 24/7 to provide and support.
+                  </p>
+                </div>
+              </div>
+
+              {/* Bottom Button and Image */}
+              <div className="mt-8 flex justify-between items-end">
+                <button className="bg-white text-[#8B4513] px-6 py-2 rounded font-medium text-sm hover:bg-gray-100 transition-colors duration-300">
+                  Contact Us
+                </button>
+                
+                <div className="w-16 h-20 relative">
+                  <Image
+                    src="/images/img1.jpeg"
+                    alt="Attorney"
+                    fill
+                    className="object-cover rounded"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

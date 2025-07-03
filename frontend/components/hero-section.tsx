@@ -1,132 +1,172 @@
 import { Button } from "@/components/ui/button"
-import { Scale, Shield, Award, Users } from "lucide-react"
+import { Play } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
 export default function HeroSection() {
   return (
-    <section className="legal-hero-bg relative py-20 lg:py-32 overflow-hidden">
-      {/* Professional Legal Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-10 left-10 transform rotate-12">
-          <Scale className="w-32 h-32 text-amber-800" />
-        </div>
-        <div className="absolute bottom-10 right-10 transform -rotate-12">
-          <Scale className="w-24 h-24 text-amber-700" />
-        </div>
-        <div className="absolute top-1/2 left-1/4 transform -rotate-6">
-          <Scale className="w-20 h-20 text-amber-600" />
-        </div>
+    <section className="relative min-h-screen bg-[#F8F3EE] overflow-hidden">
+      {/* Faded Background Text */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <h1 className="text-[12rem] md:text-[16rem] lg:text-[20rem] font-light text-[#F0EBE6] opacity-20 tracking-widest select-none whitespace-nowrap">
+          LAWYER
+        </h1>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div className="text-left max-w-2xl">
-            {/* Professional Badge */}
-            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm border border-amber-200 rounded-full px-4 py-2 mb-6 legal-shadow">
-              <Scale className="w-5 h-5 text-amber-700" />
-              <span className="text-sm font-semibold text-amber-800">HIGH QUALITY LEGAL CONSULTANCY</span>
-            </div>
+      {/* Main Content Container */}
+      <div className="container mx-auto px-4 pt-16 pb-8 relative h-screen flex flex-col">
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-[2.8rem] md:text-[3.8rem] lg:text-[4.2rem] font-light tracking-wider leading-tight text-[#2A2A2A]">
+            HIGH QUALITY LEGAL
+            <br />
+            CONSULTANCY
+          </h1>
+        </div>
 
-            {/* Main Headline */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl legal-heading mb-6 leading-tight">
-              Specialist Family Lawyers
-              <br />
-              <span className="text-amber-700">and Divorce Solicitors.</span>
-            </h1>
-
-            {/* Subtext */}
-            <p className="text-xl md:text-2xl legal-text mb-8 leading-relaxed max-w-lg">
-              Family law is all we do, so whatever your situation, it will be familiar to us. We strive to expand time.
-            </p>
-
-            {/* CTA Button */}
-            <div className="mb-12">
-              <Button className="btn-legal-primary text-lg px-12 py-6 rounded-full">
-                <Link href="/contact" className="flex items-center space-x-2">
-                  <span>GET STARTED</span>
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </Link>
-              </Button>
-            </div>
-
-            {/* Professional Stats */}
-            <div className="grid grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-amber-800">500+</div>
-                <div className="text-sm legal-text-muted">Trusted Clients</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-amber-800">25+</div>
-                <div className="text-sm legal-text-muted">Years Experience</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-amber-800">98%</div>
-                <div className="text-sm legal-text-muted">Success Rate</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Lady Justice Statue */}
-          <div className="relative">
-            <div className="relative legal-shadow-lg rounded-2xl overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 p-8">
-              <div className="relative w-full h-96 lg:h-[500px] flex items-center justify-center">
-                {/* Justice statue placeholder - replace with actual image */}
-                <div className="justice-scale relative">
-                  <Scale className="w-64 h-64 lg:w-80 lg:h-80 text-amber-800" />
+        {/* Main Content Area with Three Columns */}
+        <div className="flex-grow flex items-center justify-center relative max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-3 gap-8 items-center w-full h-full">
+            
+            {/* Left Side - Text and Arrow */}
+            <div className="flex flex-col justify-center h-full">
+              <div className="flex items-start space-x-4 mb-8">
+                {/* Down Arrow */}
+                <div className="flex flex-col items-center">
+                  <div className="w-0.5 h-12 bg-[#2A2A2A] mb-2"></div>
+                  <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[8px] border-l-transparent border-r-transparent border-t-[#2A2A2A]"></div>
                 </div>
                 
-                {/* Decorative elements */}
-                <div className="absolute top-4 right-4 w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                  <Scale className="w-6 h-6 text-amber-700" />
+                {/* Text Content */}
+                <div>
+                  <p className="text-base md:text-lg font-light text-[#2A2A2A] leading-relaxed">
+                    Specialist Family Lawyers
+                    <br />
+                    and Divorce Solicitors.
+                  </p>
                 </div>
-                <div className="absolute bottom-4 left-4 w-16 h-16 bg-amber-200 rounded-full flex items-center justify-center opacity-60">
-                  <Shield className="w-8 h-8 text-amber-800" />
+              </div>
+
+              {/* Gavel Image */}
+              <div className="w-20 h-10">
+                <Image
+                  src="/images/gavel.png"
+                  alt="Legal Gavel"
+                  width={80}
+                  height={40}
+                  className="object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Center - Statue Image */}
+            <div className="flex justify-center items-center h-full">
+              <div className="relative bg-[#E8DDD1] rounded-3xl p-8 w-full max-w-md">
+                <div className="relative w-full h-[500px]">
+                  <Image
+                    src="/images/lady-justice-statue.png"
+                    alt="Lady Justice Statue"
+                    fill
+                    className="object-contain drop-shadow-2xl"
+                    priority
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Floating Professional Indicators */}
-            <div className="absolute -top-4 -left-4 bg-white legal-shadow rounded-xl p-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-semibold text-amber-800">Legal Solutions</span>
+            {/* Right Side - Text and Play Button */}
+            <div className="flex flex-col justify-center h-full">
+              <div className="text-right mb-8">
+                <p className="text-sm md:text-base font-light text-[#2A2A2A] max-w-[280px] leading-relaxed ml-auto">
+                  Family law is all we do, so whatever your situation, it will be familiar to us. We strive to expand time.
+                </p>
               </div>
-            </div>
-
-            <div className="absolute -bottom-4 -right-4 bg-white legal-shadow rounded-xl p-4">
-              <div className="flex items-center space-x-2">
-                <Award className="w-5 h-5 text-amber-700" />
-                <span className="text-sm font-semibold text-amber-800">Award Winning</span>
+              
+              {/* Play Button with Decorative Elements */}
+              <div className="flex justify-end">
+                <div className="relative">
+                  <button className="w-14 h-14 rounded-full border-2 border-[#2A2A2A] flex items-center justify-center hover:bg-[#2A2A2A] hover:text-white transition-all duration-300 group">
+                    <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
+                  </button>
+                  
+                  {/* Decorative dots around the button */}
+                  <div className="absolute -top-3 -right-3">
+                    <div className="flex space-x-1">
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                    </div>
+                    <div className="flex space-x-1 mt-1">
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                    </div>
+                    <div className="flex space-x-1 mt-1">
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#2A2A2A] rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Professional Navigation */}
-        <div className="mt-16 pt-8 border-t border-amber-200">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div className="legal-professional-card">
-              <Users className="w-8 h-8 text-amber-700 mx-auto mb-2" />
-              <h3 className="legal-subheading text-sm mb-1">Business Law</h3>
-              <p className="text-xs legal-text-muted">These are various forms of legal business services ranging from the sole trader</p>
+        {/* Mobile Layout - Stack vertically on smaller screens */}
+        <div className="lg:hidden flex-grow flex flex-col items-center justify-center space-y-8 pt-8">
+          {/* Statue Image */}
+          <div className="relative bg-[#E8DDD1] rounded-3xl p-6 w-full max-w-sm">
+            <div className="relative w-full h-80">
+              <Image
+                src="/images/lady-justice-statue.png"
+                alt="Lady Justice Statue"
+                fill
+                className="object-contain drop-shadow-2xl"
+                priority
+              />
             </div>
-            <div className="legal-professional-card">
-              <Scale className="w-8 h-8 text-amber-700 mx-auto mb-2" />
-              <h3 className="legal-subheading text-sm mb-1">Criminal Law</h3>
-              <p className="text-xs legal-text-muted">Criminal law is the body of law that relates to crime. Concerns perceived as threatening lawful</p>
+          </div>
+
+          {/* Bottom Content for Mobile */}
+          <div className="flex justify-between items-end w-full px-4">
+            {/* Left Side Mobile */}
+            <div className="flex items-end space-x-2">
+              <div className="flex flex-col items-center">
+                <div className="w-0.5 h-8 bg-[#2A2A2A] mb-2"></div>
+                <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[8px] border-l-transparent border-r-transparent border-t-[#2A2A2A]"></div>
+              </div>
+              <div>
+                <p className="text-sm font-light text-[#2A2A2A] leading-relaxed">
+                  Specialist Family Lawyers
+                  <br />
+                  and Divorce Solicitors.
+                </p>
+              </div>
             </div>
-            <div className="legal-professional-card">
-              <Shield className="w-8 h-8 text-amber-700 mx-auto mb-2" />
-              <h3 className="legal-subheading text-sm mb-1">Family Law</h3>
-              <p className="text-xs legal-text-muted">Family law is a legal practice area that focuses on issues involving family relationships</p>
+
+            {/* Right Side Mobile */}
+            <div className="flex items-end space-x-4">
+              <div className="text-right">
+                <p className="text-xs font-light text-[#2A2A2A] max-w-[200px] leading-relaxed">
+                  Family law is all we do, so whatever your situation, it will be familiar to us.
+                </p>
+              </div>
+              <button className="w-12 h-12 rounded-full border-2 border-[#2A2A2A] flex items-center justify-center">
+                <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
+              </button>
             </div>
-            <div className="legal-professional-card">
-              <Award className="w-8 h-8 text-amber-700 mx-auto mb-2" />
-              <h3 className="legal-subheading text-sm mb-1">Property Law</h3>
-              <p className="text-xs legal-text-muted">Property law is the area of law that governs the various forms of ownership and tenancy</p>
-            </div>
+          </div>
+
+          {/* Gavel Image Mobile */}
+          <div className="self-start ml-8">
+            <Image
+              src="/images/gavel.png"
+              alt="Legal Gavel"
+              width={60}
+              height={30}
+              className="object-contain"
+            />
           </div>
         </div>
       </div>
