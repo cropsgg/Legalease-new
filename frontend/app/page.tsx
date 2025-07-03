@@ -9,7 +9,7 @@ import Footer from "@/components/footer"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0d1117] transition-colors duration-300">
+    <div className="min-h-screen legal-bg-primary">
       <HeroSection />
       <FeaturesSection />
       <ProblemSection />

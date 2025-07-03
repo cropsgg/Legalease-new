@@ -26,6 +26,7 @@ import {
   Clock,
   Bot,
   Zap,
+  Scale,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -54,7 +55,7 @@ export default function DocumentsPage() {
       size: "2.4 MB",
       pages: 24,
       icon: FileText,
-      color: "bg-green-500",
+      color: "bg-success",
     },
     {
       id: 2,
@@ -67,7 +68,7 @@ export default function DocumentsPage() {
       size: "1.8 MB",
       pages: 12,
       icon: FileText,
-      color: "bg-blue-500",
+      color: "bg-legal-brown",
     },
     {
       id: 3,
@@ -80,7 +81,7 @@ export default function DocumentsPage() {
       size: "856 KB",
       pages: 8,
       icon: FileText,
-      color: "bg-yellow-500",
+      color: "bg-warning",
     },
     {
       id: 4,
@@ -93,7 +94,7 @@ export default function DocumentsPage() {
       size: "3.2 MB",
       pages: 32,
       icon: FileText,
-      color: "bg-purple-500",
+      color: "bg-legal-gold",
     },
     {
       id: 5,
@@ -106,7 +107,7 @@ export default function DocumentsPage() {
       size: "4.1 MB",
       pages: 45,
       icon: FileText,
-      color: "bg-green-500",
+      color: "bg-success",
     },
     {
       id: 6,
@@ -119,22 +120,22 @@ export default function DocumentsPage() {
       size: "1.2 MB",
       pages: 16,
       icon: FileText,
-      color: "bg-orange-500",
+      color: "bg-legal-beige",
     },
   ]
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+        return "legal-badge-success"
       case "In Progress":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+        return "legal-badge-warning"
       case "Under Review":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+        return "legal-badge"
       case "Draft":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+        return "legal-badge"
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+        return "legal-badge"
     }
   }
 
@@ -157,19 +158,19 @@ export default function DocumentsPage() {
     .slice(0, user?.isGuest ? 4 : documents.length)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 legal-bg-primary min-h-screen p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Documents</h1>
-          <p className="text-gray-600 dark:text-gray-400">Upload, analyze, and manage your legal documents with AI</p>
+          <h1 className="text-4xl legal-heading mb-2">Documents</h1>
+          <p className="text-legal-secondary legal-body text-lg">Upload, analyze, and manage your legal documents with AI</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="btn-legal-secondary gap-2">
             <Bot className="w-4 h-4" />
             AI Analysis
           </Button>
-          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white gap-2">
+          <Button className="btn-legal-primary gap-2">
             <Upload className="w-4 h-4" />
             Upload Document
           </Button>
@@ -178,21 +179,21 @@ export default function DocumentsPage() {
 
       {/* Guest Mode Banner */}
       {user?.isGuest && (
-        <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-800">
-          <CardContent className="p-4">
+        <Card className="legal-card border-warning/30 bg-warning/5">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Crown className="w-5 h-5 text-yellow-600" />
+                <Crown className="w-5 h-5 text-warning" />
                 <div>
-                  <p className="font-medium text-yellow-800 dark:text-yellow-200">Limited Document Storage</p>
-                  <p className="text-sm text-yellow-600 dark:text-yellow-300">
+                  <p className="font-playfair font-semibold text-legal-dark-text">Limited Document Storage</p>
+                  <p className="text-legal-secondary legal-body">
                     Upgrade to store unlimited documents and access advanced AI analysis
                   </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="border-yellow-300 text-yellow-700">
+              <Button className="btn-legal-outline flex items-center gap-2">
                 Upgrade Now
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </CardContent>
@@ -200,59 +201,67 @@ export default function DocumentsPage() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="legal-card-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Documents</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-legal-secondary legal-body">Total Documents</p>
+                <p className="text-3xl font-playfair font-semibold text-legal-dark-text mt-2">
                   {user?.isGuest ? "4" : documents.length}
                 </p>
               </div>
-              <FileText className="w-8 h-8 text-blue-600" />
+              <div className="w-12 h-12 bg-legal-brown/10 rounded-2xl flex items-center justify-center">
+                <FileText className="w-6 h-6 text-legal-brown" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="legal-card-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">AI Analyzed</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-legal-secondary legal-body">AI Analyzed</p>
+                <p className="text-3xl font-playfair font-semibold text-legal-dark-text mt-2">
                   {user?.isGuest ? "3" : documents.filter((d) => d.status === "Completed").length}
                 </p>
               </div>
-              <Bot className="w-8 h-8 text-purple-600" />
+              <div className="w-12 h-12 bg-legal-gold/10 rounded-2xl flex items-center justify-center">
+                <Bot className="w-6 h-6 text-legal-gold" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="legal-card-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Under Review</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-legal-secondary legal-body">Under Review</p>
+                <p className="text-3xl font-playfair font-semibold text-legal-dark-text mt-2">
                   {user?.isGuest ? "1" : documents.filter((d) => d.status === "Under Review").length}
                 </p>
               </div>
-              <AlertCircle className="w-8 h-8 text-yellow-600" />
+              <div className="w-12 h-12 bg-warning/10 rounded-2xl flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-warning" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="legal-card-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Storage Used</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-legal-secondary legal-body">Storage Used</p>
+                <p className="text-3xl font-playfair font-semibold text-legal-dark-text mt-2">
                   {user?.isGuest ? "8.2 MB" : "24.8 MB"}
                 </p>
               </div>
-              <Zap className="w-8 h-8 text-green-600" />
+              <div className="w-12 h-12 bg-success/10 rounded-2xl flex items-center justify-center">
+                <Zap className="w-6 h-6 text-success" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -261,20 +270,20 @@ export default function DocumentsPage() {
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-legal-secondary" />
           <Input
             placeholder="Search documents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="legal-input pl-10"
           />
         </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] legal-input">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Category" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="legal-card">
             <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="legal">Legal</SelectItem>
             <SelectItem value="compliance">Compliance</SelectItem>
@@ -285,35 +294,35 @@ export default function DocumentsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="all">All Documents</TabsTrigger>
-          <TabsTrigger value="recent">Recent</TabsTrigger>
-          <TabsTrigger value="favorites">Favorites</TabsTrigger>
+        <TabsList className="legal-card">
+          <TabsTrigger value="all" className="data-[state=active]:bg-legal-beige data-[state=active]:text-legal-dark-text">All Documents</TabsTrigger>
+          <TabsTrigger value="recent" className="data-[state=active]:bg-legal-beige data-[state=active]:text-legal-dark-text">Recent</TabsTrigger>
+          <TabsTrigger value="favorites" className="data-[state=active]:bg-legal-beige data-[state=active]:text-legal-dark-text">Favorites</TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="space-y-4">
+        <TabsContent value={activeTab} className="space-y-6 mt-6">
           {/* Documents Grid */}
-          <div className="grid gap-4">
+          <div className="grid gap-6">
             {filteredDocuments.map((document) => {
               const IconComponent = document.icon
               return (
-                <Card key={document.id} className="hover:shadow-md transition-shadow">
+                <Card key={document.id} className="legal-card-hover">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 flex-1">
-                        <div className={`w-12 h-12 ${document.color} rounded-lg flex items-center justify-center`}>
-                          <IconComponent className="w-6 h-6 text-white" />
+                        <div className={`w-14 h-14 ${document.color}/10 rounded-2xl flex items-center justify-center`}>
+                          <IconComponent className={`w-7 h-7 ${document.color.replace('bg-', 'text-')}`} />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">{document.name}</h3>
-                            <Badge variant="outline">{document.type}</Badge>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-playfair font-semibold text-legal-dark-text text-lg">{document.name}</h3>
+                            <Badge className="legal-badge">{document.type}</Badge>
                             <Badge className={getStatusColor(document.status)}>
                               {getStatusIcon(document.status)}
                               <span className="ml-1">{document.status}</span>
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-2">
+                          <div className="flex items-center gap-6 text-sm text-legal-secondary mb-3">
                             <span className="flex items-center gap-1">
                               <User className="w-4 h-4" />
                               {document.uploadedBy}
@@ -326,25 +335,25 @@ export default function DocumentsPage() {
                             <span>{document.pages} pages</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Bot className="w-4 h-4 text-purple-600" />
-                            <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                            <Scale className="w-4 h-4 text-legal-brown" />
+                            <span className="text-sm font-medium text-legal-brown">
                               AI Analysis: {document.aiAnalysis}
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" className="gap-2">
+                        <Button size="sm" className="btn-legal-outline gap-2">
                           <Eye className="w-4 h-4" />
                           View
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button size="sm" variant="ghost">
+                            <Button size="sm" variant="ghost" className="text-legal-secondary hover:text-legal-dark-text">
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" className="legal-card">
                             <DropdownMenuItem>
                               <Download className="w-4 h-4 mr-2" />
                               Download
@@ -358,7 +367,7 @@ export default function DocumentsPage() {
                               Re-analyze
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem className="text-destructive">
                               <Trash2 className="w-4 h-4 mr-2" />
                               Delete
                             </DropdownMenuItem>
@@ -373,14 +382,14 @@ export default function DocumentsPage() {
           </div>
 
           {filteredDocuments.length === 0 && (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No documents found</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <Card className="legal-card">
+              <CardContent className="p-16 text-center">
+                <FileText className="w-16 h-16 text-legal-secondary mx-auto mb-6" />
+                <h3 className="text-xl font-playfair font-semibold text-legal-dark-text mb-3">No documents found</h3>
+                <p className="text-legal-secondary legal-body mb-6">
                   {searchQuery ? "Try adjusting your search terms" : "Upload your first document to get started"}
                 </p>
-                <Button className="gap-2">
+                <Button className="btn-legal-primary gap-2">
                   <Upload className="w-4 h-4" />
                   Upload Document
                 </Button>

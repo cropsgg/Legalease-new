@@ -2,173 +2,603 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Google Fonts for Legal Theme */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Serif+Pro:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
 @layer base {
   :root {
-    /* Legal Theme - Light Mode Colors */
-    --background: 38 20% 96%; /* Warm cream background */
-    --foreground: 0 0% 0%; /* Pure black text */
-    --card: 41 25% 94%; /* Light beige cards */
-    --card-foreground: 0 0% 0%;
-    --popover: 41 25% 94%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 30 70% 25%; /* Rich brown */
-    --primary-foreground: 38 20% 96%;
-    --secondary: 41 25% 88%; /* Warm beige */
-    --secondary-foreground: 0 0% 0%;
-    --muted: 40 18% 90%;
-    --muted-foreground: 0 0% 0%;
-    --accent: 27 65% 45%; /* Golden brown accent */
-    --accent-foreground: 38 20% 96%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 38 20% 96%;
-    --border: 30 71.4% 20%;
-    --input: 30 71.4% 20%;
-    --ring: 30 70% 25%;
+    /* Legal Theme Color Palette */
+    --legal-bg-primary: #F8F3EE;           /* Warm cream background */
+    --legal-bg-secondary: #E8DDD1;         /* Light beige for cards */
+    --legal-dark-text: #2A2A2A;            /* Dark charcoal for headings */
+    --legal-secondary: #8B7355;            /* Warm brown for secondary text */
+    --legal-accent: #8B4513;               /* Rich brown for accents */
+    --legal-brown: #8B4513;                /* Primary brown */
+    --legal-border: #D1C4B8;               /* Soft brown borders */
+    --legal-gold: #D4AF37;                 /* Gold highlights */
+    --legal-beige: #E8DDD1;                /* Same as secondary bg */
+    --legal-warm-text: #8B7355;            /* Same as secondary text */
+    
+    /* Semantic Colors */
+    --background: var(--legal-bg-primary);
+    --foreground: var(--legal-dark-text);
+    --card: var(--legal-bg-secondary);
+    --card-foreground: var(--legal-dark-text);
+    --popover: var(--legal-bg-secondary);
+    --popover-foreground: var(--legal-dark-text);
+    --primary: var(--legal-brown);
+    --primary-foreground: #FFFFFF;
+    --secondary: var(--legal-bg-secondary);
+    --secondary-foreground: var(--legal-dark-text);
+    --muted: var(--legal-bg-secondary);
+    --muted-foreground: var(--legal-secondary);
+    --accent: var(--legal-accent);
+    --accent-foreground: #FFFFFF;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: var(--legal-border);
+    --input: var(--legal-bg-secondary);
+    --ring: var(--legal-accent);
     --radius: 0.75rem;
-
-    /* Custom Legal Theme Variables */
-    --legal-cream: 38 20% 96%;
-    --legal-beige: 41 25% 88%;
-    --legal-brown: 30 70% 25%;
-    --legal-dark-brown: 25 70% 15%;
-    --legal-gold: 35 85% 55%;
-    --legal-warm-white: 40 25% 98%;
-    --legal-text-primary: 25 15% 15%;
-    --legal-text-secondary: 25 8% 35%;
-    --legal-border: 40 12% 85%;
+    
+    /* Success/Warning/Error Colors */
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+    --info: #0284C7;
   }
 
-  .dark {
-    /* Legal Theme - Dark Mode (Professional dark) */
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 100%; /* Pure white text for dark mode */
-    --card: 24 9.8% 10%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 30 70% 25%;
-    --primary-foreground: 38 20% 96%;
-    --secondary: 12 6.5% 15.1%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 12 6.5% 15.1%;
-    --muted-foreground: 0 0% 100%;
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 38 20% 96%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 38 20% 96%;
-    --border: 12 6.5% 15.1%;
-    --input: 12 6.5% 15.1%;
-    --ring: 30 70% 25%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
+  
   body {
-    @apply bg-background text-foreground font-serif;
-    font-family: "Playfair Display", "Georgia", serif;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--legal-bg-primary);
+    color: var(--legal-dark-text);
   }
 }
 
-/* Legal Theme Custom Styles */
-.legal-gradient-bg {
-  background: linear-gradient(135deg, hsl(var(--legal-cream)) 0%, hsl(var(--legal-beige)) 50%, hsl(var(--legal-warm-white)) 100%);
+@layer components {
+  /* Typography Classes */
+  .legal-heading {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    color: var(--legal-dark-text);
+    line-height: 1.2;
+  }
+  
+  .legal-body {
+    font-family: 'Inter', sans-serif;
+    color: var(--legal-dark-text);
+    line-height: 1.6;
+  }
+  
+  .legal-serif {
+    font-family: 'Source Serif Pro', serif;
+    color: var(--legal-dark-text);
+  }
+
+  /* Background Classes */
+  .legal-bg-primary {
+    background-color: var(--legal-bg-primary);
+  }
+  
+  .legal-bg-secondary {
+    background-color: var(--legal-bg-secondary);
+  }
+
+  .legal-beige {
+    background-color: var(--legal-beige);
+  }
+
+  /* Text Color Classes */
+  .text-legal-dark-text {
+    color: var(--legal-dark-text);
+  }
+  
+  .text-legal-secondary {
+    color: var(--legal-secondary);
+  }
+  
+  .text-legal-accent {
+    color: var(--legal-accent);
+  }
+  
+  .text-legal-brown {
+    color: var(--legal-brown);
+  }
+  
+  .text-legal-gold {
+    color: var(--legal-gold);
+  }
+
+  .text-legal-warm-text {
+    color: var(--legal-warm-text);
+  }
+
+  /* Background Color Classes */
+  .bg-legal-beige {
+    background-color: var(--legal-beige);
+  }
+
+  .bg-legal-bg-primary {
+    background-color: var(--legal-bg-primary);
+  }
+
+  .bg-legal-bg-secondary {
+    background-color: var(--legal-bg-secondary);
+  }
+
+  /* Hover Background Classes */
+  .hover\:bg-legal-beige:hover {
+    background-color: var(--legal-beige);
+  }
+
+  .hover\:bg-legal-bg-secondary:hover {
+    background-color: var(--legal-bg-secondary);
+  }
+
+  /* Border Classes */
+  .border-legal-border {
+    border-color: var(--legal-border);
+  }
+
+  /* Card Components */
+  .legal-card {
+    background-color: var(--legal-bg-secondary);
+    border: 1px solid var(--legal-border);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(139, 69, 19, 0.08);
+  }
+  
+  .legal-card-hover {
+    background-color: var(--legal-bg-secondary);
+    border: 1px solid var(--legal-border);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(139, 69, 19, 0.08);
+    transition: all 0.3s ease;
+  }
+  
+  .legal-card-hover:hover {
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.12);
+    transform: translateY(-2px);
+  }
+
+  /* Form Section */
+  .legal-form-section {
+    background-color: var(--legal-bg-secondary);
+    border: 1px solid var(--legal-border);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(139, 69, 19, 0.08);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Button Components */
+  .btn-legal-primary {
+    background-color: var(--legal-brown);
+    color: #FFFFFF;
+    font-weight: 600;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.25);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-legal-primary:hover {
+    background-color: var(--legal-accent);
+    box-shadow: 0 8px 20px rgba(139, 69, 19, 0.35);
+    transform: translateY(-1px);
+  }
+  
+  .btn-legal-secondary {
+    background-color: var(--legal-bg-secondary);
+    color: var(--legal-dark-text);
+    font-weight: 500;
+    border-radius: 1rem;
+    border: 1px solid var(--legal-border);
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-legal-secondary:hover {
+    background-color: var(--legal-border);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
+  }
+  
+  .btn-legal-outline {
+    background-color: transparent;
+    color: var(--legal-brown);
+    border: 1px solid var(--legal-brown);
+    border-radius: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-legal-outline:hover {
+    background-color: var(--legal-bg-secondary);
+    transform: translateY(-1px);
+  }
+
+  /* Input Components */
+  .legal-input {
+    background-color: var(--legal-bg-primary);
+    border: 1px solid var(--legal-border);
+    color: var(--legal-dark-text);
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .legal-input:focus {
+    outline: none;
+    border-color: var(--legal-accent);
+    box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.1);
+  }
+  
+  .legal-input::placeholder {
+    color: var(--legal-secondary);
+  }
+
+  /* Badge Components */
+  .legal-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: var(--legal-bg-secondary);
+    color: var(--legal-dark-text);
+    border: 1px solid var(--legal-border);
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .legal-badge-success {
+    background-color: #DCFCE7;
+    color: #166534;
+    border-color: #BBF7D0;
+  }
+  
+  .legal-badge-warning {
+    background-color: #FEF3C7;
+    color: #92400E;
+    border-color: #FDE68A;
+  }
+  
+  .legal-badge-error {
+    background-color: #FEE2E2;
+    color: #991B1B;
+    border-color: #FECACA;
+  }
+  
+  .legal-badge-info {
+    background-color: #DBEAFE;
+    color: #1E40AF;
+    border-color: #BFDBFE;
+  }
+
+  /* Icon Background */
+  .legal-icon-bg {
+    background: linear-gradient(135deg, var(--legal-brown), var(--legal-accent));
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.25);
+  }
+
+  /* Shadow Utilities */
+  .shadow-legal {
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
+  }
+  
+  .shadow-legal-lg {
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
+  }
+  
+  .shadow-legal-xl {
+    box-shadow: 0 12px 35px rgba(139, 69, 19, 0.25);
+  }
+
+  /* Animation Classes */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  /* Status Indicators */
+  .status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+  }
+  
+  .status-dot-success {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: #10B981;
+  }
+  
+  .status-dot-warning {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: #F59E0B;
+  }
+  
+  .status-dot-error {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: #EF4444;
+  }
+  
+  .status-dot-info {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: #3B82F6;
+  }
+
+  /* Progress Bars */
+  .legal-progress-bar {
+    background-color: var(--legal-bg-secondary);
+    border-radius: 9999px;
+    overflow: hidden;
+    height: 8px;
+  }
+  
+  .legal-progress-fill {
+    background-color: var(--legal-brown);
+    border-radius: 9999px;
+    transition: all 0.5s ease;
+    height: 100%;
+  }
+
+  /* Special Effects */
+  .glass-effect {
+    background: rgba(248, 243, 238, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(209, 196, 184, 0.2);
+  }
+  
+  .gradient-legal {
+    background: linear-gradient(135deg, var(--legal-brown), var(--legal-accent));
+  }
+  
+  .gradient-legal-subtle {
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(139, 69, 19, 0.05));
+  }
+
+  /* Custom Scrollbar */
+  .legal-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .legal-scrollbar::-webkit-scrollbar-track {
+    background: var(--legal-bg-secondary);
+    border-radius: 4px;
+  }
+  
+  .legal-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--legal-border);
+    border-radius: 4px;
+  }
+  
+  .legal-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--legal-accent);
+  }
+
+  /* Responsive Utilities */
+  .container-legal {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container-legal {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-legal {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  /* Loading States */
+  .loading-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--legal-bg-secondary) 25%,
+      var(--legal-border) 50%,
+      var(--legal-bg-secondary) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
 }
 
-.legal-card-bg {
-  background: hsl(var(--legal-warm-white));
-  border: 1px solid hsl(var(--legal-border));
-  box-shadow: 0 4px 6px -1px rgba(139, 69, 19, 0.1), 0 2px 4px -1px rgba(139, 69, 19, 0.06);
+@layer utilities {
+  /* Animation Keyframes */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  @keyframes pulse-legal {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(139, 69, 19, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(139, 69, 19, 0);
+    }
+  }
+  
+  /* Print Styles */
+  @media print {
+    .legal-bg-primary,
+    .legal-bg-secondary {
+      background: white !important;
+    }
+    
+    .legal-card {
+      border: 1px solid #ccc !important;
+      box-shadow: none !important;
+    }
+    
+    .btn-legal-primary,
+    .btn-legal-secondary {
+      border: 1px solid #333 !important;
+      background: white !important;
+      color: black !important;
+    }
+  }
+  
+  /* Dark mode preparation (currently disabled) */
+  .dark-mode-disabled {
+    display: none;
+  }
+  
+  /* Accessibility improvements */
+  .focus-legal:focus {
+    outline: 2px solid var(--legal-accent);
+    outline-offset: 2px;
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .legal-card-hover {
+      transition: none;
+    }
+    
+    .btn-legal-primary,
+    .btn-legal-secondary {
+      transition: none;
+    }
+    
+    .animate-fade-in,
+    .animate-slide-up,
+    .animate-scale-in {
+      animation: none;
+    }
+  }
 }
 
-.legal-section-bg {
-  @apply bg-white dark:bg-[#0d1117];
+/* Component-specific styles */
+.sidebar-legal {
+  background-color: var(--legal-bg-secondary);
+  border-right: 1px solid var(--legal-border);
 }
 
-/* Enhanced Button Styles for Legal Theme */
-.btn-legal-primary {
-  @apply bg-amber-700 hover:bg-amber-800 text-white dark:bg-amber-800 dark:hover:bg-amber-700 shadow-lg hover:shadow-xl transition-all duration-300 border-0 rounded-lg px-8 py-3;
+.header-legal {
+  background-color: var(--legal-bg-primary);
+  border-bottom: 1px solid var(--legal-border);
+  backdrop-filter: blur(8px);
 }
 
-.btn-legal-secondary {
-  @apply bg-white hover:bg-amber-50 text-black border border-amber-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white dark:border-amber-800 shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg px-8 py-3;
+/* Table styles */
+.table-legal {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.btn-legal-outline {
-  @apply border-2 border-amber-600 text-amber-700 hover:bg-amber-50 hover:border-amber-700 font-semibold transition-all duration-300 bg-white/50 rounded-lg px-6 py-2;
+.table-legal th {
+  background-color: var(--legal-bg-secondary);
+  color: var(--legal-dark-text);
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--legal-border);
 }
 
-/* Legal Professional Cards */
-.legal-feature-card {
-  @apply bg-white dark:bg-gray-800/50 rounded-xl p-6 border border-amber-200 dark:border-amber-800 shadow-lg;
+.table-legal td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--legal-border);
+  color: var(--legal-dark-text);
 }
 
-.legal-professional-card {
-  @apply bg-white dark:bg-gray-800/50 rounded-xl p-6 border border-amber-200 dark:border-amber-800 shadow-lg hover:shadow-xl transition-all duration-300;
+.table-legal tr:hover {
+  background-color: rgba(232, 221, 209, 0.5);
 }
 
-/* Legal Icon Styles */
-.legal-icon-bg {
-  @apply bg-amber-700 dark:bg-amber-800;
+/* Modal and overlay styles */
+.modal-overlay-legal {
+  background-color: rgba(42, 42, 42, 0.6);
+  backdrop-filter: blur(4px);
 }
 
-/* Legal Typography */
-.legal-heading {
-  @apply text-black dark:text-white font-bold;
-  font-family: "Playfair Display", "Georgia", serif;
-}
-
-.legal-subheading {
-  @apply text-black dark:text-white font-semibold;
-  font-family: "Playfair Display", "Georgia", serif;
-}
-
-.legal-text {
-  @apply text-black dark:text-white;
-  font-family: "Source Serif Pro", "Georgia", serif;
-}
-
-.legal-text-muted {
-  @apply text-black/80 dark:text-white/80;
-}
-
-/* Section Dividers */
-.legal-divider {
-  @apply w-24 h-1 bg-amber-700 dark:bg-amber-800 mx-auto;
-}
-
-/* Enhanced Legal Professional Layout */
-.legal-hero-bg {
-  background: linear-gradient(135deg, 
-    hsl(var(--legal-cream)) 0%, 
-    hsl(var(--legal-beige)) 25%, 
-    hsl(var(--legal-warm-white)) 50%,
-    hsl(var(--legal-beige)) 75%,
-    hsl(var(--legal-cream)) 100%
-  );
-}
-
-.legal-section-alternate {
-  @apply bg-amber-50/50 dark:bg-amber-900/10;
-}
-
-/* Professional Shadow Effects */
-.legal-shadow {
-  @apply shadow-lg shadow-amber-100 dark:shadow-amber-900/20;
-}
-
-.legal-shadow-lg {
-  box-shadow: 0 20px 25px -5px rgba(139, 69, 19, 0.15), 0 10px 10px -5px rgba(139, 69, 19, 0.1);
-}
-
-/* Justice Scale Animation */
-@keyframes gentle-sway {
-  0%, 100% { transform: rotate(-1deg); }
-  50% { transform: rotate(1deg); }
-}
-
-.justice-scale {
-  animation: gentle-sway 4s ease-in-out infinite;
+.modal-content-legal {
+  background-color: var(--legal-bg-primary);
+  border: 1px solid var(--legal-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(139, 69, 19, 0.08);
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
 }

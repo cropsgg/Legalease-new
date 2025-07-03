@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/lib/theme-context"
 import { AuthProvider } from "@/lib/auth-context"
 import { LayoutWrapper } from "@/components/layout-wrapper"
 
@@ -21,13 +20,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider defaultTheme="dark" storageKey="legalease-ui-theme">
-          <AuthProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
-          </AuthProvider>
-        </ThemeProvider>
+    <html lang="en" className="light">
+      <body className={`${inter.className} legal-bg-primary`}>
+        <AuthProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </AuthProvider>
       </body>
     </html>
   )
