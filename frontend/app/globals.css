@@ -57,7 +57,12 @@
     /* font-family: "Playfair Display", "Georgia", serif; */
   }
 }
-
+/* .font-montserrat{
+  font-family: var(--font-montserrat);
+}
+.font-baskervville{
+  font-family: var(--font-baskervville);
+} */
 /* Legal Theme Custom Styles */
 .legal-gradient-bg {
   background: linear-gradient(135deg, hsl(var(--legal-cream)) 0%, hsl(var(--legal-beige)) 50%, hsl(var(--legal-warm-white)) 100%);

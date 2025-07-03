@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         baskervville: ['var(--font-baskervville)', 'serif'],
+        montserrat: ['var(--font-montserrat)', 'sans-serif'],
       },
       colors: {
         // Legal Theme Colors

@@ -1,7 +1,7 @@
 // layout.tsx
 import type React from "react"
 import type { Metadata } from "next"
-import { Baskervville} from "next/font/google"
+import { Baskervville, Montserrat} from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/lib/auth-context"
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -11,6 +11,12 @@ const baskervville = Baskervville({
   weight: ["400"],
   style: ["italic", "normal"],
   variable: "--font-baskervville",
+});
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic", "normal"],
+  variable: "--font-montserrat",
 });
 export const metadata: Metadata = {
   title: "LegalEase - AI-Powered Legal Compliance for Indian Startups",
