@@ -4,7 +4,6 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import {
   Menu,
@@ -112,7 +111,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-[#0d1117]/95 backdrop-blur-sm border-b border-amber-200 dark:border-amber-800 transition-colors duration-300">
+    <header className="sticky top-0 z-50 legal-bg-primary backdrop-blur-sm border-b border-legal-border transition-colors duration-300">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -134,10 +133,10 @@ export default function Header() {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-50 dark:hover:bg-amber-900/20",
+                      "flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-legal-beige",
                       isActivePage(item.href)
-                        ? "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800"
-                        : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200",
+                        ? "bg-legal-beige text-legal-accent border border-legal-border"
+                        : "text-legal-warm-text hover:text-legal-dark-text",
                     )}
                     title={item.description}
                   >
@@ -157,8 +156,8 @@ export default function Header() {
                   className={cn(
                     "text-sm font-medium transition-colors",
                     isActivePage(item.href)
-                      ? "text-amber-800 dark:text-amber-200"
-                      : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200",
+                      ? "text-legal-accent"
+                      : "text-legal-warm-text hover:text-legal-dark-text",
                   )}
                 >
                   {item.name}
@@ -169,8 +168,6 @@ export default function Header() {
 
           {/* Right Side Actions */}
           <div className="hidden md:flex items-center space-x-3">
-            <ThemeToggle />
-
             {user ? (
               // User Menu
               <DropdownMenu>
@@ -180,23 +177,23 @@ export default function Header() {
                       <User className="w-4 h-4 text-white" />
                     </div>
                     <div className="flex flex-col items-start">
-                      <span className="text-sm font-medium legal-text">
+                      <span className="text-sm font-medium text-legal-primary">
                         {user.firstName} {user.lastName}
                       </span>
-                      {user.isGuest && <span className="text-xs text-amber-700 dark:text-amber-300">Guest Mode</span>}
+                      {user.isGuest && <span className="text-xs text-legal-accent">Guest Mode</span>}
                     </div>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64">
-                  <div className="px-3 py-2 border-b border-amber-200 dark:border-amber-800">
-                    <p className="text-sm font-medium legal-text">
+                  <div className="px-3 py-2 border-b border-legal-border">
+                    <p className="text-sm font-medium text-legal-primary">
                       {user.firstName} {user.lastName}
                     </p>
-                    <p className="text-xs legal-text-muted">{user.email || "Guest User"}</p>
+                    <p className="text-xs text-legal-secondary">{user.email || "Guest User"}</p>
                     {user.isGuest && (
                       <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200">
+                        <span className="legal-badge">
                           Guest Session
                         </span>
                       </div>
@@ -223,13 +220,13 @@ export default function Header() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleUpgradeAccount} className="cursor-pointer">
-                        <span className="text-amber-700 dark:text-amber-300 font-medium">⭐ Upgrade Account</span>
+                        <span className="text-legal-accent font-medium">⭐ Upgrade Account</span>
                       </DropdownMenuItem>
                     </>
                   )}
 
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 dark:text-red-400">
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
                     {user.isGuest ? "End Session" : "Logout"}
                   </DropdownMenuItem>
@@ -250,8 +247,7 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
-            <ThemeToggle />
-            <button className="text-amber-900 dark:text-amber-100 p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <button className="text-legal-warm-text p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -259,7 +255,7 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-amber-200 dark:border-amber-800">
+          <div className="md:hidden mt-4 pb-4 border-t border-legal-border">
             <nav className="flex flex-col space-y-2 mt-4">
               {user ? (
                 // Mobile Authenticated Navigation
@@ -273,15 +269,15 @@ export default function Header() {
                         className={cn(
                           "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActivePage(item.href)
-                            ? "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200"
-                            : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-900/20",
+                            ? "bg-legal-beige text-legal-accent"
+                            : "text-legal-warm-text hover:text-legal-dark-text hover:bg-legal-beige",
                         )}
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <Icon className="w-4 h-4" />
                         <div>
                           <div>{item.name}</div>
-                          <div className="text-xs legal-text-muted">{item.description}</div>
+                          <div className="text-xs text-legal-secondary">{item.description}</div>
                         </div>
                       </Link>
                     )
@@ -297,8 +293,8 @@ export default function Header() {
                       className={cn(
                         "px-3 py-2 text-sm font-medium transition-colors rounded-lg",
                         isActivePage(item.href)
-                          ? "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200"
-                          : "text-amber-900 dark:text-amber-100 hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-900/20",
+                          ? "bg-legal-beige text-legal-accent"
+                          : "text-legal-warm-text hover:text-legal-dark-text hover:bg-legal-beige",
                       )}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -309,20 +305,20 @@ export default function Header() {
               )}
 
               {/* Mobile User Actions */}
-              <div className="flex flex-col space-y-2 pt-4 border-t border-amber-200 dark:border-amber-800">
+              <div className="flex flex-col space-y-2 pt-4 border-t border-legal-border">
                 {user ? (
                   <>
-                    <div className="flex items-center space-x-3 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                    <div className="flex items-center space-x-3 px-3 py-2 bg-legal-beige rounded-lg">
                       <div className="w-8 h-8 legal-icon-bg rounded-full flex items-center justify-center">
                         <User className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium legal-text">
+                        <div className="text-sm font-medium text-legal-primary">
                           {user.firstName} {user.lastName}
                         </div>
-                        <div className="text-xs legal-text-muted">{user.email || "Guest User"}</div>
+                        <div className="text-xs text-legal-secondary">{user.email || "Guest User"}</div>
                         {user.isGuest && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 mt-1">
+                          <span className="legal-badge mt-1">
                             Guest Mode
                           </span>
                         )}
@@ -338,7 +334,7 @@ export default function Header() {
                     <Button
                       onClick={handleLogout}
                       variant="ghost"
-                      className="justify-start text-red-600 dark:text-red-400"
+                      className="justify-start text-destructive"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       {user.isGuest ? "End Session" : "Logout"}

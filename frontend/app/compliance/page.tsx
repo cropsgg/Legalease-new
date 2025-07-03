@@ -1,487 +1,593 @@
 "use client"
 
+import type React from "react"
 import { useState } from "react"
-import { useAuth } from "@/lib/auth-context"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Shield,
-  CalendarIcon,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Bell,
-  FileText,
-  Crown,
-  ArrowRight,
-  Plus,
-  Filter,
+import { 
+  Shield, 
+  CheckCircle, 
+  AlertTriangle, 
+  Clock, 
+  FileText, 
   Download,
-  Settings,
+  Eye,
+  Calendar,
+  TrendingUp,
+  AlertCircle,
+  Users,
+  Building,
+  Globe,
+  Scale,
+  BookOpen,
+  Target,
+  Zap
 } from "lucide-react"
 
+interface ComplianceItem {
+  id: string
+  title: string
+  description: string
+  status: "compliant" | "non-compliant" | "pending" | "warning"
+  dueDate: string
+  category: string
+  priority: "high" | "medium" | "low"
+  progress: number
+}
+
+const complianceData: ComplianceItem[] = [
+  {
+    id: "1",
+    title: "GDPR Data Protection",
+    description: "General Data Protection Regulation compliance for EU customers",
+    status: "compliant",
+    dueDate: "2024-05-25",
+    category: "Data Protection",
+    priority: "high",
+    progress: 100
+  },
+  {
+    id: "2",
+    title: "SOX Financial Reporting",
+    description: "Sarbanes-Oxley Act compliance for financial reporting",
+    status: "pending",
+    dueDate: "2024-03-31",
+    category: "Financial",
+    priority: "high",
+    progress: 75
+  },
+  {
+    id: "3",
+    title: "CCPA Consumer Privacy",
+    description: "California Consumer Privacy Act compliance",
+    status: "warning",
+    dueDate: "2024-01-30",
+    category: "Privacy",
+    priority: "medium",
+    progress: 60
+  },
+  {
+    id: "4",
+    title: "HIPAA Healthcare Data",
+    description: "Health Insurance Portability and Accountability Act",
+    status: "non-compliant",
+    dueDate: "2024-02-15",
+    category: "Healthcare",
+    priority: "high",
+    progress: 30
+  },
+  {
+    id: "5",
+    title: "PCI DSS Payment Processing",
+    description: "Payment Card Industry Data Security Standard",
+    status: "compliant",
+    dueDate: "2024-12-31",
+    category: "Payment",
+    priority: "medium",
+    progress: 95
+  }
+]
+
 export default function CompliancePage() {
-  const { user } = useAuth()
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [activeTab, setActiveTab] = useState("overview")
+  const [selectedCategory, setSelectedCategory] = useState("all")
 
-  const complianceStats = [
-    {
-      title: "Overall Score",
-      value: user?.isGuest ? "85%" : "92%",
-      change: "+5% this month",
-      icon: Shield,
-      color: "text-green-600",
-      bgColor: "bg-green-100 dark:bg-green-900/20",
-    },
-    {
-      title: "Active Deadlines",
-      value: user?.isGuest ? "3" : "8",
-      change: "2 due this week",
-      icon: CalendarIcon,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100 dark:bg-orange-900/20",
-    },
-    {
-      title: "Completed Tasks",
-      value: user?.isGuest ? "12" : "24",
-      change: "+3 this week",
-      icon: CheckCircle,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100 dark:bg-blue-900/20",
-    },
-    {
-      title: "Risk Alerts",
-      value: user?.isGuest ? "1" : "2",
-      change: "Low priority",
-      icon: AlertTriangle,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100 dark:bg-yellow-900/20",
-    },
-  ]
-
-  const upcomingDeadlines = [
-    {
-      title: "GST Return Filing",
-      description: "Monthly GST return submission",
-      dueDate: "March 20, 2024",
-      priority: "High",
-      progress: 75,
-      category: "Tax",
-      daysLeft: 5,
-    },
-    {
-      title: "Annual Return (MCA)",
-      description: "Company annual return filing with MCA",
-      dueDate: "March 30, 2024",
-      priority: "Medium",
-      progress: 30,
-      category: "Corporate",
-      daysLeft: 15,
-    },
-    {
-      title: "Income Tax Return",
-      description: "Annual income tax return filing",
-      dueDate: "July 31, 2024",
-      priority: "Low",
-      progress: 10,
-      category: "Tax",
-      daysLeft: 138,
-    },
-    {
-      title: "ESI Contribution",
-      description: "Employee State Insurance contribution",
-      dueDate: "March 15, 2024",
-      priority: "High",
-      progress: 90,
-      category: "Labor",
-      daysLeft: 2,
-    },
-  ]
-
-  const complianceAreas = [
-    {
-      name: "Tax Compliance",
-      score: 95,
-      status: "Excellent",
-      lastUpdated: "2 days ago",
-      items: ["GST Returns", "Income Tax", "TDS Compliance"],
-    },
-    {
-      name: "Corporate Compliance",
-      score: 88,
-      status: "Good",
-      lastUpdated: "1 week ago",
-      items: ["Annual Returns", "Board Resolutions", "Statutory Registers"],
-    },
-    {
-      name: "Labor Compliance",
-      score: 92,
-      status: "Excellent",
-      lastUpdated: "3 days ago",
-      items: ["PF Compliance", "ESI Compliance", "Labor Licenses"],
-    },
-    {
-      name: "Environmental Compliance",
-      score: 78,
-      status: "Needs Attention",
-      lastUpdated: "2 weeks ago",
-      items: ["Pollution Clearance", "Waste Management", "Environmental Audit"],
-    },
-  ]
-
-  const recentActivities = [
-    {
-      title: "GST Return Filed Successfully",
-      description: "February GST return submitted on time",
-      time: "2 hours ago",
-      type: "success",
-      icon: CheckCircle,
-    },
-    {
-      title: "Deadline Reminder",
-      description: "ESI contribution due in 2 days",
-      time: "4 hours ago",
-      type: "warning",
-      icon: Bell,
-    },
-    {
-      title: "Compliance Report Generated",
-      description: "Monthly compliance report ready for review",
-      time: "1 day ago",
-      type: "info",
-      icon: FileText,
-    },
-    {
-      title: "New Regulation Alert",
-      description: "Updated labor law requirements",
-      time: "2 days ago",
-      type: "info",
-      icon: AlertTriangle,
-    },
-  ]
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
-      case "Low":
-        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
-    }
-  }
-
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-green-600"
-    if (score >= 80) return "text-yellow-600"
-    return "text-red-600"
-  }
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "success":
-        return "text-green-600"
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "compliant":
+        return <CheckCircle className="w-5 h-5 text-green-600" />
+      case "non-compliant":
+        return <AlertCircle className="w-5 h-5 text-red-600" />
+      case "pending":
+        return <Clock className="w-5 h-5 text-amber-600" />
       case "warning":
-        return "text-yellow-600"
-      case "error":
-        return "text-red-600"
+        return <AlertTriangle className="w-5 h-5 text-orange-600" />
       default:
-        return "text-blue-600"
+        return <Clock className="w-5 h-5 text-legal-secondary" />
     }
   }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "compliant":
+        return <Badge className="legal-badge legal-badge-success">Compliant</Badge>
+      case "non-compliant":
+        return <Badge className="legal-badge legal-badge-error">Non-Compliant</Badge>
+      case "pending":
+        return <Badge className="legal-badge legal-badge-warning">Pending</Badge>
+      case "warning":
+        return <Badge className="legal-badge legal-badge-warning">Warning</Badge>
+      default:
+        return <Badge className="legal-badge">Unknown</Badge>
+    }
+  }
+
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return <Badge variant="destructive" className="text-xs">High</Badge>
+      case "medium":
+        return <Badge variant="secondary" className="text-xs">Medium</Badge>
+      case "low":
+        return <Badge variant="outline" className="text-xs">Low</Badge>
+      default:
+        return <Badge className="text-xs">Unknown</Badge>
+    }
+  }
+
+  const filteredData = selectedCategory === "all" 
+    ? complianceData 
+    : complianceData.filter(item => item.category.toLowerCase() === selectedCategory.toLowerCase())
+
+  const complianceStats = {
+    total: complianceData.length,
+    compliant: complianceData.filter(item => item.status === "compliant").length,
+    nonCompliant: complianceData.filter(item => item.status === "non-compliant").length,
+    pending: complianceData.filter(item => item.status === "pending").length,
+    warning: complianceData.filter(item => item.status === "warning").length,
+  }
+
+  const overallComplianceRate = (complianceStats.compliant / complianceStats.total) * 100
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Compliance Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Stay on top of all your regulatory requirements and deadlines
-          </p>
+    <div className="min-h-screen legal-bg-primary p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 legal-icon-bg rounded-xl flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl legal-heading">Compliance Dashboard</h1>
+              <p className="text-legal-secondary legal-body">Monitor and manage your regulatory compliance status</p>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
-            <Download className="w-4 h-4" />
-            Export Report
-          </Button>
-          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white gap-2">
-            <Plus className="w-4 h-4" />
-            Add Compliance Item
-          </Button>
-        </div>
-      </div>
 
-      {/* Guest Mode Banner */}
-      {user?.isGuest && (
-        <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-800">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Crown className="w-5 h-5 text-yellow-600" />
+        {/* Compliance Overview Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="legal-card-hover border-legal-border">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-yellow-800 dark:text-yellow-200">Limited Compliance Tracking</p>
-                  <p className="text-sm text-yellow-600 dark:text-yellow-300">
-                    Upgrade to track unlimited compliance requirements and get advanced alerts
+                  <p className="text-legal-secondary legal-body text-sm">Overall Compliance</p>
+                  <p className="text-2xl font-bold text-legal-dark-text legal-heading">
+                    {Math.round(overallComplianceRate)}%
                   </p>
                 </div>
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-green-600" />
+                </div>
               </div>
-              <Button variant="outline" size="sm" className="border-yellow-300 text-yellow-700">
-                Upgrade Now
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              <Progress value={overallComplianceRate} className="mt-3" />
+            </CardContent>
+          </Card>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {complianceStats.map((stat, index) => {
-          const IconComponent = stat.icon
-          return (
-            <Card key={index}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stat.change}</p>
-                  </div>
-                  <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
-                    <IconComponent className={`w-6 h-6 ${stat.color}`} />
-                  </div>
+          <Card className="legal-card-hover border-legal-border">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-legal-secondary legal-body text-sm">Compliant</p>
+                  <p className="text-2xl font-bold text-green-600 legal-heading">{complianceStats.compliant}</p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="legal-card-hover border-legal-border">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-legal-secondary legal-body text-sm">Pending</p>
+                  <p className="text-2xl font-bold text-amber-600 legal-heading">{complianceStats.pending}</p>
+                </div>
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-amber-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="legal-card-hover border-legal-border">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-legal-secondary legal-body text-sm">Issues</p>
+                  <p className="text-2xl font-bold text-red-600 legal-heading">
+                    {complianceStats.nonCompliant + complianceStats.warning}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 legal-card p-2 h-auto">
+            <TabsTrigger 
+              value="overview" 
+              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="hidden sm:inline legal-body">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="requirements" 
+              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
+            >
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline legal-body">Requirements</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="reports" 
+              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span className="hidden sm:inline legal-body">Reports</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="resources" 
+              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline legal-body">Resources</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Quick Actions */}
+            <Card className="legal-card-hover border-legal-border">
+              <CardHeader>
+                <CardTitle className="legal-heading">Quick Actions</CardTitle>
+                <CardDescription className="text-legal-secondary legal-body">
+                  Common compliance tasks and shortcuts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button className="btn-legal-primary h-auto p-4 flex-col space-y-2">
+                    <Zap className="w-6 h-6" />
+                    <span className="legal-body">Run Compliance Scan</span>
+                  </Button>
+                  <Button className="btn-legal-secondary h-auto p-4 flex-col space-y-2">
+                    <Download className="w-6 h-6" />
+                    <span className="legal-body">Generate Report</span>
+                  </Button>
+                  <Button className="btn-legal-secondary h-auto p-4 flex-col space-y-2">
+                    <Target className="w-6 h-6" />
+                    <span className="legal-body">Set Compliance Goals</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          )
-        })}
-      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="deadlines">Deadlines</TabsTrigger>
-          <TabsTrigger value="areas">Compliance Areas</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar</TabsTrigger>
-        </TabsList>
-
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            {/* Upcoming Deadlines */}
-            <Card>
+            {/* Recent Compliance Activities */}
+            <Card className="legal-card-hover border-legal-border">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Upcoming Deadlines</CardTitle>
-                  <Button variant="outline" size="sm">
-                    View All
-                  </Button>
-                </div>
-                <CardDescription>Critical compliance deadlines requiring attention</CardDescription>
+                <CardTitle className="legal-heading">Recent Activities</CardTitle>
+                <CardDescription className="text-legal-secondary legal-body">
+                  Latest compliance updates and changes
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {upcomingDeadlines.slice(0, 3).map((deadline, index) => (
-                    <div key={index} className="space-y-2 p-4 border rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{deadline.title}</h4>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{deadline.description}</p>
-                        </div>
-                        <div className="text-right">
-                          <Badge className={getPriorityColor(deadline.priority)}>{deadline.priority}</Badge>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{deadline.daysLeft} days</p>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span>Progress</span>
-                          <span>{deadline.progress}%</span>
-                        </div>
-                        <Progress value={deadline.progress} className="h-2" />
+                  {[
+                    {
+                      title: "GDPR compliance verified",
+                      description: "Annual audit completed successfully",
+                      time: "2 hours ago",
+                      status: "success"
+                    },
+                    {
+                      title: "SOX documentation updated",
+                      description: "Financial controls documentation refreshed",
+                      time: "1 day ago",
+                      status: "info"
+                    },
+                    {
+                      title: "HIPAA compliance warning",
+                      description: "Data access logs require review",
+                      time: "3 days ago",
+                      status: "warning"
+                    }
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 bg-legal-bg-secondary/50 rounded-xl">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
+                        activity.status === 'success' ? 'bg-green-500' :
+                        activity.status === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
+                      }`} />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-legal-dark-text legal-body">{activity.title}</h4>
+                        <p className="text-sm text-legal-secondary legal-body">{activity.description}</p>
+                        <p className="text-xs text-legal-secondary legal-body mt-1">{activity.time}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Recent Activities */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activities</CardTitle>
-                <CardDescription>Latest compliance updates and notifications</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentActivities.map((activity, index) => {
-                    const IconComponent = activity.icon
-                    return (
-                      <div key={index} className="flex items-start gap-3">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.type === "success" ? "bg-green-100 dark:bg-green-900/20" : activity.type === "warning" ? "bg-yellow-100 dark:bg-yellow-900/20" : "bg-blue-100 dark:bg-blue-900/20"}`}
-                        >
-                          <IconComponent className={`w-4 h-4 ${getActivityIcon(activity.type)}`} />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white">{activity.title}</h4>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{activity.description}</p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{activity.time}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
+          {/* Requirements Tab */}
+          <TabsContent value="requirements" className="space-y-6">
+            {/* Filter Options */}
+            <Card className="legal-card border-legal-border">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-4">
+                  <label className="text-sm font-medium text-legal-dark-text legal-body">Filter by category:</label>
+                  <select 
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="legal-input w-auto"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="data protection">Data Protection</option>
+                    <option value="financial">Financial</option>
+                    <option value="privacy">Privacy</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="payment">Payment</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
 
-        {/* Deadlines Tab */}
-        <TabsContent value="deadlines" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">All Deadlines</h2>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter className="w-4 h-4" />
-                Filter
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Settings className="w-4 h-4" />
-                Settings
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid gap-4">
-            {upcomingDeadlines.map((deadline, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{deadline.title}</h3>
-                        <Badge variant="outline">{deadline.category}</Badge>
-                        <Badge className={getPriorityColor(deadline.priority)}>{deadline.priority}</Badge>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-3">{deadline.description}</p>
-                      <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <CalendarIcon className="w-4 h-4" />
-                          Due: {deadline.dueDate}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {deadline.daysLeft} days left
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right min-w-[120px]">
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-gray-900 dark:text-white">{deadline.progress}%</span>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Complete</p>
-                      </div>
-                      <Progress value={deadline.progress} className="h-2 w-24" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Compliance Areas Tab */}
-        <TabsContent value="areas" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            {complianceAreas.map((area, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{area.name}</CardTitle>
-                    <div className="text-right">
-                      <span className={`text-2xl font-bold ${getScoreColor(area.score)}`}>{area.score}</span>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{area.status}</p>
-                    </div>
-                  </div>
-                  <CardDescription>Last updated: {area.lastUpdated}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Progress value={area.score} className="h-2" />
-                    <div className="space-y-2">
-                      {area.items.map((item, itemIndex) => (
-                        <div key={itemIndex} className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-gray-600 dark:text-gray-400">{item}</span>
+            {/* Compliance Requirements List */}
+            <div className="space-y-4">
+              {filteredData.map((item) => (
+                <Card key={item.id} className="legal-card-hover border-legal-border">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-4 flex-1">
+                        <div className="mt-1">
+                          {getStatusIcon(item.status)}
                         </div>
-                      ))}
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="font-semibold text-legal-dark-text legal-heading">{item.title}</h3>
+                            {getStatusBadge(item.status)}
+                            {getPriorityBadge(item.priority)}
+                          </div>
+                          <p className="text-legal-secondary legal-body mb-3">{item.description}</p>
+                          
+                          <div className="flex items-center space-x-6 text-sm text-legal-secondary">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="w-4 h-4" />
+                              <span className="legal-body">Due: {new Date(item.dueDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Building className="w-4 h-4" />
+                              <span className="legal-body">{item.category}</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-4">
+                            <div className="flex items-center justify-between text-sm mb-2">
+                              <span className="text-legal-secondary legal-body">Progress</span>
+                              <span className="font-medium text-legal-dark-text legal-body">{item.progress}%</span>
+                            </div>
+                            <Progress value={item.progress} className="h-2" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 ml-4">
+                        <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full mt-4">
-                      View Details
-                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Compliance Score Chart */}
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
+                  <CardTitle className="legal-heading">Compliance Score Trend</CardTitle>
+                  <CardDescription className="text-legal-secondary legal-body">
+                    Monthly compliance score over time
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-legal-bg-secondary/30 rounded-xl">
+                    <div className="text-center">
+                      <TrendingUp className="w-12 h-12 text-legal-accent mx-auto mb-2" />
+                      <p className="text-legal-secondary legal-body">Chart visualization would go here</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </TabsContent>
 
-        {/* Calendar Tab */}
-        <TabsContent value="calendar" className="space-y-6">
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
+              {/* Compliance by Category */}
+              <Card className="legal-card-hover border-legal-border">
                 <CardHeader>
-                  <CardTitle>Compliance Calendar</CardTitle>
-                  <CardDescription>View all compliance deadlines in calendar format</CardDescription>
+                  <CardTitle className="legal-heading">Compliance by Category</CardTitle>
+                  <CardDescription className="text-legal-secondary legal-body">
+                    Breakdown by compliance area
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="rounded-md border"
-                  />
+                  <div className="space-y-4">
+                    {["Data Protection", "Financial", "Privacy", "Healthcare", "Payment"].map((category, index) => {
+                      const percentage = Math.floor(Math.random() * 40 + 60) // Random for demo
+                      return (
+                        <div key={category} className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-legal-dark-text legal-body">{category}</span>
+                            <span className="text-legal-secondary legal-body">{percentage}%</span>
+                          </div>
+                          <Progress value={percentage} />
+                        </div>
+                      )
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             </div>
-            <div>
-              <Card>
+
+            {/* Report Generation */}
+            <Card className="legal-card-hover border-legal-border">
+              <CardHeader>
+                <CardTitle className="legal-heading">Generate Reports</CardTitle>
+                <CardDescription className="text-legal-secondary legal-body">
+                  Create custom compliance reports for stakeholders
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 border border-legal-border rounded-xl hover:bg-legal-bg-secondary/50 transition-colors cursor-pointer">
+                    <FileText className="w-8 h-8 text-legal-accent mb-3" />
+                    <h4 className="font-medium text-legal-dark-text legal-body mb-2">Executive Summary</h4>
+                    <p className="text-sm text-legal-secondary legal-body">High-level compliance overview</p>
+                  </div>
+                  <div className="p-4 border border-legal-border rounded-xl hover:bg-legal-bg-secondary/50 transition-colors cursor-pointer">
+                    <Scale className="w-8 h-8 text-legal-accent mb-3" />
+                    <h4 className="font-medium text-legal-dark-text legal-body mb-2">Detailed Audit</h4>
+                    <p className="text-sm text-legal-secondary legal-body">Comprehensive compliance audit</p>
+                  </div>
+                  <div className="p-4 border border-legal-border rounded-xl hover:bg-legal-bg-secondary/50 transition-colors cursor-pointer">
+                    <Users className="w-8 h-8 text-legal-accent mb-3" />
+                    <h4 className="font-medium text-legal-dark-text legal-body mb-2">Stakeholder Report</h4>
+                    <p className="text-sm text-legal-secondary legal-body">Report for external stakeholders</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Resources Tab */}
+          <TabsContent value="resources" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Compliance Guides */}
+              <Card className="legal-card-hover border-legal-border">
                 <CardHeader>
-                  <CardTitle>Today's Tasks</CardTitle>
-                  <CardDescription>Compliance items due today</CardDescription>
+                  <CardTitle className="legal-heading">Compliance Guides</CardTitle>
+                  <CardDescription className="text-legal-secondary legal-body">
+                    Step-by-step guidance for regulations
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="p-3 border rounded-lg">
-                      <h4 className="font-medium text-gray-900 dark:text-white">Review GST Returns</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Final review before submission</p>
-                      <Badge className="mt-2 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
-                        In Progress
-                      </Badge>
-                    </div>
-                    <div className="p-3 border rounded-lg">
-                      <h4 className="font-medium text-gray-900 dark:text-white">Update Statutory Registers</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Monthly register updates</p>
-                      <Badge className="mt-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-                        Pending
-                      </Badge>
-                    </div>
+                    {[
+                      "GDPR Implementation Guide",
+                      "SOX Compliance Checklist",
+                      "HIPAA Security Rules",
+                      "PCI DSS Requirements",
+                      "CCPA Privacy Guidelines"
+                    ].map((guide, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border border-legal-border rounded-xl hover:bg-legal-bg-secondary/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <BookOpen className="w-5 h-5 text-legal-accent" />
+                          <span className="text-legal-dark-text legal-body">{guide}</span>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Training Materials */}
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
+                  <CardTitle className="legal-heading">Training Materials</CardTitle>
+                  <CardDescription className="text-legal-secondary legal-body">
+                    Educational resources and courses
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      "Data Protection Training",
+                      "Financial Compliance Course",
+                      "Privacy Best Practices",
+                      "Security Awareness Training",
+                      "Regulatory Updates Webinar"
+                    ].map((training, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border border-legal-border rounded-xl hover:bg-legal-bg-secondary/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <Users className="w-5 h-5 text-legal-accent" />
+                          <span className="text-legal-dark-text legal-body">{training}</span>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+
+            {/* Contact Support */}
+            <Card className="legal-card-hover border-legal-border">
+              <CardHeader>
+                <CardTitle className="legal-heading">Need Help?</CardTitle>
+                <CardDescription className="text-legal-secondary legal-body">
+                  Get expert assistance with your compliance questions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-legal-dark-text legal-body mb-2">
+                      Contact our compliance experts for personalized guidance
+                    </p>
+                    <p className="text-sm text-legal-secondary legal-body">
+                      Available 24/7 for urgent compliance matters
+                    </p>
+                  </div>
+                  <Button className="btn-legal-primary">
+                    Contact Support
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }
