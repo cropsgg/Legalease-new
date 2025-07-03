@@ -1,125 +1,170 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
-import { Check, Star } from "lucide-react"
-import Link from "next/link"
+import { Check } from "lucide-react"
 
 export default function PricingSection() {
   const plans = [
     {
-      name: "Starter",
+      name: "Initial Consultation",
       price: "Free",
-      period: "",
-      description: "Perfect for early-stage startups",
+      description: "Understand your legal needs",
       features: [
-        "3 AI document workflows per month",
-        "Basic compliance tracking",
-        "Email support",
-        "Standard templates",
-        "Basic deadline alerts",
+        "30-minute consultation",
+        "Case evaluation",
+        "Legal strategy overview",
+        "Cost estimate",
+        "Next steps guidance",
       ],
-      cta: "Get Started Free",
+      buttonText: "Schedule Consultation",
       popular: false,
     },
     {
-      name: "Pro",
-      price: "₹699",
-      period: "/month",
-      description: "Best for growing startups",
+      name: "Professional Package",
+      price: "$299",
+      description: "Comprehensive legal support",
       features: [
-        "Unlimited AI document generation",
-        "Advanced compliance tracking",
-        "Priority support + WhatsApp",
-        "Custom templates",
-        "Smart deadline management",
-        "10 government filings included",
-        "Multi-language support",
-        "Payment workflow integration",
+        "Full case review",
+        "Document preparation",
+        "Legal representation",
+        "Court filing assistance",
+        "Regular case updates",
+        "Priority support",
       ],
-      cta: "Start Pro Trial",
+      buttonText: "Get Started",
       popular: true,
     },
     {
-      name: "Enterprise",
+      name: "Enterprise Solution",
       price: "Custom",
-      period: "",
-      description: "For established businesses",
+      description: "Tailored legal services",
       features: [
-        "Everything in Pro",
-        "API access",
-        "Team collaboration tools",
-        "Custom integrations",
-        "Dedicated account manager",
-        "SLA guarantee",
-        "Advanced analytics",
-        "White-label options",
+        "Dedicated legal team",
+        "24/7 priority access",
+        "Custom legal strategy",
+        "Compliance monitoring",
+        "Regular legal audits",
+        "Board meeting attendance",
       ],
-      cta: "Contact Sales",
+      buttonText: "Contact Us",
       popular: false,
     },
   ]
 
   return (
-    <section className="py-20 bg-white dark:bg-[#0d1117] transition-colors duration-300">
+    <section className="py-20 legal-section-bg">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-            Simple, Transparent Pricing
+          <h2 className="text-3xl md:text-5xl legal-heading mb-4">
+            Legal Service Packages
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Choose the plan that fits your startup's needs. No hidden fees, cancel anytime.
+          <div className="legal-divider mb-6"></div>
+          <p className="text-xl legal-text max-w-2xl mx-auto">
+            Choose the right legal service package for your needs
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white dark:bg-gray-800/50 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 ${
-                plan.popular
-                  ? "border-blue-500 dark:border-blue-400 scale-105 shadow-blue-500/20 dark:shadow-blue-400/20"
-                  : "border-gray-200 dark:border-gray-700"
+              className={`legal-professional-card relative ${
+                plan.popular ? "border-amber-500 shadow-amber-100" : ""
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg">
-                    <Star className="w-4 h-4 mr-1" />
-                    Best for Startups
+                <div className="absolute -top-4 right-4">
+                  <div className="bg-amber-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    Most Popular
                   </div>
                 </div>
               )}
 
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{plan.name}</h3>
-                <div className="mb-2">
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">{plan.price}</span>
-                  <span className="text-gray-500 dark:text-gray-400">{plan.period}</span>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">{plan.description}</p>
+                <h3 className="text-xl legal-subheading mb-2">{plan.name}</h3>
+                <div className="text-4xl legal-heading mb-2">{plan.price}</div>
+                <p className="legal-text-muted">{plan.description}</p>
               </div>
 
               <ul className="space-y-4 mb-8">
                 {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-start">
-                    <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                  <li key={featureIndex} className="flex items-center space-x-3">
+                    <div className="w-5 h-5 legal-icon-bg rounded-full flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="legal-text">{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              <Button className={`w-full ${plan.popular ? "btn-primary" : "btn-secondary"}`} size="lg">
-                <Link href={plan.name === "Enterprise" ? "/contact" : "/signup"}>{plan.cta}</Link>
-              </Button>
+              <div className="text-center">
+                <Button
+                  className={`btn-legal-${plan.popular ? "primary" : "secondary"} w-full`}
+                >
+                  {plan.buttonText}
+                </Button>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            All plans include 14-day free trial • No setup fees • Cancel anytime
-          </p>
-          <Button className="btn-outline" size="lg">
-            <Link href="/pricing">View Detailed Pricing →</Link>
-          </Button>
+        {/* Additional Information */}
+        <div className="mt-20 grid md:grid-cols-2 gap-12">
+          <div className="legal-professional-card">
+            <h3 className="text-2xl legal-heading mb-4">Custom Legal Solutions</h3>
+            <p className="legal-text mb-6">
+              Need a customized legal service package? Our team can create a tailored solution that meets your specific requirements.
+            </p>
+            <Button className="btn-legal-primary">Request Custom Quote</Button>
+          </div>
+
+          <div className="legal-professional-card">
+            <h3 className="text-2xl legal-heading mb-4">Legal Service Guarantee</h3>
+            <p className="legal-text mb-6">
+              We are committed to providing the highest quality legal services. Our work is backed by our satisfaction guarantee.
+            </p>
+            <Button className="btn-legal-secondary">Learn More</Button>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-20">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl legal-heading mb-4">Frequently Asked Questions</h3>
+            <p className="legal-text-muted">
+              Find answers to common questions about our legal service packages
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="legal-professional-card">
+              <h4 className="legal-subheading mb-2">What's included in the initial consultation?</h4>
+              <p className="legal-text-muted">
+                The initial consultation includes a thorough discussion of your legal needs, preliminary case evaluation, and a proposed strategy for moving forward.
+              </p>
+            </div>
+
+            <div className="legal-professional-card">
+              <h4 className="legal-subheading mb-2">How long are the service contracts?</h4>
+              <p className="legal-text-muted">
+                Service contracts are flexible and can be tailored to your needs. We offer month-to-month, annual, and custom-term agreements.
+              </p>
+            </div>
+
+            <div className="legal-professional-card">
+              <h4 className="legal-subheading mb-2">Can I upgrade my package?</h4>
+              <p className="legal-text-muted">
+                Yes, you can upgrade your legal service package at any time to access additional services and support.
+              </p>
+            </div>
+
+            <div className="legal-professional-card">
+              <h4 className="legal-subheading mb-2">What if I need additional services?</h4>
+              <p className="legal-text-muted">
+                Additional legal services can be added à la carte to any package based on your specific needs.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

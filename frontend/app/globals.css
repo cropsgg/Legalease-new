@@ -4,60 +4,61 @@
 
 @layer base {
   :root {
-    /* Refined Light Theme Colors */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 98%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220 8.9% 34.1%;
+    /* Legal Theme - Light Mode Colors */
+    --background: 38 20% 96%; /* Warm cream background */
+    --foreground: 0 0% 0%; /* Pure black text */
+    --card: 41 25% 94%; /* Light beige cards */
+    --card-foreground: 0 0% 0%;
+    --popover: 41 25% 94%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 30 70% 25%; /* Rich brown */
+    --primary-foreground: 38 20% 96%;
+    --secondary: 41 25% 88%; /* Warm beige */
+    --secondary-foreground: 0 0% 0%;
+    --muted: 40 18% 90%;
+    --muted-foreground: 0 0% 0%;
+    --accent: 27 65% 45%; /* Golden brown accent */
+    --accent-foreground: 38 20% 96%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 221.2 83.2% 53.3%;
+    --destructive-foreground: 38 20% 96%;
+    --border: 30 71.4% 20%;
+    --input: 30 71.4% 20%;
+    --ring: 30 70% 25%;
     --radius: 0.75rem;
 
-    /* Custom Light Theme Variables */
-    --light-bg-primary: 255 255 255;
-    --light-bg-secondary: 248 250 252;
-    --light-bg-tertiary: 241 245 249;
-    --light-text-primary: 15 23 42;
-    --light-text-secondary: 51 65 85;
-    --light-text-muted: 100 116 139;
-    --light-border: 226 232 240;
-    --light-accent: 59 130 246;
-    --light-accent-hover: 37 99 235;
+    /* Custom Legal Theme Variables */
+    --legal-cream: 38 20% 96%;
+    --legal-beige: 41 25% 88%;
+    --legal-brown: 30 70% 25%;
+    --legal-dark-brown: 25 70% 15%;
+    --legal-gold: 35 85% 55%;
+    --legal-warm-white: 40 25% 98%;
+    --legal-text-primary: 25 15% 15%;
+    --legal-text-secondary: 25 8% 35%;
+    --legal-border: 40 12% 85%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Legal Theme - Dark Mode (Professional dark) */
+    --background: 20 14.3% 4.1%;
+    --foreground: 0 0% 100%; /* Pure white text for dark mode */
+    --card: 24 9.8% 10%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 30 70% 25%;
+    --primary-foreground: 38 20% 96%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 0 0% 100%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 38 20% 96%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    --destructive-foreground: 38 20% 96%;
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 30 70% 25%;
   }
 }
 
@@ -66,52 +67,108 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-serif;
+    font-family: "Playfair Display", "Georgia", serif;
   }
 }
 
-/* Enhanced Light Theme Styles */
-.light-gradient-bg {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+/* Legal Theme Custom Styles */
+.legal-gradient-bg {
+  background: linear-gradient(135deg, hsl(var(--legal-cream)) 0%, hsl(var(--legal-beige)) 50%, hsl(var(--legal-warm-white)) 100%);
 }
 
-.light-card-bg {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+.legal-card-bg {
+  background: hsl(var(--legal-warm-white));
+  border: 1px solid hsl(var(--legal-border));
+  box-shadow: 0 4px 6px -1px rgba(139, 69, 19, 0.1), 0 2px 4px -1px rgba(139, 69, 19, 0.06);
 }
 
-.light-feature-bg {
-  background: linear-gradient(135deg, #fefefe 0%, #f8fafc 100%);
+.legal-section-bg {
+  @apply bg-white dark:bg-[#0d1117];
 }
 
-/* Enhanced Button Styles */
-.btn-primary {
-  @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-0;
+/* Enhanced Button Styles for Legal Theme */
+.btn-legal-primary {
+  @apply bg-amber-700 hover:bg-amber-800 text-white dark:bg-amber-800 dark:hover:bg-amber-700 shadow-lg hover:shadow-xl transition-all duration-300 border-0 rounded-lg px-8 py-3;
 }
 
-.btn-secondary {
-  @apply bg-white dark:bg-gray-800 text-slate-700 dark:text-white border-2 border-slate-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-gray-500 hover:bg-slate-50 dark:hover:bg-gray-700 font-semibold shadow-md hover:shadow-lg transition-all duration-300;
+.btn-legal-secondary {
+  @apply bg-white hover:bg-amber-50 text-black border border-amber-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white dark:border-amber-800 shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg px-8 py-3;
 }
 
-.btn-outline {
-  @apply border-2 border-slate-300 dark:border-gray-600 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 hover:border-slate-400 dark:hover:border-gray-500 font-semibold transition-all duration-300 bg-white/50 dark:bg-transparent;
+.btn-legal-outline {
+  @apply border-2 border-amber-600 text-amber-700 hover:bg-amber-50 hover:border-amber-700 font-semibold transition-all duration-300 bg-white/50 rounded-lg px-6 py-2;
 }
 
-/* Image Fallback Styles */
-.image-fallback {
-  @apply bg-gradient-to-br from-slate-100 to-slate-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-slate-400 dark:text-gray-500 rounded-xl;
+/* Legal Professional Cards */
+.legal-feature-card {
+  @apply bg-white dark:bg-gray-800/50 rounded-xl p-6 border border-amber-200 dark:border-amber-800 shadow-lg;
 }
 
-.feature-icon-bg {
-  @apply bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg;
+.legal-professional-card {
+  @apply bg-white dark:bg-gray-800/50 rounded-xl p-6 border border-amber-200 dark:border-amber-800 shadow-lg hover:shadow-xl transition-all duration-300;
 }
 
-/* Enhanced Card Styles */
-.enhanced-card {
-  @apply bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm border border-slate-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl;
+/* Legal Icon Styles */
+.legal-icon-bg {
+  @apply bg-amber-700 dark:bg-amber-800;
 }
 
-.trust-card {
-  @apply bg-white/95 dark:bg-gray-800/60 backdrop-blur-sm border border-slate-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all duration-300;
+/* Legal Typography */
+.legal-heading {
+  @apply text-black dark:text-white font-bold;
+  font-family: "Playfair Display", "Georgia", serif;
+}
+
+.legal-subheading {
+  @apply text-black dark:text-white font-semibold;
+  font-family: "Playfair Display", "Georgia", serif;
+}
+
+.legal-text {
+  @apply text-black dark:text-white;
+  font-family: "Source Serif Pro", "Georgia", serif;
+}
+
+.legal-text-muted {
+  @apply text-black/80 dark:text-white/80;
+}
+
+/* Section Dividers */
+.legal-divider {
+  @apply w-24 h-1 bg-amber-700 dark:bg-amber-800 mx-auto;
+}
+
+/* Enhanced Legal Professional Layout */
+.legal-hero-bg {
+  background: linear-gradient(135deg, 
+    hsl(var(--legal-cream)) 0%, 
+    hsl(var(--legal-beige)) 25%, 
+    hsl(var(--legal-warm-white)) 50%,
+    hsl(var(--legal-beige)) 75%,
+    hsl(var(--legal-cream)) 100%
+  );
+}
+
+.legal-section-alternate {
+  @apply bg-amber-50/50 dark:bg-amber-900/10;
+}
+
+/* Professional Shadow Effects */
+.legal-shadow {
+  @apply shadow-lg shadow-amber-100 dark:shadow-amber-900/20;
+}
+
+.legal-shadow-lg {
+  box-shadow: 0 20px 25px -5px rgba(139, 69, 19, 0.15), 0 10px 10px -5px rgba(139, 69, 19, 0.1);
+}
+
+/* Justice Scale Animation */
+@keyframes gentle-sway {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+.justice-scale {
+  animation: gentle-sway 4s ease-in-out infinite;
 }
