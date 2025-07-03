@@ -8,22 +8,18 @@ class UserBase(BaseModel):
     role: UserRole = UserRole.USER
 
 class UserCreate(UserBase):
-    password: str
+    pass
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
-    password: Optional[str] = None
     role: Optional[UserRole] = None
 
-class UserInDB(UserBase):
+class User(BaseModel):
     id: UUID4
-    is_active: bool
-    is_superuser: bool
+    email: EmailStr
+    role: UserRole
     created_at: datetime
     updated_at: Optional[datetime] = None
 
     class Config:
-        from_attributes = True
-
-class User(UserInDB):
-    pass 
+        from_attributes = True 

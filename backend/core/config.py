@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional, List
+from typing import List
 from functools import lru_cache
 
 class Settings(BaseSettings):
@@ -7,40 +7,25 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
-    # Database
+    # Supabase Configuration
     SUPABASE_URL: str
-    SUPABASE_KEY: str
+    SUPABASE_SERVICE_ROLE_KEY: str
     SUPABASE_ANON_KEY: str
     SUPABASE_JWT_SECRET: str
     
-    # Database connection details
-    user: str
-    password: str
-    host: str
-    port: str
-    dbname: str
+    # Database Configuration
+    DATABASE_URL: str
     
-    # JWT - use computed field for SECRET_KEY
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    # Security
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 3600
     
-    # CORS - will be parsed from comma-separated string
+    # CORS
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
-    
-    # Computed properties
-    @property
-    def DATABASE_URL(self) -> str:
-        # return f"postgresql+asyncpg://postgres:Ronitraj_964@db.ijcparkwogetqcknallb.supabase.co:5432/postgres"
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.dbname}"
-    
-    @property
-    def SECRET_KEY(self) -> str:
-        return self.SUPABASE_JWT_SECRET
     
     @property
     def CORS_ORIGINS_LIST(self) -> List[str]:
         return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",")]
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = True

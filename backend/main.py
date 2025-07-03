@@ -2,10 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import engine, Base
-from auth.setup import fastapi_users, auth_backend
-from auth.base_user import UserCreate, UserRead, UserUpdate
-from api import companies
-import asyncio
+from api import auth, companies
 import logging
 
 # Set up logging
@@ -29,42 +26,36 @@ app.add_middleware(
 
 # Include routers
 app.include_router(
-    fastapi_users.get_auth_router(auth_backend),
-    prefix=f"{settings.API_V1_STR}/auth/jwt",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
+    auth.router,
     prefix=f"{settings.API_V1_STR}/auth",
-    tags=["auth"],
+    tags=["auth"]
 )
+
 app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix=f"{settings.API_V1_STR}/users",
-    tags=["users"],
+    companies.router,
+    prefix=f"{settings.API_V1_STR}/companies",
+    tags=["companies"]
 )
-app.include_router(companies.router, prefix=settings.API_V1_STR)
 
 @app.on_event("startup")
 async def startup():
     try:
         logger.info("Attempting to connect to database...")
-        logger.info(f"Database URL: {settings.DATABASE_URL}")
-        
-        # Create tables
+        # Create database tables
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        
-        logger.info("Database connected successfully!")
+        logger.info("Database connected and tables created successfully!")
     except Exception as e:
         logger.error(f"Failed to connect to database: {e}")
-        logger.error("The application will start but database operations will fail.")
-        # Don't raise the exception to allow the app to start
-        # This allows for debugging and testing the configuration
+        raise
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to LegalEase API"}
+    return {
+        "message": "Welcome to LegalEase API",
+        "version": settings.VERSION,
+        "docs_url": f"{settings.API_V1_STR}/docs"
+    }
 
 @app.get("/health")
 async def health_check():
@@ -72,6 +63,14 @@ async def health_check():
         # Test database connection
         async with engine.begin() as conn:
             await conn.execute("SELECT 1")
-        return {"status": "healthy", "database": "connected"}
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "version": settings.VERSION
+        }
     except Exception as e:
-        return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }
