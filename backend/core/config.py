@@ -5,9 +5,10 @@ import os
 
 class Settings(BaseSettings):
     # Application
-    PROJECT_NAME: str = "LegalEase API"
+    PROJECT_NAME: str = "LegalEase"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
+    DEBUG: bool = True
 
     # MongoDB Configuration
     MONGODB_URL: str = "mongodb+srv://raunitr786:E6GZuI9hJa7LJV6u@cluster0.rylgbat.mongodb.net/"
@@ -61,7 +62,6 @@ class Settings(BaseSettings):
     # Application settings
     APP_NAME: str = "LegalEase"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
     
     # Task settings
     TASK_REMINDER_DAYS: int = 7
