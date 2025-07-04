@@ -6,7 +6,7 @@ from .config import settings
 
 # Database engine and models
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    f"postgresql+asyncpg://{settings.USER}:{settings.PASSWORD}@{settings.HOST}:{settings.PORT}/{settings.DBNAME}",
     pool_size=20,  # Increased pool size for session pooler
     max_overflow=10,
     pool_pre_ping=True,
@@ -40,8 +40,18 @@ def get_supabase() -> Client:
     """Get or create Supabase client instance"""
     global _supabase
     if not _supabase:
-        _supabase = create_client(
-            settings.SUPABASE_URL,
-            settings.SUPABASE_SERVICE_ROLE_KEY
-        )
+        try:
+            _supabase = create_client(
+                settings.SUPABASE_URL,
+                settings.SUPABASE_SERVICE_ROLE_KEY,
+                options={
+                    'postgrest_client_timeout': 30,
+                    'headers': {
+                        'X-Client-Info': 'legalease-backend'
+                    }
+                }
+            )
+        except Exception as e:
+            print(f"Error initializing Supabase client: {e}")
+            raise
     return _supabase 

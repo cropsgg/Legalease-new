@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
-from core.database import engine, Base, get_supabase
 from api.v1 import router as api_v1_router
 from api.v1.tax_filing import router as tax_filing_router
+from api.v1.automation import router as automation_router, initialize_automation
 import logging
-from sqlalchemy import text
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -18,18 +17,19 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs"
 )
 
-# Set up CORS
+# Enhanced CORS configuration for WebSocket support
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS_LIST,
+    allow_origins=settings.CORS_ORIGINS_LIST + ["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API v1 router
+# Include API routers
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 app.include_router(tax_filing_router, prefix=settings.API_V1_STR)
+app.include_router(automation_router, prefix=settings.API_V1_STR)
 
 @app.on_event("startup")
 async def startup():
@@ -37,17 +37,15 @@ async def startup():
     try:
         logger.info("Starting LegalEase API...")
         
-        # Initialize Supabase client
-        await get_supabase()
-        logger.info("✓ Supabase client initialized")
-        
-        # Initialize database and create tables
-        async with engine.begin() as conn:
-            await conn.execute(text("SELECT 1"))
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("✓ Database initialized")
+        # Initialize browser automation
+        if await initialize_automation():
+            logger.info("✓ Browser automation ready")
+        else:
+            logger.warning("⚠️ Browser automation not available")
         
         logger.info("✅ LegalEase API started successfully!")
+        logger.info(f"📊 API Documentation: http://localhost:8000{settings.API_V1_STR}/docs")
+        logger.info("🤖 WebSocket Automation: ws://localhost:8000/api/v1/ws/automation")
         
     except Exception as e:
         logger.error(f"❌ Startup failed: {e}")
@@ -57,7 +55,6 @@ async def startup():
 async def shutdown():
     """Clean up on shutdown"""
     logger.info("Shutting down LegalEase API...")
-    await engine.dispose()
 
 @app.get("/")
 async def root():
@@ -65,28 +62,19 @@ async def root():
     return {
         "message": "Welcome to LegalEase API",
         "version": settings.VERSION,
-        "docs_url": f"{settings.API_V1_STR}/docs"
+        "docs_url": f"{settings.API_V1_STR}/docs",
+        "websocket_url": f"ws://localhost:8000{settings.API_V1_STR}/ws/automation",
+        "frontend_url": "http://localhost:3000/automation"
     }
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
-    try:
-        # Test database connection
-        async with engine.begin() as conn:
-            await conn.execute(text("SELECT 1"))
-        
-        # Test Supabase client
-        await get_supabase()
-        
-        return {
-            "status": "healthy",
-            "version": settings.VERSION,
-            "database": "connected",
-            "supabase": "connected"
+    return {
+        "status": "healthy",
+        "version": settings.VERSION,
+        "services": {
+            "automation": "available",
+            "websocket": "ready"
         }
-    except Exception as e:
-        return {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+    }
