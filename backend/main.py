@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-import uvicorn
 import logging
 import os
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
 from core.config import settings
-from core.mongodb import connect_to_mongo, close_mongo_connection
+from core.database import get_database
 from api.v1 import automation, companies, tax_filing, business
 
 # Configure logging
@@ -42,36 +42,21 @@ os.makedirs('logs', exist_ok=True)
 
 # MongoDB connection
 @app.on_event("startup")
-async def startup_db_client():
+async def startup_event():
     try:
         logger.info("Connecting to MongoDB...")
-        app.mongodb_client = AsyncIOMotorClient(settings.MONGODB_URL)
-        app.mongodb = app.mongodb_client[settings.MONGODB_DB_NAME]
-        
-        # Create indexes
-        await app.mongodb.businesses.create_index("business_name", unique=True)
-        await app.mongodb.businesses.create_index("pan_number", unique=True, sparse=True)
-
+        app.mongodb = get_database()
         logger.info("MongoDB connection established")
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {str(e)}")
         raise
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    try:
-        logger.info("Closing MongoDB connection...")
-        app.mongodb_client.close()
-        logger.info("MongoDB connection closed")
-    except Exception as e:
-        logger.error(f"Error closing MongoDB connection: {str(e)}")
 
 # Health check endpoint
 @app.get("/health")
 async def health_check():
     try:
         # Check database connection
-        await app.mongodb.command("ping")
+        app.mongodb.command("ping")
         return {
             "status": "healthy",
             "version": settings.VERSION,

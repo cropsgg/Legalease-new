@@ -1,33 +1,38 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
-from typing import AsyncGenerator
+import logging
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 from .config import settings
 
-# Database engine and models
-engine = create_async_engine(
-    settings.DATABASE_CONNECTION_URL,
-    pool_size=20,  # Increased pool size for session pooler
-    max_overflow=10,
-    pool_pre_ping=True,
-    pool_recycle=3600,
-    pool_timeout=30,  # Added timeout
-    echo=False  # Set to True for debugging SQL queries
-)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# SQLAlchemy async session
-AsyncSessionLocal = sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
-
-# Base class for SQLAlchemy models
-Base = declarative_base()
-
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """FastAPI dependency for getting database session"""
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close() 
+def get_database():
+    """Get MongoDB database connection"""
+    try:
+        # Configure MongoDB client with basic settings
+        client = MongoClient(
+            settings.MONGODB_URL,
+            serverSelectionTimeoutMS=5000,
+            maxPoolSize=50
+        )
+        
+        # Test the connection
+        client.admin.command('ping')
+        logger.info("Successfully connected to MongoDB")
+        
+        # Get database instance
+        db = client[settings.MONGODB_DB_NAME]
+        
+        # Create basic indexes if they don't exist
+        db.businesses.create_index("business_name", unique=True)
+        db.businesses.create_index("pan_number", unique=True, sparse=True)
+        
+        return db
+        
+    except ConnectionFailure as e:
+        logger.error(f"Failed to connect to MongoDB: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error while connecting to MongoDB: {e}")
+        raise 
