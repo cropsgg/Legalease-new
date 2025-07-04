@@ -85,10 +85,10 @@ export default function HowItWorksSection() {
             </div>
 
             {/* Attorney Image */}
-            <div className="bg-[#E8DDD1]  p-6">
+            <div className="bg-[#E8DDD1]  p-1">
               <div className="relative w-full h-80  overflow-hidden">
                 <Image
-                  src="/images/img1.jpeg"
+                  src="/images/img1.png"
                   alt="Professional Attorney"
                   fill
                   className="object-cover"
@@ -186,7 +186,7 @@ export default function HowItWorksSection() {
 
                 <div className="w-16 h-20 relative">
                   <Image
-                    src="/images/img1.jpeg"
+                    src="/images/img1.png"
                     alt="Attorney"
                     fill
                     className="object-cover "
