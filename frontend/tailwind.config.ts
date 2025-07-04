@@ -11,6 +11,9 @@ const config: Config = {
       fontFamily: {
         baskervville: ['var(--font-baskervville)', 'serif'],
         montserrat: ['var(--font-montserrat)', 'sans-serif'],
+        'legal-heading': ['Playfair Display', 'serif'],
+        'legal-body': ['Inter', 'sans-serif'],
+        'legal-serif': ['Source Serif Pro', 'serif'],
       },
       colors: {
         // Legal Theme Colors
@@ -69,11 +72,6 @@ const config: Config = {
         warning: '#D97706',
         error: '#DC2626',
         info: '#0284C7',
-      },
-      fontFamily: {
-        'legal-heading': ['Playfair Display', 'serif'],
-        'legal-body': ['Inter', 'sans-serif'],
-        'legal-serif': ['Source Serif Pro', 'serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -518,15 +518,15 @@ export default function SignupPage() {
             {!isUpgrade && (
               <div className="mt-8 text-center">
                 <p className="text-legal-secondary legal-body">
-                  Already have an account?{" "}
-                  <Link
-                    href="/login"
+                Already have an account?{" "}
+                <Link
+                  href="/login"
                     className="text-legal-accent hover:text-legal-brown font-semibold transition-colors"
-                  >
-                    Sign in
-                  </Link>
-                </p>
-              </div>
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
             )}
           </div>
         </div>

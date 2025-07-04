@@ -1,0 +1,40 @@
+{
+  "name": "legalease-blockchain",
+  "version": "1.0.0",
+  "description": "Smart contracts for LegalEase document notarization on Base",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:local": "npx hardhat run scripts/deploy.ts --network hardhat",
+    "deploy:base-sepolia": "npx hardhat run scripts/deploy.ts --network base-sepolia",
+    "deploy:base-goerli": "npx hardhat run scripts/deploy.ts --network base-goerli",
+    "deploy:base": "npx hardhat run scripts/deploy.ts --network base",
+    "verify:base-sepolia": "npx hardhat verify --network base-sepolia",
+    "verify:base-goerli": "npx hardhat verify --network base-goerli",
+    "verify:base": "npx hardhat verify --network base",
+    "node": "npx hardhat node",
+    "clean": "npx hardhat clean",
+    "size": "npx hardhat size-contracts",
+    "gas-report": "REPORT_GAS=true npx hardhat test"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "base",
+    "smart-contracts",
+    "legal",
+    "document-notarization",
+    "hardhat"
+  ],
+  "author": "LegalEase Team",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.9",
+    "@nomicfoundation/hardhat-toolbox": "^6.0.0",
+    "dotenv": "^17.0.1",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.25.0"
+  }
+}

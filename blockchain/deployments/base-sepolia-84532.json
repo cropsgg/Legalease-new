@@ -1,0 +1,10 @@
+{
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "contractAddress": "0xB8C12Ff0f2628Af59dEF9D4BAf89BB250D8A87F3",
+  "deployerAddress": "0xf22CB7C67Af492D817c0E3580a1Df4a1073E8E97",
+  "deploymentTx": "0xd7dc0eb0c22da71e987e59093d264a583fe8e3cb15790a578fe9cf9082d71458",
+  "blockNumber": 27919393,
+  "timestamp": "2025-07-04T05:31:22.580Z",
+  "gasUsed": "390693"
+}

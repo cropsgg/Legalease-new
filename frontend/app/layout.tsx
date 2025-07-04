@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { Baskervville, Montserrat} from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/lib/auth-context"
+import { Web3Provider } from "@/lib/web3-provider"
 import { LayoutWrapper } from "@/components/layout-wrapper"
 
 const baskervville = Baskervville({
@@ -33,9 +34,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body >
-        <AuthProvider>
-          <LayoutWrapper>{children}</LayoutWrapper>
-        </AuthProvider>
+        <Web3Provider>
+          <AuthProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </AuthProvider>
+        </Web3Provider>
       </body>
     </html>
   )

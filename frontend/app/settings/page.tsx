@@ -70,7 +70,7 @@ export default function SettingsPage() {
 
   const [privacySettings, setPrivacySettings] = useState({
     profileVisibility: "private",
-    dataSharing: false,
+      dataSharing: false,
     analyticsOptOut: false,
     twoFactorAuth: false,
   })
@@ -117,7 +117,7 @@ export default function SettingsPage() {
             <div className="w-10 h-10 legal-icon-bg rounded-xl flex items-center justify-center">
               <Settings className="w-5 h-5 text-white" />
             </div>
-            <div>
+          <div>
               <h1 className="text-3xl legal-heading">Settings</h1>
               <p className="text-legal-secondary legal-body">Manage your account settings and preferences</p>
             </div>
@@ -160,59 +160,59 @@ export default function SettingsPage() {
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
             <Card className="legal-card-hover border-legal-border">
-              <CardHeader>
+          <CardHeader>
                 <CardTitle className="legal-heading flex items-center space-x-2">
-                  <User className="w-5 h-5" />
+              <User className="w-5 h-5" />
                   <span>Personal Information</span>
                 </CardTitle>
                 <CardDescription className="text-legal-secondary legal-body">
                   Update your personal details and contact information
                 </CardDescription>
-              </CardHeader>
+          </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
                     <Label htmlFor="firstName" className="text-legal-dark-text font-medium legal-body">
                       First Name
                     </Label>
-                    <Input
-                      id="firstName"
+                <Input
+                  id="firstName"
                       value={profileData.firstName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                       className="legal-input"
                       placeholder="John"
-                    />
-                  </div>
-                  <div className="space-y-2">
+                />
+              </div>
+              <div className="space-y-2">
                     <Label htmlFor="lastName" className="text-legal-dark-text font-medium legal-body">
                       Last Name
                     </Label>
-                    <Input
-                      id="lastName"
+                <Input
+                  id="lastName"
                       value={profileData.lastName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                       className="legal-input"
                       placeholder="Doe"
-                    />
-                  </div>
-                </div>
+                />
+              </div>
+            </div>
 
-                <div className="space-y-2">
+            <div className="space-y-2">
                   <Label htmlFor="email" className="text-legal-dark-text font-medium legal-body">
                     Email Address
                   </Label>
-                  <Input
-                    id="email"
-                    type="email"
+              <Input
+                id="email"
+                type="email"
                     value={profileData.email}
                     onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                     className="legal-input"
                     placeholder="john@example.com"
-                  />
-                </div>
+              />
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
                     <Label htmlFor="company" className="text-legal-dark-text font-medium legal-body">
                       Company Name
                     </Label>
@@ -234,18 +234,18 @@ export default function SettingsPage() {
                     >
                       <SelectTrigger className="legal-input">
                         <SelectValue placeholder="Select size" />
-                      </SelectTrigger>
+                  </SelectTrigger>
                       <SelectContent className="legal-card">
-                        <SelectItem value="1-10">1-10 employees</SelectItem>
-                        <SelectItem value="11-50">11-50 employees</SelectItem>
-                        <SelectItem value="51-200">51-200 employees</SelectItem>
-                        <SelectItem value="200+">200+ employees</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <SelectItem value="1-10">1-10 employees</SelectItem>
+                    <SelectItem value="11-50">11-50 employees</SelectItem>
+                    <SelectItem value="51-200">51-200 employees</SelectItem>
+                    <SelectItem value="200+">200+ employees</SelectItem>
+                  </SelectContent>
+                </Select>
                   </div>
-                </div>
+              </div>
 
-                <div className="space-y-2">
+              <div className="space-y-2">
                   <Label htmlFor="phone" className="text-legal-dark-text font-medium legal-body">
                     Phone Number
                   </Label>
@@ -257,7 +257,7 @@ export default function SettingsPage() {
                     className="legal-input"
                     placeholder="+1 (555) 123-4567"
                   />
-                </div>
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="bio" className="text-legal-dark-text font-medium legal-body">
@@ -271,18 +271,18 @@ export default function SettingsPage() {
                     placeholder="Tell us about yourself..."
                     rows={3}
                   />
-                </div>
+            </div>
 
                 <Button onClick={handleProfileUpdate} disabled={isLoading} className="btn-legal-primary">
-                  <Save className="w-4 h-4 mr-2" />
+                <Save className="w-4 h-4 mr-2" />
                   {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-              </CardContent>
-            </Card>
+              </Button>
+          </CardContent>
+        </Card>
 
             {/* Password Change */}
             <Card className="legal-card-hover border-legal-border">
-              <CardHeader>
+          <CardHeader>
                 <CardTitle className="legal-heading flex items-center space-x-2">
                   <Shield className="w-5 h-5" />
                   <span>Change Password</span>
@@ -290,8 +290,8 @@ export default function SettingsPage() {
                 <CardDescription className="text-legal-secondary legal-body">
                   Update your password to keep your account secure
                 </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          </CardHeader>
+          <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword" className="text-legal-dark-text font-medium legal-body">
                     Current Password
@@ -383,7 +383,7 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Email Notifications */}
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
                       <Mail className="w-4 h-4" />
@@ -392,17 +392,17 @@ export default function SettingsPage() {
                     <p className="text-sm text-legal-secondary legal-body">
                       Receive notifications via email
                     </p>
-                  </div>
-                  <Switch
+                </div>
+                <Switch
                     checked={notificationSettings.emailNotifications}
                     onCheckedChange={(checked) => 
                       setNotificationSettings(prev => ({ ...prev, emailNotifications: checked }))
                     }
-                  />
-                </div>
+                />
+              </div>
 
                 {/* Push Notifications */}
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
                       <Smartphone className="w-4 h-4" />
@@ -410,18 +410,18 @@ export default function SettingsPage() {
                     </Label>
                     <p className="text-sm text-legal-secondary legal-body">
                       Receive push notifications on your device
-                    </p>
-                  </div>
-                  <Switch
+                  </p>
+                </div>
+                <Switch
                     checked={notificationSettings.pushNotifications}
                     onCheckedChange={(checked) => 
                       setNotificationSettings(prev => ({ ...prev, pushNotifications: checked }))
                     }
-                  />
-                </div>
+                />
+              </div>
 
                 {/* Marketing Emails */}
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
                       <Globe className="w-4 h-4" />
@@ -449,17 +449,17 @@ export default function SettingsPage() {
                     <p className="text-sm text-legal-secondary legal-body">
                       Get weekly summaries of your legal activities
                     </p>
-                  </div>
-                  <Switch
+                </div>
+                <Switch
                     checked={notificationSettings.weeklyReports}
                     onCheckedChange={(checked) => 
                       setNotificationSettings(prev => ({ ...prev, weeklyReports: checked }))
                     }
-                  />
-                </div>
+                />
+              </div>
 
                 {/* Document Updates */}
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
                       <FileText className="w-4 h-4" />
@@ -487,35 +487,35 @@ export default function SettingsPage() {
                     <p className="text-sm text-legal-secondary legal-body">
                       Important compliance deadlines and updates
                     </p>
-                  </div>
-                  <Switch
+                </div>
+                <Switch
                     checked={notificationSettings.complianceAlerts}
                     onCheckedChange={(checked) => 
                       setNotificationSettings(prev => ({ ...prev, complianceAlerts: checked }))
                     }
-                  />
-                </div>
+                />
+              </div>
 
                 <Button className="btn-legal-primary">
                   <Save className="w-4 h-4 mr-2" />
                   Save Notification Settings
                 </Button>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
           </TabsContent>
 
           {/* Privacy Tab */}
           <TabsContent value="privacy" className="space-y-6">
             <Card className="legal-card-hover border-legal-border">
-              <CardHeader>
+          <CardHeader>
                 <CardTitle className="legal-heading flex items-center space-x-2">
-                  <Shield className="w-5 h-5" />
+              <Shield className="w-5 h-5" />
                   <span>Privacy & Security</span>
                 </CardTitle>
                 <CardDescription className="text-legal-secondary legal-body">
                   Control your privacy settings and data usage
                 </CardDescription>
-              </CardHeader>
+          </CardHeader>
               <CardContent className="space-y-6">
                 {/* Profile Visibility */}
                 <div className="space-y-3">
@@ -541,7 +541,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Data Sharing */}
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-legal-dark-text font-medium legal-body">
                       Data Sharing
@@ -549,35 +549,35 @@ export default function SettingsPage() {
                     <p className="text-sm text-legal-secondary legal-body">
                       Allow anonymized data sharing for product improvement
                     </p>
-                  </div>
-                  <Switch
+                </div>
+                <Switch
                     checked={privacySettings.dataSharing}
                     onCheckedChange={(checked) => 
                       setPrivacySettings(prev => ({ ...prev, dataSharing: checked }))
                     }
-                  />
-                </div>
+                />
+              </div>
 
                 {/* Analytics Opt-out */}
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-legal-dark-text font-medium legal-body">
                       Analytics Opt-out
                     </Label>
                     <p className="text-sm text-legal-secondary legal-body">
                       Opt out of usage analytics and tracking
-                    </p>
-                  </div>
-                  <Switch
+                  </p>
+                </div>
+                <Switch
                     checked={privacySettings.analyticsOptOut}
                     onCheckedChange={(checked) => 
                       setPrivacySettings(prev => ({ ...prev, analyticsOptOut: checked }))
                     }
-                  />
-                </div>
+                />
+              </div>
 
                 {/* Two-Factor Authentication */}
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label className="text-legal-dark-text font-medium legal-body">
                       Two-Factor Authentication
@@ -585,33 +585,33 @@ export default function SettingsPage() {
                     <p className="text-sm text-legal-secondary legal-body">
                       Add an extra layer of security to your account
                     </p>
-                  </div>
-                  <Switch
+                </div>
+                <Switch
                     checked={privacySettings.twoFactorAuth}
                     onCheckedChange={(checked) => 
                       setPrivacySettings(prev => ({ ...prev, twoFactorAuth: checked }))
                     }
-                  />
-                </div>
+                />
+              </div>
 
                 <Button className="btn-legal-primary">
                   <Save className="w-4 h-4 mr-2" />
                   Save Privacy Settings
                 </Button>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
             {/* Data Management */}
             <Card className="legal-card-hover border-legal-border">
-              <CardHeader>
+            <CardHeader>
                 <CardTitle className="legal-heading">Data Management</CardTitle>
                 <CardDescription className="text-legal-secondary legal-body">
                   Export or delete your account data
                 </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            </CardHeader>
+            <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                  <div>
+                <div>
                     <h4 className="font-medium text-blue-900 legal-body">Export Data</h4>
                     <p className="text-sm text-blue-700 legal-body">Download all your account data</p>
                   </div>
@@ -625,20 +625,20 @@ export default function SettingsPage() {
                   <div>
                     <h4 className="font-medium text-red-900 legal-body">Delete Account</h4>
                     <p className="text-sm text-red-700 legal-body">Permanently delete your account and all data</p>
-                  </div>
+              </div>
                   <Button onClick={handleDeleteAccount} variant="destructive">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
           </TabsContent>
 
           {/* Billing Tab */}
           <TabsContent value="billing" className="space-y-6">
             <Card className="legal-card-hover border-legal-border">
-              <CardHeader>
+            <CardHeader>
                 <CardTitle className="legal-heading flex items-center space-x-2">
                   <CreditCard className="w-5 h-5" />
                   <span>Billing & Subscription</span>
@@ -695,20 +695,20 @@ export default function SettingsPage() {
                             <p className="font-medium text-legal-dark-text legal-body">{item.invoice}</p>
                             <p className="text-sm text-legal-secondary legal-body">{item.date}</p>
                           </div>
-                        </div>
+              </div>
                         <div className="flex items-center space-x-4">
                           <span className="font-medium text-legal-dark-text legal-body">{item.amount}</span>
                           <span className="legal-badge legal-badge-success">{item.status}</span>
                           <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
                             <Download className="w-4 h-4" />
-                          </Button>
+              </Button>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+            </CardContent>
+          </Card>
           </TabsContent>
         </Tabs>
       </div>
