@@ -2,7 +2,20 @@
 
 import { Scale, Shield, Users, FileText, Clock, Award, Heart } from "lucide-react"
 import Image from "next/image"
+import { Baskervville, Montserrat } from "next/font/google";
 
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic", "normal"],
+  variable: "--font-montserrat",
+});
+const baskervville = Baskervville({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic", "normal"],
+  variable: "--font-baskervville",
+});
 export default function FeaturesSection() {
   const legalServices = [
     {
@@ -87,14 +100,12 @@ export default function FeaturesSection() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-[#2A2A2A] mb-8 tracking-wide">
-            THE AREA WHERE WE
-            <br />
-            PRACTISE LAW
+
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl font-light text-[#2A2A2A] mb-8 tracking-wide ${baskervville.className}`}>
+            LEGAL & ACCOUNTING SERVICES WE OFFER
           </h2>
-          <p className="text-base md:text-lg text-[#8B7355] max-w-2xl mx-auto leading-relaxed">
-            We offer a wide range of services to our customers and we go the extra length 
-            to make sure justice is served.
+          <p className={`text-base md:text-lg text-[#8B7355] max-w-2xl mx-auto leading-relaxed ${montserrat.className}`}>
+            Legalease provides a complete suite of legal and accounting (CA) services for businesses and individuals, including GST filings, tax returns, compliance, and legal assistance for any situation.
           </p>
         </div>
 
@@ -113,12 +124,12 @@ export default function FeaturesSection() {
                 </div>
                 
                 {/* Title */}
-                <h3 className="text-xl font-semibold text-[#2A2A2A] mb-4">
+                <h3 className={`text-xl font-extrabold text-[#2A2A2A] mb-4 ${baskervville.className}`}>
                   {area.title}
                 </h3>
                 
                 {/* Description */}
-                <p className="text-[#8B7355] leading-relaxed text-sm md:text-base">
+                <p className={`text-[#8B7355] leading-relaxed text-sm md:text-base ${montserrat.className}`}>
                   {area.description}
                 </p>
               </div>

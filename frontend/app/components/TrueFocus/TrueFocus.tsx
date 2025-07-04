@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Baskervville } from "next/font/google";
 
+const baskervville = Baskervville({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic", "normal"],
+  variable: "--font-baskervville",
+});
 interface TrueFocusProps {
   sentence?: string;
   manualMode?: boolean;
@@ -41,14 +48,10 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
 
   useEffect(() => {
     if (!manualMode) {
-      const interval = setInterval(
-        () => {
-          setCurrentIndex((prev) => (prev + 1) % words.length);
-        },
-        (animationDuration + pauseBetweenAnimations) * 1000,
-      );
-
-      return () => clearInterval(interval);
+      // const interval = setInterval(() => {
+      //   setCurrentIndex((prev) => (prev + 1) % words.length);
+      // }, (animationDuration + pauseBetweenAnimations) * 1000);
+      // return () => clearInterval(interval);
     }
   }, [manualMode, animationDuration, pauseBetweenAnimations, words.length]);
 
@@ -79,19 +82,46 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
       setCurrentIndex(lastActiveIndex!);
     }
   };
-
+  let lastWord = [words.slice(3).join(" ")];
   return (
     <div
-      className="relative flex gap-4 justify-center items-center flex-wrap"
+      className={`font-montserrat relative flex gap-4 justify-center items-center flex-wrap`}
       ref={containerRef}
     >
-      {words.map((word, index) => {
+      {words.slice(0, 3).map((word, index) => {
         const isActive = index === currentIndex;
         return (
           <span
             key={index}
             ref={(el) => (wordRefs.current[index] = el)}
-            className="relative text-[3rem] font-black cursor-pointer"
+            className={`relative text-[3rem] text-legal-brow cursor-pointer font-baskervville`}
+            style={
+              {
+                filter: manualMode
+                  ? isActive
+                    ? `blur(${blurAmount}px)`
+                    : `blur(${blurAmount}px)`
+                  : isActive
+                  ? `blur(${blurAmount}px)`
+                  : `blur(${blurAmount}px) `,
+                color: isActive ? `#000` : `#000`,
+                transition: `all ${animationDuration}s ease`,
+              } as React.CSSProperties
+            }
+            onMouseEnter={() => handleMouseEnter(index)}
+            onMouseLeave={handleMouseLeave}
+          >
+            {word}
+          </span>
+        );
+      })}
+      {lastWord.map((word, index) => {
+        const isActive = index === currentIndex;
+        return (
+          <span
+            key={index}
+            ref={(el) => (wordRefs.current[index] = el)}
+            className={`relative text-[3rem] text-legal-brow cursor-pointer  ${baskervville.className}`}
             style={
               {
                 filter: manualMode
@@ -99,9 +129,10 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
                     ? `blur(0px)`
                     : `blur(${blurAmount}px)`
                   : isActive
-                    ? `blur(0px)`
-                    : `blur(${blurAmount}px)`,
-                transition: `filter ${animationDuration}s ease`,
+                  ? `blur(0px)`
+                  : `blur(${blurAmount}px) `,
+                color: isActive ? `#8b4513` : `#000`,
+                transition: `all ${animationDuration}s ease`,
               } as React.CSSProperties
             }
             onMouseEnter={() => handleMouseEnter(index)}
@@ -135,28 +166,28 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
           className="absolute w-4 h-4 border-[3px] rounded-[3px] top-[-10px] left-[-10px] border-r-0 border-b-0"
           style={{
             borderColor: "var(--border-color)",
-            filter: "drop-shadow(0 0 4px var(--border-color))",
+            // filter: "drop-shadow(0 0 4px var(--border-color))",
           }}
         ></span>
         <span
           className="absolute w-4 h-4 border-[3px] rounded-[3px] top-[-10px] right-[-10px] border-l-0 border-b-0"
           style={{
             borderColor: "var(--border-color)",
-            filter: "drop-shadow(0 0 4px var(--border-color))",
+            // filter: "drop-shadow(0 0 4px var(--border-color))",
           }}
         ></span>
         <span
           className="absolute w-4 h-4 border-[3px] rounded-[3px] bottom-[-10px] left-[-10px] border-r-0 border-t-0"
           style={{
             borderColor: "var(--border-color)",
-            filter: "drop-shadow(0 0 4px var(--border-color))",
+            // filter: "drop-shadow(0 0 4px var(--border-color))",
           }}
         ></span>
         <span
           className="absolute w-4 h-4 border-[3px] rounded-[3px] bottom-[-10px] right-[-10px] border-l-0 border-t-0"
           style={{
             borderColor: "var(--border-color)",
-            filter: "drop-shadow(0 0 4px var(--border-color))",
+            // filter: "drop-shadow(0 0 4px var(--border-color))",
           }}
         ></span>
       </motion.div>
