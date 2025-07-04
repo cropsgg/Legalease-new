@@ -77,6 +77,12 @@ const navigationItems = [
     description: "Upload & AI analysis",
   },
   {
+    title: "Agents",
+    url: "/agents",
+    icon: Bot,
+    description: "AI agent management",
+  },
+  {
     title: "Compliance",
     url: "/compliance",
     icon: Shield,
