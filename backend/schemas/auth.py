@@ -1,24 +1,25 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
+from schemas.user import User
 
-class UserAuth(BaseModel):
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    full_name: str = Field(..., min_length=1)
+
+class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
-class UserResponse(BaseModel):
-    id: str
-    email: str
-    role: str = "authenticated"
-    email_confirmed: bool = False
 
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    expires_in: int
-    refresh_token: Optional[str] = None
 
-class GoogleToken(BaseModel):
+class TokenData(BaseModel):
+    user_id: Optional[str] = None
+    email: Optional[str] = None
+
+class AuthResponse(BaseModel):
+    user: User
     access_token: str
-
-class PasswordReset(BaseModel):
-    email: EmailStr 
+    token_type: str = "bearer" 
