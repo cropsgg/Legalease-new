@@ -10,15 +10,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { 
-  User, 
-  Building2, 
-  Bell, 
-  Shield, 
-  CreditCard, 
-  Eye, 
-  EyeOff, 
-  Check, 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  User,
+  Building2,
+  Bell,
+  Shield,
+  CreditCard,
+  Eye,
+  EyeOff,
+  Check,
   X,
   FileText,
   Globe,
@@ -28,19 +32,148 @@ import {
   Settings,
   Save,
   Trash2,
-  Download
+  Download,
+  Plus,
+  Edit,
+  Banknote,
+  CheckCircle,
+  Clock,
+  Phone,
+  MapPin,
+  ExternalLink,
+  Key,
+  Link,
+  Bot,
+  Activity,
+  Zap,
+  Upload
 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-api"
 
+interface SettingsData {
+  businessProfile: {
+    name: string;
+    description: string;
+    logo: string;
+    letterhead: string;
+    contact: {
+      email: string;
+      phone: string;
+      address: string;
+      website: string;
+    };
+    bank: {
+      accountNumber: string;
+      ifscCode: string;
+      bankName: string;
+    };
+  };
+  documentSettings: {
+    ocrEnabled: boolean;
+    blockchainHashing: boolean;
+    storageLocation: "local" | "cloud" | "hybrid";
+    retentionPeriod: number;
+    autoBackup: boolean;
+    backupFrequency: "daily" | "weekly" | "monthly";
+  };
+  agentConfig: {
+    memoryLimit: number;
+    feedbackEnabled: boolean;
+    automationRules: boolean;
+    notifications: {
+      email: boolean;
+      push: boolean;
+      sms: boolean;
+    };
+  };
+  security: {
+    passwordMinLength: number;
+    require2FA: boolean;
+    encryptionEnabled: boolean;
+    sessionTimeout: number;
+    privacyControls: {
+      dataSharing: boolean;
+      analytics: boolean;
+      marketing: boolean;
+    };
+  };
+  integrations: {
+    googleWorkspace: boolean;
+    microsoft365: boolean;
+    slack: boolean;
+    zapier: boolean;
+    apiEnabled: boolean;
+  };
+}
+
+const mockSettingsData: SettingsData = {
+  businessProfile: {
+    name: "LegalEase Solutions Pvt Ltd",
+    description: "AI-powered legal document automation and compliance management platform",
+    logo: "/logo.png",
+    letterhead: "LegalEase Solutions Pvt Ltd\n123 Legal Street, Mumbai, Maharashtra 400001",
+    contact: {
+      email: "contact@legalease.com",
+      phone: "+91-98765-43210",
+      address: "123 Legal Street, Mumbai, Maharashtra 400001",
+      website: "https://legalease.com"
+    },
+    bank: {
+      accountNumber: "1234567890",
+      ifscCode: "LEGL0001234",
+      bankName: "Legal Bank of India"
+    }
+  },
+  documentSettings: {
+    ocrEnabled: true,
+    blockchainHashing: true,
+    storageLocation: "cloud",
+    retentionPeriod: 7,
+    autoBackup: true,
+    backupFrequency: "daily"
+  },
+  agentConfig: {
+    memoryLimit: 512,
+    feedbackEnabled: true,
+    automationRules: true,
+    notifications: {
+      email: true,
+      push: true,
+      sms: false
+    }
+  },
+  security: {
+    passwordMinLength: 8,
+    require2FA: true,
+    encryptionEnabled: true,
+    sessionTimeout: 30,
+    privacyControls: {
+      dataSharing: false,
+      analytics: true,
+      marketing: false
+    }
+  },
+  integrations: {
+    googleWorkspace: true,
+    microsoft365: false,
+    slack: true,
+    zapier: false,
+    apiEnabled: true
+  }
+};
+
 export default function SettingsPage() {
   const { user, isLoading } = useAuth()
   const { showToast } = useToast()
-  
-  const [activeTab, setActiveTab] = useState("profile")
+
+  const [activeTab, setActiveTab] = useState("business-profile")
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [data, setData] = useState<SettingsData>(mockSettingsData)
+  const [showBankDetails, setShowBankDetails] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   // Form states
   const [profileData, setProfileData] = useState({
@@ -89,7 +222,7 @@ export default function SettingsPage() {
       showToast("Passwords don't match", "error")
       return
     }
-    
+
     try {
       // Password change logic here
       showToast("Password changed successfully!", "success")
@@ -108,609 +241,803 @@ export default function SettingsPage() {
     showToast("Data export will be sent to your email", "info")
   }
 
+  const updateData = <K extends keyof SettingsData>(section: K, field: keyof SettingsData[K], value: any) => {
+    setData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }));
+  };
+
+  const updateNestedData = (section: keyof SettingsData, parent: string, field: string, value: any) => {
+    setData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [parent]: {
+          ...(prev[section] as any)[parent],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const settingsTabs = [
+    { key: "business-profile", label: "Business Profile", icon: Building2 },
+    { key: "document-settings", label: "Document Settings", icon: FileText },
+    { key: "agent-configuration", label: "Agent Configuration", icon: Bot },
+    { key: "billing-subscription", label: "Billing & Subscription", icon: CreditCard },
+    { key: "security-privacy", label: "Security & Privacy", icon: Shield },
+    { key: "integration-settings", label: "Integration Settings", icon: Settings }
+  ];
+
+
+
   return (
     <div className="min-h-screen legal-bg-primary p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 legal-icon-bg rounded-xl flex items-center justify-center">
               <Settings className="w-5 h-5 text-white" />
             </div>
-          <div>
-              <h1 className="text-3xl legal-heading">Settings</h1>
+            <div>
+              <h1 className="text-3xl text-legal-dark-text">Settings & Configuration</h1>
               <p className="text-legal-secondary legal-body">Manage your account settings and preferences</p>
             </div>
           </div>
         </div>
 
-        {/* Settings Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 legal-card p-2 h-auto">
-            <TabsTrigger 
-              value="profile" 
-              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
-            >
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline legal-body">Profile</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="notifications" 
-              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="hidden sm:inline legal-body">Notifications</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="privacy" 
-              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
-            >
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline legal-body">Privacy</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="billing" 
-              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
-            >
-              <CreditCard className="w-4 h-4" />
-              <span className="hidden sm:inline legal-body">Billing</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <Card className="legal-card-hover border-legal-border">
-          <CardHeader>
-                <CardTitle className="legal-heading flex items-center space-x-2">
-              <User className="w-5 h-5" />
-                  <span>Personal Information</span>
-                </CardTitle>
-                <CardDescription className="text-legal-secondary legal-body">
-                  Update your personal details and contact information
-                </CardDescription>
-          </CardHeader>
-              <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-legal-dark-text font-medium legal-body">
-                      First Name
-                    </Label>
-                <Input
-                  id="firstName"
-                      value={profileData.firstName}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
-                      className="legal-input"
-                      placeholder="John"
-                />
-              </div>
-              <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-legal-dark-text font-medium legal-body">
-                      Last Name
-                    </Label>
-                <Input
-                  id="lastName"
-                      value={profileData.lastName}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
-                      className="legal-input"
-                      placeholder="Doe"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-                  <Label htmlFor="email" className="text-legal-dark-text font-medium legal-body">
-                    Email Address
-                  </Label>
-              <Input
-                id="email"
-                type="email"
-                    value={profileData.email}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                    className="legal-input"
-                    placeholder="john@example.com"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                    <Label htmlFor="company" className="text-legal-dark-text font-medium legal-body">
-                      Company Name
-                    </Label>
-                    <Input
-                      id="company"
-                      value={profileData.company}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, company: e.target.value }))}
-                      className="legal-input"
-                      placeholder="Your Company"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="companySize" className="text-legal-dark-text font-medium legal-body">
-                      Company Size
-                    </Label>
-                    <Select 
-                      value={profileData.companySize} 
-                      onValueChange={(value) => setProfileData(prev => ({ ...prev, companySize: value }))}
-                    >
-                      <SelectTrigger className="legal-input">
-                        <SelectValue placeholder="Select size" />
-                  </SelectTrigger>
-                      <SelectContent className="legal-card">
-                    <SelectItem value="1-10">1-10 employees</SelectItem>
-                    <SelectItem value="11-50">11-50 employees</SelectItem>
-                    <SelectItem value="51-200">51-200 employees</SelectItem>
-                    <SelectItem value="200+">200+ employees</SelectItem>
-                  </SelectContent>
-                </Select>
-                  </div>
-              </div>
-
-              <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-legal-dark-text font-medium legal-body">
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={profileData.phone}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="legal-input"
-                    placeholder="+1 (555) 123-4567"
-                  />
-              </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio" className="text-legal-dark-text font-medium legal-body">
-                    Bio
-                  </Label>
-                  <Textarea
-                    id="bio"
-                    value={profileData.bio}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                    className="legal-input"
-                    placeholder="Tell us about yourself..."
-                    rows={3}
-                  />
-            </div>
-
-                <Button onClick={handleProfileUpdate} disabled={isLoading} className="btn-legal-primary">
-                <Save className="w-4 h-4 mr-2" />
-                  {isLoading ? "Saving..." : "Save Changes"}
-              </Button>
-          </CardContent>
-        </Card>
-
-            {/* Password Change */}
-            <Card className="legal-card-hover border-legal-border">
-          <CardHeader>
-                <CardTitle className="legal-heading flex items-center space-x-2">
-                  <Shield className="w-5 h-5" />
-                  <span>Change Password</span>
-                </CardTitle>
-                <CardDescription className="text-legal-secondary legal-body">
-                  Update your password to keep your account secure
-                </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword" className="text-legal-dark-text font-medium legal-body">
-                    Current Password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="currentPassword"
-                      type={showCurrentPassword ? "text" : "password"}
-                      value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                      className="legal-input pr-12"
-                      placeholder="Enter current password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-legal-secondary hover:text-legal-dark-text transition-colors"
-                    >
-                      {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword" className="text-legal-dark-text font-medium legal-body">
-                    New Password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      type={showNewPassword ? "text" : "password"}
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                      className="legal-input pr-12"
-                      placeholder="Enter new password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-legal-secondary hover:text-legal-dark-text transition-colors"
-                    >
-                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-legal-dark-text font-medium legal-body">
-                    Confirm New Password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className="legal-input pr-12"
-                      placeholder="Confirm new password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-legal-secondary hover:text-legal-dark-text transition-colors"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button onClick={handlePasswordChange} className="btn-legal-primary">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Change Password
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-6">
+        {/* Settings Navigation */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Sidebar */}
+          <div className="lg:col-span-1">
             <Card className="legal-card-hover border-legal-border">
               <CardHeader>
-                <CardTitle className="legal-heading flex items-center space-x-2">
-                  <Bell className="w-5 h-5" />
-                  <span>Notification Preferences</span>
-                </CardTitle>
-                <CardDescription className="text-legal-secondary legal-body">
-                  Choose how you want to receive notifications
-                </CardDescription>
+                <CardTitle className="text-legal-dark-text">Settings</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Email Notifications */}
-              <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
-                      <Mail className="w-4 h-4" />
-                      <span>Email Notifications</span>
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Receive notifications via email
-                    </p>
-                </div>
-                <Switch
-                    checked={notificationSettings.emailNotifications}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings(prev => ({ ...prev, emailNotifications: checked }))
-                    }
-                />
-              </div>
+              <CardContent className="p-0">
+                <nav className="space-y-1">
+                  {settingsTabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setActiveTab(tab.key)}
+                        className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${
+                          activeTab === tab.key
+                            ? "bg-legal-accent text-white"
+                            : "text-legal-secondary hover:bg-legal-bg-secondary hover:text-legal-dark-text"
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span className="legal-body font-medium">{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </CardContent>
+            </Card>
+          </div>
 
-                {/* Push Notifications */}
-              <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
-                      <Smartphone className="w-4 h-4" />
-                      <span>Push Notifications</span>
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Receive push notifications on your device
-                  </p>
-                </div>
-                <Switch
-                    checked={notificationSettings.pushNotifications}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings(prev => ({ ...prev, pushNotifications: checked }))
-                    }
-                />
-              </div>
-
-                {/* Marketing Emails */}
-              <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
-                      <Globe className="w-4 h-4" />
-                      <span>Marketing Emails</span>
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Receive product updates and promotional content
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.marketingEmails}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings(prev => ({ ...prev, marketingEmails: checked }))
-                    }
-                  />
-                </div>
-
-                {/* Weekly Reports */}
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
-                      <FileText className="w-4 h-4" />
-                      <span>Weekly Reports</span>
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Get weekly summaries of your legal activities
-                    </p>
-                </div>
-                <Switch
-                    checked={notificationSettings.weeklyReports}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings(prev => ({ ...prev, weeklyReports: checked }))
-                    }
-                />
-              </div>
-
-                {/* Document Updates */}
-              <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
-                      <FileText className="w-4 h-4" />
-                      <span>Document Updates</span>
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Notifications when your documents are processed
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.documentUpdates}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings(prev => ({ ...prev, documentUpdates: checked }))
-                    }
-                  />
-                </div>
-
-                {/* Compliance Alerts */}
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body flex items-center space-x-2">
-                      <Shield className="w-4 h-4" />
-                      <span>Compliance Alerts</span>
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Important compliance deadlines and updates
-                    </p>
-                </div>
-                <Switch
-                    checked={notificationSettings.complianceAlerts}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings(prev => ({ ...prev, complianceAlerts: checked }))
-                    }
-                />
-              </div>
-
-                <Button className="btn-legal-primary">
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Notification Settings
-                </Button>
-          </CardContent>
-        </Card>
-          </TabsContent>
-
-          {/* Privacy Tab */}
-          <TabsContent value="privacy" className="space-y-6">
-            <Card className="legal-card-hover border-legal-border">
-          <CardHeader>
-                <CardTitle className="legal-heading flex items-center space-x-2">
-              <Shield className="w-5 h-5" />
-                  <span>Privacy & Security</span>
-                </CardTitle>
-                <CardDescription className="text-legal-secondary legal-body">
-                  Control your privacy settings and data usage
-                </CardDescription>
-          </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Profile Visibility */}
-                <div className="space-y-3">
-                  <Label className="text-legal-dark-text font-medium legal-body">
-                    Profile Visibility
-                  </Label>
-                  <Select 
-                    value={privacySettings.profileVisibility} 
-                    onValueChange={(value) => setPrivacySettings(prev => ({ ...prev, profileVisibility: value }))}
-                  >
-                    <SelectTrigger className="legal-input">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="legal-card">
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
-                      <SelectItem value="contacts">Contacts Only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-legal-secondary legal-body">
-                    Control who can see your profile information
-                  </p>
-                </div>
-
-                {/* Data Sharing */}
-              <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body">
-                      Data Sharing
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Allow anonymized data sharing for product improvement
-                    </p>
-                </div>
-                <Switch
-                    checked={privacySettings.dataSharing}
-                    onCheckedChange={(checked) => 
-                      setPrivacySettings(prev => ({ ...prev, dataSharing: checked }))
-                    }
-                />
-              </div>
-
-                {/* Analytics Opt-out */}
-              <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body">
-                      Analytics Opt-out
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Opt out of usage analytics and tracking
-                  </p>
-                </div>
-                <Switch
-                    checked={privacySettings.analyticsOptOut}
-                    onCheckedChange={(checked) => 
-                      setPrivacySettings(prev => ({ ...prev, analyticsOptOut: checked }))
-                    }
-                />
-              </div>
-
-                {/* Two-Factor Authentication */}
-              <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-legal-dark-text font-medium legal-body">
-                      Two-Factor Authentication
-                    </Label>
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Add an extra layer of security to your account
-                    </p>
-                </div>
-                <Switch
-                    checked={privacySettings.twoFactorAuth}
-                    onCheckedChange={(checked) => 
-                      setPrivacySettings(prev => ({ ...prev, twoFactorAuth: checked }))
-                    }
-                />
-              </div>
-
-                <Button className="btn-legal-primary">
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Privacy Settings
-                </Button>
-          </CardContent>
-        </Card>
-
-            {/* Data Management */}
-            <Card className="legal-card-hover border-legal-border">
-            <CardHeader>
-                <CardTitle className="legal-heading">Data Management</CardTitle>
-                <CardDescription className="text-legal-secondary legal-body">
-                  Export or delete your account data
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                <div>
-                    <h4 className="font-medium text-blue-900 legal-body">Export Data</h4>
-                    <p className="text-sm text-blue-700 legal-body">Download all your account data</p>
-                  </div>
-                  <Button onClick={handleExportData} className="btn-legal-secondary">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <div>
-                    <h4 className="font-medium text-red-900 legal-body">Delete Account</h4>
-                    <p className="text-sm text-red-700 legal-body">Permanently delete your account and all data</p>
-              </div>
-                  <Button onClick={handleDeleteAccount} variant="destructive">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          </TabsContent>
-
-          {/* Billing Tab */}
-          <TabsContent value="billing" className="space-y-6">
-            <Card className="legal-card-hover border-legal-border">
-            <CardHeader>
-                <CardTitle className="legal-heading flex items-center space-x-2">
-                  <CreditCard className="w-5 h-5" />
-                  <span>Billing & Subscription</span>
-                </CardTitle>
-                <CardDescription className="text-legal-secondary legal-body">
-                  Manage your subscription and billing information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Current Plan */}
-                <div className="p-6 bg-gradient-to-r from-legal-accent/10 to-legal-brown/10 border border-legal-border rounded-2xl">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {/* Business Profile Tab */}
+            {activeTab === "business-profile" && (
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-legal-dark-text legal-heading">Professional Plan</h3>
-                      <p className="text-legal-secondary legal-body">$99/month • Billed monthly</p>
+                      <CardTitle className="text-legal-dark-text flex items-center space-x-2">
+                        <Building2 className="w-5 h-5 text-legal-accent" />
+                        <span>Business Profile</span>
+                      </CardTitle>
+                      <p className="text-legal-secondary legal-body">Manage your business information and branding</p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-legal-brown legal-heading">$99</div>
-                      <div className="text-sm text-legal-secondary legal-body">per month</div>
+                    <Button
+                      onClick={() => setIsEditing(!isEditing)}
+                      className="btn-legal-primary"
+                    >
+                      {isEditing ? <Save className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
+                      {isEditing ? "Save Changes" : "Edit Profile"}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Logo Upload */}
+                  <div className="space-y-4">
+                    <Label className="legal-text font-semibold">Company Logo</Label>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-20 h-20 bg-legal-bg-secondary rounded-lg flex items-center justify-center border-2 border-dashed border-legal-border">
+                        {data.businessProfile.logo ? (
+                          <img src={data.businessProfile.logo} alt="Logo" className="w-16 h-16 object-contain" />
+                        ) : (
+                          <Upload className="w-8 h-8 text-legal-secondary" />
+                        )}
+                      </div>
+                      <div>
+                        <Button variant="outline" className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload Logo
+                        </Button>
+                        <p className="text-sm text-legal-secondary mt-1">Recommended: 200x200px, PNG or JPG</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-legal-border">
-                    <p className="text-sm text-legal-secondary legal-body">
-                      Next billing date: <span className="font-medium text-legal-dark-text">January 15, 2024</span>
-                    </p>
+
+                  <Separator />
+
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="businessName" className="legal-text font-semibold">Business Name *</Label>
+                      <Input
+                        id="businessName"
+                        value={data.businessProfile.name}
+                        onChange={(e) => updateData("businessProfile", "name", e.target.value)}
+                        disabled={!isEditing}
+                        className="border-legal-border focus:border-legal-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="website" className="legal-text font-semibold">Website</Label>
+                      <Input
+                        id="website"
+                        value={data.businessProfile.contact.website}
+                        onChange={(e) => updateNestedData("businessProfile", "contact", "website", e.target.value)}
+                        disabled={!isEditing}
+                        className="border-legal-border focus:border-legal-accent"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex space-x-3">
-                  <Button className="btn-legal-primary">
-                    Upgrade Plan
-                  </Button>
-                  <Button className="btn-legal-secondary">
-                    Change Plan
-                  </Button>
-                  <Button variant="outline" className="border-legal-border hover:bg-legal-bg-secondary">
-                    Cancel Subscription
-                  </Button>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="legal-text font-semibold">Business Description</Label>
+                    <Textarea
+                      id="description"
+                      value={data.businessProfile.description}
+                      onChange={(e) => updateData("businessProfile", "description", e.target.value)}
+                      disabled={!isEditing}
+                      rows={4}
+                      className="border-legal-border focus:border-legal-accent"
+                    />
+                  </div>
 
-                {/* Billing History */}
-                <div>
-                  <h4 className="font-medium text-legal-dark-text mb-4 legal-heading">Billing History</h4>
-                  <div className="space-y-3">
-                    {[
-                      { date: "Dec 15, 2023", amount: "$99.00", status: "Paid", invoice: "INV-001" },
-                      { date: "Nov 15, 2023", amount: "$99.00", status: "Paid", invoice: "INV-002" },
-                      { date: "Oct 15, 2023", amount: "$99.00", status: "Paid", invoice: "INV-003" },
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 border border-legal-border rounded-xl">
-                        <div className="flex items-center space-x-4">
-                          <div>
-                            <p className="font-medium text-legal-dark-text legal-body">{item.invoice}</p>
-                            <p className="text-sm text-legal-secondary legal-body">{item.date}</p>
-                          </div>
-              </div>
-                        <div className="flex items-center space-x-4">
-                          <span className="font-medium text-legal-dark-text legal-body">{item.amount}</span>
-                          <span className="legal-badge legal-badge-success">{item.status}</span>
-                          <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
-                            <Download className="w-4 h-4" />
-              </Button>
+                  <Separator />
+
+                  {/* Contact Information */}
+                  <div className="space-y-4">
+                    <h3 className="legal-subheading flex items-center space-x-2">
+                      <Mail className="w-5 h-5 text-legal-accent" />
+                      <span>Contact Information</span>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="legal-text font-semibold">Email Address *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={data.businessProfile.contact.email}
+                          onChange={(e) => updateNestedData("businessProfile", "contact", "email", e.target.value)}
+                          disabled={!isEditing}
+                          className="border-legal-border focus:border-legal-accent"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="legal-text font-semibold">Phone Number *</Label>
+                        <Input
+                          id="phone"
+                          value={data.businessProfile.contact.phone}
+                          onChange={(e) => updateNestedData("businessProfile", "contact", "phone", e.target.value)}
+                          disabled={!isEditing}
+                          className="border-legal-border focus:border-legal-accent"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address" className="legal-text font-semibold">Address</Label>
+                      <Textarea
+                        id="address"
+                        value={data.businessProfile.contact.address}
+                        onChange={(e) => updateNestedData("businessProfile", "contact", "address", e.target.value)}
+                        disabled={!isEditing}
+                        rows={3}
+                        className="border-legal-border focus:border-legal-accent"
+                      />
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Bank Details */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="legal-subheading flex items-center space-x-2">
+                        <Banknote className="w-5 h-5 text-legal-accent" />
+                        <span>Bank Details</span>
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowBankDetails(!showBankDetails)}
+                        className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary"
+                      >
+                        {showBankDetails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showBankDetails ? "Hide" : "Show"} Details
+                      </Button>
+                    </div>
+                    {showBankDetails && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-legal-bg-secondary rounded-lg">
+                        <div className="space-y-2">
+                          <Label htmlFor="accountNumber" className="legal-text font-semibold">Account Number</Label>
+                          <Input
+                            id="accountNumber"
+                            value={data.businessProfile.bank.accountNumber}
+                            onChange={(e) => updateNestedData("businessProfile", "bank", "accountNumber", e.target.value)}
+                            disabled={!isEditing}
+                            className="border-legal-border focus:border-legal-accent"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="ifscCode" className="legal-text font-semibold">IFSC Code</Label>
+                          <Input
+                            id="ifscCode"
+                            value={data.businessProfile.bank.ifscCode}
+                            onChange={(e) => updateNestedData("businessProfile", "bank", "ifscCode", e.target.value)}
+                            disabled={!isEditing}
+                            className="border-legal-border focus:border-legal-accent"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="bankName" className="legal-text font-semibold">Bank Name</Label>
+                          <Input
+                            id="bankName"
+                            value={data.businessProfile.bank.bankName}
+                            onChange={(e) => updateNestedData("businessProfile", "bank", "bankName", e.target.value)}
+                            disabled={!isEditing}
+                            className="border-legal-border focus:border-legal-accent"
+                          />
                         </div>
                       </div>
-                    ))}
+                    )}
                   </div>
-                </div>
-            </CardContent>
-          </Card>
-          </TabsContent>
-        </Tabs>
+                </CardContent>
+              </Card>
+            )}
+
+
+
+            {/* Document Settings Tab */}
+            {activeTab === "document-settings" && (
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
+                  <CardTitle className="text-legal-dark-text flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-legal-accent" />
+                    <span>Document Settings</span>
+                  </CardTitle>
+                  <p className="text-legal-secondary legal-body">Configure document processing and storage preferences</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="legal-text font-semibold">OCR Processing</Label>
+                          <p className="text-sm text-legal-secondary">Enable automatic text extraction from documents</p>
+                        </div>
+                        <Switch
+                          checked={data.documentSettings.ocrEnabled}
+                          onCheckedChange={(checked) => updateData("documentSettings", "ocrEnabled", checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="legal-text font-semibold">Blockchain Hashing</Label>
+                          <p className="text-sm text-legal-secondary">Store document hashes on blockchain for verification</p>
+                        </div>
+                        <Switch
+                          checked={data.documentSettings.blockchainHashing}
+                          onCheckedChange={(checked) => updateData("documentSettings", "blockchainHashing", checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="legal-text font-semibold">Auto Backup</Label>
+                          <p className="text-sm text-legal-secondary">Automatically backup documents</p>
+                        </div>
+                        <Switch
+                          checked={data.documentSettings.autoBackup}
+                          onCheckedChange={(checked) => updateData("documentSettings", "autoBackup", checked)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="legal-text font-semibold">Storage Location</Label>
+                        <Select
+                          value={data.documentSettings.storageLocation}
+                          onValueChange={(value) => updateData("documentSettings", "storageLocation", value)}
+                        >
+                          <SelectTrigger className="border-legal-border focus:border-legal-accent">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="local">Local Storage</SelectItem>
+                            <SelectItem value="cloud">Cloud Storage</SelectItem>
+                            <SelectItem value="hybrid">Hybrid</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="legal-text font-semibold">Retention Period (years)</Label>
+                        <Input
+                          type="number"
+                          value={data.documentSettings.retentionPeriod}
+                          onChange={(e) => updateData("documentSettings", "retentionPeriod", parseInt(e.target.value))}
+                          className="border-legal-border focus:border-legal-accent"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="legal-text font-semibold">Backup Frequency</Label>
+                        <Select
+                          value={data.documentSettings.backupFrequency}
+                          onValueChange={(value) => updateData("documentSettings", "backupFrequency", value)}
+                        >
+                          <SelectTrigger className="border-legal-border focus:border-legal-accent">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Agent Configuration Tab */}
+            {activeTab === "agent-configuration" && (
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
+                  <CardTitle className="text-legal-dark-text flex items-center space-x-2">
+                    <Bot className="w-5 h-5 text-legal-accent" />
+                    <span>Agent Configuration</span>
+                  </CardTitle>
+                  <p className="text-legal-secondary legal-body">Configure AI agent behavior and preferences</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="legal-text font-semibold">Memory Limit (MB)</Label>
+                        <Input
+                          type="number"
+                          value={data.agentConfig.memoryLimit}
+                          onChange={(e) => updateData("agentConfig", "memoryLimit", parseInt(e.target.value))}
+                          className="border-legal-border focus:border-legal-accent"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="legal-text font-semibold">Feedback Collection</Label>
+                          <p className="text-sm text-legal-secondary">Allow agents to collect user feedback</p>
+                        </div>
+                        <Switch
+                          checked={data.agentConfig.feedbackEnabled}
+                          onCheckedChange={(checked) => updateData("agentConfig", "feedbackEnabled", checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="legal-text font-semibold">Automation Rules</Label>
+                          <p className="text-sm text-legal-secondary">Enable automated workflow rules</p>
+                        </div>
+                        <Switch
+                          checked={data.agentConfig.automationRules}
+                          onCheckedChange={(checked) => updateData("agentConfig", "automationRules", checked)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="legal-subheading">Notification Preferences</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Mail className="w-4 h-4 text-legal-accent" />
+                            <Label className="legal-text">Email Notifications</Label>
+                          </div>
+                          <Switch
+                            checked={data.agentConfig.notifications.email}
+                            onCheckedChange={(checked) => updateNestedData("agentConfig", "notifications", "email", checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Bell className="w-4 h-4 text-legal-accent" />
+                            <Label className="legal-text">Push Notifications</Label>
+                          </div>
+                          <Switch
+                            checked={data.agentConfig.notifications.push}
+                            onCheckedChange={(checked) => updateNestedData("agentConfig", "notifications", "push", checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Phone className="w-4 h-4 text-legal-accent" />
+                            <Label className="legal-text">SMS Notifications</Label>
+                          </div>
+                          <Switch
+                            checked={data.agentConfig.notifications.sms}
+                            onCheckedChange={(checked) => updateNestedData("agentConfig", "notifications", "sms", checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Billing & Subscription Tab */}
+            {activeTab === "billing-subscription" && (
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
+                  <CardTitle className="text-legal-dark-text flex items-center space-x-2">
+                    <CreditCard className="w-5 h-5 text-legal-accent" />
+                    <span>Billing & Subscription</span>
+                  </CardTitle>
+                  <p className="text-legal-secondary legal-body">Manage your subscription and billing information</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="border-legal-border">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="legal-subheading text-center">Current Plan</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-center">
+                        <div className="text-3xl font-bold text-legal-accent mb-2">Professional</div>
+                        <p className="text-legal-secondary legal-body mb-4">₹2,999/month</p>
+                        <Button className="btn-legal-primary w-full">Upgrade Plan</Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-legal-border">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="legal-subheading text-center">Usage</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-center">
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex justify-between text-sm">
+                              <span>Documents</span>
+                              <span>1,247 / 5,000</span>
+                            </div>
+                            <Progress value={25} className="h-2" />
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-sm">
+                              <span>Storage</span>
+                              <span>2.1 GB / 10 GB</span>
+                            </div>
+                            <Progress value={21} className="h-2" />
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-sm">
+                              <span>Users</span>
+                              <span>3 / 10</span>
+                            </div>
+                            <Progress value={30} className="h-2" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-legal-border">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="legal-subheading text-center">Next Billing</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-center">
+                        <div className="text-2xl font-bold text-legal-accent mb-2">Feb 15, 2024</div>
+                        <p className="text-legal-secondary legal-body mb-4">₹2,999</p>
+                        <Button variant="outline" className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary w-full">
+                          View Invoice
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h3 className="legal-subheading">Payment Methods</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 bg-legal-bg-secondary rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <CreditCard className="w-6 h-6 text-legal-accent" />
+                          <div>
+                            <p className="legal-subheading">•••• •••• •••• 4242</p>
+                            <p className="text-legal-secondary legal-body">Expires 12/25</p>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700 border-green-300">Default</Badge>
+                      </div>
+                      <Button variant="outline" className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Payment Method
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Security & Privacy Tab */}
+            {activeTab === "security-privacy" && (
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
+                  <CardTitle className="text-legal-dark-text flex items-center space-x-2">
+                    <Shield className="w-5 h-5 text-legal-accent" />
+                    <span>Security & Privacy</span>
+                  </CardTitle>
+                  <p className="text-legal-secondary legal-body">Manage security settings and privacy preferences</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="legal-text font-semibold">Minimum Password Length</Label>
+                        <Input
+                          type="number"
+                          value={data.security.passwordMinLength}
+                          onChange={(e) => updateData("security", "passwordMinLength", parseInt(e.target.value))}
+                          className="border-legal-border focus:border-legal-accent"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="legal-text font-semibold">Two-Factor Authentication</Label>
+                          <p className="text-sm text-legal-secondary">Require 2FA for all users</p>
+                        </div>
+                        <Switch
+                          checked={data.security.require2FA}
+                          onCheckedChange={(checked) => updateData("security", "require2FA", checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="legal-text font-semibold">Data Encryption</Label>
+                          <p className="text-sm text-legal-secondary">Enable end-to-end encryption</p>
+                        </div>
+                        <Switch
+                          checked={data.security.encryptionEnabled}
+                          onCheckedChange={(checked) => updateData("security", "encryptionEnabled", checked)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="legal-text font-semibold">Session Timeout (minutes)</Label>
+                        <Input
+                          type="number"
+                          value={data.security.sessionTimeout}
+                          onChange={(e) => updateData("security", "sessionTimeout", parseInt(e.target.value))}
+                          className="border-legal-border focus:border-legal-accent"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="legal-subheading">Privacy Controls</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="legal-text font-semibold">Data Sharing</Label>
+                            <p className="text-sm text-legal-secondary">Allow data sharing with partners</p>
+                          </div>
+                          <Switch
+                            checked={data.security.privacyControls.dataSharing}
+                            onCheckedChange={(checked) => updateNestedData("security", "privacyControls", "dataSharing", checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="legal-text font-semibold">Analytics</Label>
+                            <p className="text-sm text-legal-secondary">Collect usage analytics</p>
+                          </div>
+                          <Switch
+                            checked={data.security.privacyControls.analytics}
+                            onCheckedChange={(checked) => updateNestedData("security", "privacyControls", "analytics", checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="legal-text font-semibold">Marketing</Label>
+                            <p className="text-sm text-legal-secondary">Receive marketing communications</p>
+                          </div>
+                          <Switch
+                            checked={data.security.privacyControls.marketing}
+                            onCheckedChange={(checked) => updateNestedData("security", "privacyControls", "marketing", checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h3 className="legal-subheading">Access Logs</h3>
+                    <div className="space-y-2">
+                      {[
+                        { action: "Login", user: "priya@legalease.com", time: "2024-01-15 10:30:00", ip: "192.168.1.100" },
+                        { action: "Document Upload", user: "amit@legalease.com", time: "2024-01-15 09:15:00", ip: "192.168.1.101" },
+                        { action: "Settings Change", user: "rohit@legalease.com", time: "2024-01-14 16:45:00", ip: "192.168.1.102" }
+                      ].map((log, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-legal-bg-secondary rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <Activity className="w-4 h-4 text-legal-accent" />
+                            <div>
+                              <p className="legal-text font-medium">{log.action}</p>
+                              <p className="text-sm text-legal-secondary">{log.user}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-legal-secondary">{log.time}</p>
+                            <p className="text-xs text-legal-secondary">{log.ip}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Integration Settings Tab */}
+            {activeTab === "integration-settings" && (
+              <Card className="legal-card-hover border-legal-border">
+                <CardHeader>
+                  <CardTitle className="text-legal-dark-text flex items-center space-x-2">
+                    <Settings className="w-5 h-5 text-legal-accent" />
+                    <span>Integration Settings</span>
+                  </CardTitle>
+                  <p className="text-legal-secondary legal-body">Connect with third-party services and APIs</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-legal-bg-secondary rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <Globe className="w-6 h-6 text-legal-accent" />
+                          <div>
+                            <h4 className="legal-subheading">Google Workspace</h4>
+                            <p className="text-sm text-legal-secondary">Connect Google Drive and Docs</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={data.integrations.googleWorkspace}
+                          onCheckedChange={(checked) => updateData("integrations", "googleWorkspace", checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-legal-bg-secondary rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <Globe className="w-6 h-6 text-legal-accent" />
+                          <div>
+                            <h4 className="legal-subheading">Microsoft 365</h4>
+                            <p className="text-sm text-legal-secondary">Connect OneDrive and Office</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={data.integrations.microsoft365}
+                          onCheckedChange={(checked) => updateData("integrations", "microsoft365", checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-legal-bg-secondary rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <Bell className="w-6 h-6 text-legal-accent" />
+                          <div>
+                            <h4 className="legal-subheading">Slack</h4>
+                            <p className="text-sm text-legal-secondary">Send notifications to Slack</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={data.integrations.slack}
+                          onCheckedChange={(checked) => updateData("integrations", "slack", checked)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-legal-bg-secondary rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <Zap className="w-6 h-6 text-legal-accent" />
+                          <div>
+                            <h4 className="legal-subheading">Zapier</h4>
+                            <p className="text-sm text-legal-secondary">Connect with 5000+ apps</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={data.integrations.zapier}
+                          onCheckedChange={(checked) => updateData("integrations", "zapier", checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-legal-bg-secondary rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <Link className="w-6 h-6 text-legal-accent" />
+                          <div>
+                            <h4 className="legal-subheading">API Access</h4>
+                            <p className="text-sm text-legal-secondary">Enable REST API access</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={data.integrations.apiEnabled}
+                          onCheckedChange={(checked) => updateData("integrations", "apiEnabled", checked)}
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Button variant="outline" className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary w-full">
+                          <Key className="w-4 h-4 mr-2" />
+                          Generate API Key
+                        </Button>
+                        <Button variant="outline" className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary w-full">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View API Documentation
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h3 className="legal-subheading">Connected Services</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[
+                        { name: "Google Drive", status: "Connected", icon: "📁" },
+                        { name: "Slack", status: "Connected", icon: "💬" },
+                        { name: "Zapier", status: "Disconnected", icon: "⚡" }
+                      ].map((service, index) => (
+                        <div key={index} className="p-4 bg-legal-bg-secondary rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-2xl">{service.icon}</span>
+                            <Badge className={service.status === "Connected" ? "bg-green-100 text-green-700 border-green-300" : "bg-gray-100 text-gray-700 border-gray-300"}>
+                              {service.status}
+                            </Badge>
+                          </div>
+                          <h4 className="legal-subheading">{service.name}</h4>
+                          <Button variant="outline" size="sm" className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary mt-2">
+                            {service.status === "Connected" ? "Disconnect" : "Connect"}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
