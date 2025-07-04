@@ -4,6 +4,7 @@
 
 /* Import Google Fonts for Legal Theme */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Serif+Pro:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baskervville:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 @layer base {
   :root {
@@ -63,6 +64,19 @@
 .font-baskervville{
   font-family: var(--font-baskervville);
 } */
+.font-montserrat{
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+.font-baskervville {
+  font-family: "Baskervville", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 /* Legal Theme Custom Styles */
 .legal-gradient-bg {
   background: linear-gradient(135deg, hsl(var(--legal-cream)) 0%, hsl(var(--legal-beige)) 50%, hsl(var(--legal-warm-white)) 100%);
@@ -95,7 +109,11 @@
 .legal-feature-card {
   @apply bg-white dark:bg-gray-800/50 rounded-xl p-6 border border-amber-200 dark:border-amber-800 shadow-lg;
 }
-
+@layer utilities {
+  .clip-inward-rounded {
+    clip-path: path("M20,0 H244 C260,0 260,48 244,48 H20 C4,48 4,0 20,0 Z");
+  }
+}
 .legal-professional-card {
   @apply bg-white dark:bg-gray-800/50 rounded-xl p-6 border border-amber-200 dark:border-amber-800 shadow-lg hover:shadow-xl transition-all duration-300;
 }

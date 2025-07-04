@@ -7,6 +7,8 @@ import Image from "next/image";
 import TrueFocus from "@/app/components/TrueFocus/TrueFocus";
 import { Baskervville, Montserrat } from "next/font/google";
 import { cn } from "@/lib/utils";
+import TextRotate from "@/fancy/components/text/text-rotate";
+import { FlipWords } from "./ui/flip-words";
 
 const baskervville = Baskervville({
   subsets: ["latin"],
@@ -26,9 +28,12 @@ export default function HeroSection() {
       {/* Faded Background Text */}
       <div className="absolute top-36 inset-0 flex items-center justify-center pointer-events-none">
         <h1
-          className={`text-[8rem] font-baskervville md:text-[12rem] lg:text-[19rem] opacity-50 font-light bg-gradient-to-b from-[#efe6d3] via-[#ede6d3] to-[#f2ebde] text-transparent bg-clip-text tracking-widest select-none whitespace-nowrap`}
+          className={`text-[8rem] font-baskervville md:text-[12rem] lg:text-[19rem] font-light bg-gradient-to-b from-[#efe6d3] via-[#ede6d3] to-[#f2ebde] text-transparent bg-clip-text select-none whitespace-nowrap`}
         >
-          LAWYER
+          <FlipWords
+            className="text-[8rem] font-baskervville md:text-[12rem] lg:text-[19rem] font-light bg-gradient-to-b from-[#efe6d3] via-[#ede6d3] to-[#f2ebde] text-transparent bg-clip-text select-none whitespace-nowrap"
+            words={["Lawyer", "Advisor", "Analyst"]}
+          />
         </h1>
       </div>
 
@@ -36,7 +41,7 @@ export default function HeroSection() {
       <div className="container mx-auto px-4 pt-16 pb-2 relative h-screen flex flex-col">
         {/* Title */}
         <div className="text-center mb-2">
-          <h1 className="text-[2.8rem] md:text-[3.8rem] lg:text-[4.2rem] font-light tracking-wider leading-tight text-[#2A2A2A]">
+          <h1 className="text-[2.8rem] md:text-[3.8rem] lg:text-[5rem] font-light tracking-wider leading-tight text-[#2A2A2A]">
             {/* Focus on your startup’s growth – let AI handle the legal work. */}
             <TrueFocus
               sentence="Focus on your startup’s growth"
@@ -47,12 +52,9 @@ export default function HeroSection() {
               pauseBetweenAnimations={0.7}
             />{" "}
             <span
-              className={cn(
-                " italic font-baskervville",
-                baskervville.className
-              )}
+              className={cn("italic text- text-black", baskervville.className)}
             >
-              let AI handle the legal work.
+              let AI handle the compliance ops.
             </span>
           </h1>
         </div>
@@ -150,13 +152,13 @@ export default function HeroSection() {
         {/* Mobile Layout - Stack vertically on smaller screens */}
         <div className="lg:hidden flex-grow flex flex-col items-center justify-center space-y-8 pt-8">
           {/* Statue Image */}
-          <div className="relative bg-[#E8DDD1] rounded-3xl p-6 w-full max-w-sm">
+          <div className="relative bg-[#E8DDD1] rounded-3xl p-6 w-full ">
             <div className="relative w-full h-80">
               <Image
                 src="/images/lady-justice-statue.png"
                 alt="Lady Justice Statue"
                 fill
-                className="object-contain drop-shadow-2xl"
+                className="object-none drop-shadow-2xl"
                 priority
               />
             </div>
@@ -171,7 +173,9 @@ export default function HeroSection() {
                 <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[8px] border-l-transparent border-r-transparent border-t-[#2A2A2A]"></div>
               </div>
               <div>
-                <p className={`text-sm font-light text-[#2A2A2A] leading-relaxed ${montserrat.className}`}>
+                <p
+                  className={`text-sm font-light text-[#2A2A2A] leading-relaxed ${montserrat.className}`}
+                >
                   Specialist Tax Lawyers
                   <br />
                   and Business Solicitors.
