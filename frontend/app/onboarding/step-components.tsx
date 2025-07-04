@@ -28,6 +28,7 @@ import {
 
 interface OnboardingData {
   businessName: string
+  companyDescription: string
   legalEntityType: string
   industry: string
   incorporationDate: string
@@ -189,6 +190,23 @@ export const Step1BasicInfo = ({ data, updateData }: StepProps) => (
             className="border-legal-border rounded-none   focus:border-legal-accent"
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="companyDescription" className="legal-text font-semibold">
+          Company Description *
+        </Label>
+        <Textarea
+          id="companyDescription"
+          value={data.companyDescription}
+          onChange={(e) => updateData("companyDescription", e.target.value)}
+          placeholder="Describe what your company does, its main products/services, target market, and business model..."
+          className="border-legal-border rounded-none focus:border-legal-accent min-h-[120px]"
+          rows={5}
+        />
+        <p className="text-sm text-legal-secondary">
+          Provide a comprehensive description of your business activities, services, and operations.
+        </p>
       </div>
     </CardContent>
   </Card>
@@ -744,7 +762,13 @@ export const Step5Verification = ({ data, updateData }: StepProps) => (
             <p className="legal-text font-semibold">Contact Email</p>
             <p className="legal-text-muted">{data.contactInfo.email}</p>
           </div>
+        </div>
 
+        <div className="space-y-2">
+          <p className="legal-text font-semibold">Company Description</p>
+          <div className="p-4 bg-legal-bg-secondary rounded-none">
+            <p className="legal-text-muted whitespace-pre-wrap">{data.companyDescription || "No description provided"}</p>
+          </div>
         </div>
       </div>
 
