@@ -38,7 +38,7 @@ export default function HeroSection() {
       </div>
 
       {/* Main Content Container */}
-      <div className="container mx-auto px-4 pt-16 pb-2 relative h-screen flex flex-col">
+      <div className="container mx-auto px-4 pt-8 pb-2 relative h-screen flex flex-col">
         {/* Title */}
         <div className="text-center mb-2">
           <h1 className="text-[2.8rem] md:text-[3.8rem] lg:text-[5rem] font-light tracking-wider leading-tight text-[#2A2A2A]">
@@ -63,7 +63,7 @@ export default function HeroSection() {
         <div className="flex-grow flex items-center justify-center relative max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-3 gap-8 items-center  w-full h-full">
             {/* Left Side - Text and Arrow */}
-            <div className="flex flex-col  justify-center h-full">
+            <div className="flex flex-col justify-end mb-36 h-full">
               <div className="flex items-start flex-col space-x-4 mb-8">
                 {/* Down Arrow */}
                 <div className="flex flex-col justify-center w-[52%] items-center">
@@ -111,7 +111,7 @@ export default function HeroSection() {
             </div>
 
             {/* Right Side - Text and Play Button */}
-            <div className="flex flex-col justify-center h-full">
+            <div className="flex flex-col justify-start mt-24 h-full">
               <div className="text-right mb-8">
                 <p
                   className={`text-sm md:text-base font-light text-[#2A2A2A] max-w-[280px] leading-relaxed ml-auto ${montserrat.className}`}
@@ -165,7 +165,7 @@ export default function HeroSection() {
           </div>
 
           {/* Bottom Content for Mobile */}
-          <div className="flex justify-between items-end w-full px-4">
+          <div className="flex  items-end justify-end w-full px-4">
             {/* Left Side Mobile */}
             <div className="flex items-end space-x-2">
               <div className="flex flex-col items-center">
@@ -184,7 +184,7 @@ export default function HeroSection() {
             </div>
 
             {/* Right Side Mobile */}
-            <div className="flex items-end space-x-4">
+            <div className="flex items-end h-full space-x-4">
               <div className="text-right">
                 <p
                   className={`text-xs font-light text-[#2A2A2A] max-w-[200px] leading-relaxed ${montserrat.className}`}
