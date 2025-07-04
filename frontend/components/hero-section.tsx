@@ -63,7 +63,7 @@ export default function HeroSection() {
         <div className="flex-grow flex items-center justify-center relative max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-3 gap-8 items-center  w-full h-full">
             {/* Left Side - Text and Arrow */}
-            <div className="flex flex-col justify-end mb-36 h-full">
+            <div className="flex flex-col justify-end mb-44 h-full">
               <div className="flex items-start flex-col space-x-4 mb-8">
                 {/* Down Arrow */}
                 <div className="flex flex-col justify-center w-[52%] items-center">

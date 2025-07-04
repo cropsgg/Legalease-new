@@ -158,8 +158,10 @@ export default function DashboardPage() {
         <div className="flex items-center gap-4">
           <SidebarTrigger className="md:hidden" />
           <div>
-            <h1 className="text-4xl legal-heading mb-2">
-              {user.isGuest ? "Welcome, Guest!" : `Welcome back, ${user.firstName}!`}
+            <h1 className="text-4xl text-[#2A2A2A] mb-2">
+              {user.isGuest
+                ? "Welcome, Guest!"
+                : `Welcome back, ${user.firstName}!`}
             </h1>
             <p className="text-legal-secondary legal-body text-lg">
               {user.isGuest
@@ -188,9 +190,12 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <Crown className="w-5 h-5 text-warning" />
                 <div>
-                  <p className="font-playfair font-semibold text-legal-dark-text">You're in Guest Mode</p>
+                  <p className="font-playfair font-semibold text-legal-dark-text">
+                    You're in Guest Mode
+                  </p>
                   <p className="text-legal-secondary legal-body">
-                    Create a full account to access all features and save your progress
+                    Create a full account to access all features and save your
+                    progress
                   </p>
                 </div>
               </div>
@@ -209,23 +214,31 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => {
-          const Icon = stat.icon
+          const Icon = stat.icon;
           return (
             <Card key={index} className="legal-card-hover">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-legal-secondary legal-body">{stat.title}</p>
-                    <p className="text-3xl font-playfair font-semibold text-legal-dark-text mt-2">{stat.value}</p>
-                    <p className="text-xs text-legal-secondary mt-1">{stat.change}</p>
+                    <p className="text-sm font-medium text-legal-secondary legal-body">
+                      {stat.title}
+                    </p>
+                    <p className="text-3xl font-playfair font-semibold text-legal-dark-text mt-2">
+                      {stat.value}
+                    </p>
+                    <p className="text-xs text-legal-secondary mt-1">
+                      {stat.change}
+                    </p>
                   </div>
-                  <div className={`w-12 h-12 ${stat.bgColor} rounded-2xl flex items-center justify-center`}>
+                  <div
+                    className={`w-12 h-12 ${stat.bgColor} rounded-2xl flex items-center justify-center`}
+                  >
                     <Icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -234,8 +247,15 @@ export default function DashboardPage() {
         <Card className="legal-card">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="legal-heading text-xl">Recent Documents</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => router.push("/documents")} className="btn-legal-outline">
+              <CardTitle className="legal-heading text-xl">
+                Recent Documents
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/documents")}
+                className="btn-legal-outline"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Upload New
               </Button>
@@ -246,16 +266,19 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {recentDocuments.map((doc, index) => (
-              <div key={index} className="flex items-center justify-between p-4 rounded-2xl bg-legal-cream border border-legal-border">
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 rounded-2xl bg-legal-cream border border-legal-border"
+              >
                 <div className="flex-1">
-                  <p className="font-medium text-legal-dark-text font-playfair">{doc.name}</p>
+                  <p className="font-medium text-legal-dark-text font-playfair">
+                    {doc.name}
+                  </p>
                   <p className="text-sm text-legal-secondary legal-body">
                     {doc.type} • {doc.date}
                   </p>
                 </div>
-                <Badge className={doc.statusColor}>
-                  {doc.status}
-                </Badge>
+                <Badge className={doc.statusColor}>{doc.status}</Badge>
               </div>
             ))}
           </CardContent>
@@ -265,8 +288,15 @@ export default function DashboardPage() {
         <Card className="legal-card">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="legal-heading text-xl">Upcoming Deadlines</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => router.push("/compliance")} className="btn-legal-outline">
+              <CardTitle className="legal-heading text-xl">
+                Upcoming Deadlines
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/compliance")}
+                className="btn-legal-outline"
+              >
                 View All
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -280,8 +310,12 @@ export default function DashboardPage() {
               <div key={index} className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-legal-dark-text font-playfair">{deadline.title}</p>
-                    <p className="text-sm text-legal-secondary legal-body">{deadline.date}</p>
+                    <p className="font-medium text-legal-dark-text font-playfair">
+                      {deadline.title}
+                    </p>
+                    <p className="text-sm text-legal-secondary legal-body">
+                      {deadline.date}
+                    </p>
                   </div>
                   <Badge className={deadline.priorityColor}>
                     {deadline.priority}
@@ -289,7 +323,9 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-2">
                   <Progress value={deadline.progress} className="h-2" />
-                  <p className="text-xs text-legal-secondary">{deadline.progress}% complete</p>
+                  <p className="text-xs text-legal-secondary">
+                    {deadline.progress}% complete
+                  </p>
                 </div>
               </div>
             ))}
@@ -300,23 +336,32 @@ export default function DashboardPage() {
       {/* Notifications */}
       <Card className="legal-card">
         <CardHeader>
-          <CardTitle className="legal-heading text-xl">Recent Notifications</CardTitle>
+          <CardTitle className="legal-heading text-xl">
+            Recent Notifications
+          </CardTitle>
           <CardDescription className="legal-body text-legal-secondary">
             Important updates and alerts for your account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {notifications.map((notification, index) => {
-            const Icon = notification.icon
+            const Icon = notification.icon;
             return (
-              <div key={index} className="flex items-start gap-4 p-4 rounded-2xl bg-legal-cream border border-legal-border">
+              <div
+                key={index}
+                className="flex items-start gap-4 p-4 rounded-2xl bg-legal-cream border border-legal-border"
+              >
                 <Icon className={`w-5 h-5 ${notification.iconColor} mt-0.5`} />
                 <div className="flex-1">
-                  <p className="text-sm text-legal-dark-text legal-body">{notification.message}</p>
-                  <p className="text-xs text-legal-secondary mt-1">{notification.time}</p>
+                  <p className="text-sm text-legal-dark-text legal-body">
+                    {notification.message}
+                  </p>
+                  <p className="text-xs text-legal-secondary mt-1">
+                    {notification.time}
+                  </p>
                 </div>
               </div>
-            )
+            );
           })}
         </CardContent>
       </Card>
@@ -367,6 +412,6 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
