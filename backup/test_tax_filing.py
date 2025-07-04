@@ -11,6 +11,10 @@ from core.config import settings  # Import settings from config
 # Load environment variables
 load_dotenv()
 
+# Create recording directory
+recording_dir = "./tmp/record_videos"
+os.makedirs(recording_dir, exist_ok=True)
+
 def get_test_data():
     """Get predefined test data for tax filing"""
     return {
@@ -150,7 +154,9 @@ async def main():
                 "javascript_enabled": True,
                 "cache_enabled": True,
                 "performance_mode": True,
+                "save_recording_path": recording_dir  # Enable video recording
             },
+            generate_gif=True  # Also generate a GIF version
         )
         result = await agent.run()
         
