@@ -25,8 +25,14 @@ def get_database():
         db = client[settings.MONGODB_DB_NAME]
         
         # Create basic indexes if they don't exist
-        db.businesses.create_index("business_name", unique=True)
-        db.businesses.create_index("pan_number", unique=True, sparse=True)
+        try:
+            db.businesses.create_index("business_name", unique=True)
+            db.businesses.create_index("pan_number", unique=True, sparse=True)
+            db.companies.create_index("name")
+            db.users.create_index("email", unique=True)
+            logger.info("Database indexes created successfully")
+        except Exception as e:
+            logger.warning(f"Index creation warning: {e}")
         
         return db
         

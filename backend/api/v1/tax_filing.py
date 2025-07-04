@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
-from .automation import get_tax_filing_task, automation_agent_runner, active_sessions
+from .automation import get_tax_filing_task, active_sessions
 import uuid
 import json
 
@@ -51,8 +51,12 @@ async def tax_filing_websocket(websocket: WebSocket, session_id: str):
                         f"ITR Type: {filing_details.get('itr_type', 'ITR-2')}"
                     )
                     
-                    # Start automation
-                    await automation_agent_runner(task, websocket, session_id)
+                    # Send task created message
+                    await websocket.send_text(json.dumps({
+                        "type": "task_created",
+                        "message": "Tax filing task created successfully",
+                        "task": task[:200] + "..." if len(task) > 200 else task
+                    }))
                     
             except json.JSONDecodeError:
                 await websocket.send_text(json.dumps({

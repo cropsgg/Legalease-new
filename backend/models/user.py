@@ -1,25 +1,30 @@
-from sqlalchemy import String, DateTime, Enum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
-import uuid
-from typing import Optional, List
-from core.database import Base
-import enum
+from typing import Optional
+from enum import Enum
+from bson import ObjectId
 
-class UserRole(str, enum.Enum):
+class UserRole(str, Enum):
     ADMIN = "admin"
     USER = "user"
 
-class User(Base):
-    __tablename__ = "users"
-
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-
-    # Relationships
-    companies: Mapped[List["Company"]] = relationship("Company", back_populates="owner")
+class User(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_encoders={ObjectId: str},
+        json_schema_extra={
+            "example": {
+                "email": "user@example.com",
+                "full_name": "John Doe",
+                "role": "user"
+            }
+        }
+    )
+    
+    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
+    email: EmailStr
+    full_name: str
+    role: UserRole = UserRole.USER
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None

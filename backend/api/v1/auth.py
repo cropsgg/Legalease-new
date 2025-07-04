@@ -1,64 +1,155 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
+from bson import ObjectId
+from datetime import datetime
 
-from core.database import get_db
-from schemas.auth import UserRegister, UserLogin, AuthResponse
-from schemas.user import User
-from auth.auth_service import register_user, login_user
-from auth.dependencies import get_current_active_user
+from core.database import get_database
+from models.user import User, UserRole
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
 
-@router.post("/register", response_model=AuthResponse)
+@router.post("/register")
 async def register(
-    user_data: UserRegister,
-    db: AsyncSession = Depends(get_db)
+    user_data: dict,
+    db=Depends(get_database)
 ):
     """
-    Register a new user with email and password.
+    Register a new user with just email and name.
     
     - **email**: Valid email address
-    - **password**: Password (minimum 6 characters)
     - **full_name**: User's full name
     """
-    user, access_token = await register_user(db, user_data)
+    # Check if user already exists
+    existing_user = db.users.find_one({"email": user_data["email"]})
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
     
-    return AuthResponse(
-        user=user,
-        access_token=access_token,
-        token_type="bearer"
-    )
+    # Create user with simple data
+    user_doc = {
+        "email": user_data["email"],
+        "full_name": user_data["full_name"],
+        "role": UserRole.USER,
+        "created_at": datetime.utcnow(),
+        "last_login": datetime.utcnow()
+    }
+    
+    result = db.users.insert_one(user_doc)
+    
+    # Get created user
+    created_user = db.users.find_one({"_id": result.inserted_id})
+    created_user["id"] = str(created_user["_id"])
+    del created_user["_id"]
+    
+    return {
+        "user": created_user,
+        "message": "User registered successfully"
+    }
 
-@router.post("/login", response_model=AuthResponse)
+@router.post("/login")
 async def login(
-    credentials: UserLogin,
-    db: AsyncSession = Depends(get_db)
+    credentials: dict,
+    db=Depends(get_database)
 ):
     """
-    Login with email and password.
+    Login with just email address.
     
     - **email**: Registered email address
-    - **password**: User's password
     """
-    user, access_token = await login_user(db, credentials)
+    # Find user by email
+    user = db.users.find_one({"email": credentials["email"]})
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Email not found. Please register first."
+        )
     
-    return AuthResponse(
-        user=user,
-        access_token=access_token,
-        token_type="bearer"
+    # Update last login
+    db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"last_login": datetime.utcnow()}}
     )
+    
+    # Format user response
+    user["id"] = str(user["_id"])
+    del user["_id"]
+    
+    return {
+        "user": user,
+        "message": "Login successful"
+    }
 
-@router.get("/me", response_model=User)
-async def get_current_user_info(
-    current_user: User = Depends(get_current_active_user)
+@router.get("/user/{email}")
+async def get_user_by_email(
+    email: str,
+    db=Depends(get_database)
 ):
     """
-    Get current authenticated user information.
-    
-    Requires authentication token in header.
+    Get user information by email.
     """
-    return current_user 
+    user = db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+    
+    # Format user response
+    user["id"] = str(user["_id"])
+    del user["_id"]
+    
+    return user
+
+@router.get("/users")
+async def list_users(
+    db=Depends(get_database)
+):
+    """
+    Get all users (for admin purposes).
+    """
+    users = list(db.users.find())
+    
+    # Format users response
+    for user in users:
+        user["id"] = str(user["_id"])
+        del user["_id"]
+    
+    return users
+
+@router.put("/user/{email}")
+async def update_user(
+    email: str,
+    update_data: dict,
+    db=Depends(get_database)
+):
+    """
+    Update user information.
+    """
+    user = db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+    
+    # Update user
+    update_data["updated_at"] = datetime.utcnow()
+    result = db.users.update_one(
+        {"email": email},
+        {"$set": update_data}
+    )
+    
+    # Get updated user
+    updated_user = db.users.find_one({"email": email})
+    updated_user["id"] = str(updated_user["_id"])
+    del updated_user["_id"]
+    
+    return {
+        "user": updated_user,
+        "message": "User updated successfully"
+    } 
