@@ -9,7 +9,6 @@ from browser_use.llm import ChatOpenAI
 from core.config import settings
 import os
 import logging
-from main import automation_agent
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +28,9 @@ chat_sessions: Dict[str, list] = {}
 
 # Store active WebSocket connections
 active_connections: Dict[str, WebSocket] = {}
+
+# Global automation agent
+automation_agent = None
 
 def analyze_user_intent(user_message: str) -> Dict[str, Any]:
     """Analyze user message to determine intent"""
@@ -178,6 +180,44 @@ def get_tax_filing_task(user_prompt: str) -> str:
     - Ensure each page loads completely before proceeding
     """
     return base_task
+
+async def initialize_automation():
+    """Initialize the browser automation agent"""
+    global automation_agent
+    try:
+        automation_agent = Agent(
+            task="Initialize browser for automation",
+            llm=ChatOpenAI(
+                model="gpt-4.1",
+                temperature=0.1,
+                api_key=settings.OPENAI_API_KEY,
+            ),
+            headless=False,
+            ignore_https_errors=True,
+            timeout=30000,
+            source="main",
+            context_config={
+                "bypass_csp": True,
+                "javascript_enabled": True,
+                "viewport": {"width": 1920, "height": 1080}
+            },
+            browser_config={
+                "args": [
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-accelerated-2d-canvas",
+                    "--disable-gpu",
+                    "--window-size=1920,1080"
+                ]
+            }
+        )
+        await automation_agent.start()
+        logger.info("✓ Browser automation initialized")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize browser automation: {e}")
+        return False
 
 async def automation_agent_runner(task: str, websocket: WebSocket, session_id: str):
     """Run the browser automation agent"""
@@ -445,10 +485,9 @@ async def handle_automation_request(websocket: WebSocket, message: str):
         })
 
 @router.get("/health")
-async def automation_health():
-    """Health check for automation service"""
+async def health_check():
+    """Health check endpoint"""
     return {
         "status": "healthy",
-        "active_sessions": len(active_sessions),
-        "recording_dir": recording_dir
+        "automation": "available" if automation_agent else "not_initialized"
     } 
