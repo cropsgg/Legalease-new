@@ -37,8 +37,8 @@ async def startup():
     try:
         logger.info("Starting LegalEase API...")
         
-        # Initialize browser automation
-        if await initialize_automation():
+        # Initialize browser
+        if  await initialize_automation():
             logger.info("✓ Browser automation ready")
         else:
             logger.warning("⚠️ Browser automation not available")
