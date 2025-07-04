@@ -41,7 +41,7 @@ export default function HeroSection() {
       <div className="container mx-auto px-4 pt-16 pb-2 relative h-screen flex flex-col">
         {/* Title */}
         <div className="text-center mb-2">
-          <h1 className="text-[2.8rem] md:text-[3.8rem] lg:text-[4.2rem] font-light tracking-wider leading-tight text-[#2A2A2A]">
+          <h1 className="text-[2.8rem] md:text-[3.8rem] lg:text-[5rem] font-light tracking-wider leading-tight text-[#2A2A2A]">
             {/* Focus on your startup’s growth – let AI handle the legal work. */}
             <TrueFocus
               sentence="Focus on your startup’s growth"
@@ -53,7 +53,7 @@ export default function HeroSection() {
             />{" "}
             <span
               className={cn(
-                " italic font-baskervville",
+                "italic text- text-black",
                 baskervville.className
               )}
             >

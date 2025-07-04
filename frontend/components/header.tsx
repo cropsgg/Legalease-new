@@ -101,8 +101,8 @@ export default function Header() {
   // Navigation items for unauthenticated users
   const publicNavItems = [
     { name: "Home", href: "/" },
-    { name: "Practice Areas", href: "/features" },
-    { name: "Our Attorneys", href: "/how-it-works" },
+    // { name: "Practice Areas", href: "/features" },
+    // { name: "Our Attorneys", href: "/how-it-works" },
     { name: "About Us", href: "/technology" },
     { name: "Contact", href: "/market" },
   ];
@@ -120,11 +120,12 @@ export default function Header() {
             href={user ? "/dashboard" : "/"}
             className="flex items-center space-x-2"
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center -mr-1">
               <Image src="/logo.png" alt="LegalEase" width={32} height={32} />
             </div>
             <span className="text-xl font-bold text-legal-brown">
-              LegalEase
+              <span className="text-black">Legal</span>
+              <span className="text-legal-brown">Ease</span>
             </span>
           </Link>
 
