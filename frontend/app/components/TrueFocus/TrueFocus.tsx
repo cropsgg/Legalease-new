@@ -146,10 +146,10 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
       <motion.div
         className="absolute top-0 left-0 pointer-events-none box-border border-0"
         animate={{
-          x: focusRect.x - 10,
+          x: focusRect.x,
           y: focusRect.y + 7,
-          width: focusRect.width + 120,
-          height: focusRect.height + 20,
+          width: focusRect.width,
+          height: focusRect.height,
           opacity: currentIndex >= 0 ? 1 : 0,
         }}
         transition={{
