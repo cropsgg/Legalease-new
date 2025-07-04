@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import engine, Base, get_supabase
 from api.v1 import router as api_v1_router
+from api.v1.tax_filing import router as tax_filing_router
 import logging
 from sqlalchemy import text
 
@@ -28,6 +29,7 @@ app.add_middleware(
 
 # Include API v1 router
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+app.include_router(tax_filing_router, prefix=settings.API_V1_STR)
 
 @app.on_event("startup")
 async def startup():

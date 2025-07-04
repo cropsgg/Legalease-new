@@ -29,13 +29,17 @@ class Settings(BaseSettings):
     # Security
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 3600
     
-    # Google API Configuration
-    GOOGLE_API_KEY: str
-    BROWSER_USE_HEADLESS: bool = True
-    BROWSER_USE_LLM_PROVIDER: str = "google"
-    
     # CORS
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
+    
+    # AI Configuration
+    OPENAI_API_KEY: str  # Default AI provider
+    GOOGLE_API_KEY: str  # Alternative AI provider
+    AI_PROVIDER: str = "openai"  # Default to OpenAI
+    
+    # Browser Automation
+    BROWSER_USE_HEADLESS: bool = True
+    BROWSER_USE_LLM_PROVIDER: str = "openai"  # Changed default to OpenAI
     
     @property
     def CORS_ORIGINS_LIST(self) -> List[str]:
