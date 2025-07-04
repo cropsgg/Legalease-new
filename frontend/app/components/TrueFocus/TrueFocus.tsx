@@ -94,7 +94,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
           <span
             key={index}
             ref={(el) => (wordRefs.current[index] = el)}
-            className={`relative text-[3rem] text-legal-brow cursor-pointer font-baskervville`}
+            className={`relative text-[4rem] text-legal-brow cursor-pointer font-baskervville`}
             style={
               {
                 filter: manualMode
@@ -121,7 +121,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
           <span
             key={index}
             ref={(el) => (wordRefs.current[index] = el)}
-            className={`relative text-[3rem] text-legal-brow cursor-pointer  ${baskervville.className}`}
+            className={`relative text-[4rem] text-legal-brow cursor-pointer  ${baskervville.className}`}
             style={
               {
                 filter: manualMode
@@ -147,7 +147,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
         className="absolute top-0 left-0 pointer-events-none box-border border-0"
         animate={{
           x: focusRect.x,
-          y: focusRect.y,
+          y: focusRect.y + 7,
           width: focusRect.width,
           height: focusRect.height,
           opacity: currentIndex >= 0 ? 1 : 0,
