@@ -5,7 +5,6 @@ import {
   Step1BasicInfo,
   Step2BusinessDetails,
   Step3Documents,
-  Step4TeamSetup,
   Step5Verification
 } from "./step-components"
 import { Button } from "@/components/ui/button"
@@ -132,7 +131,7 @@ export default function OnboardingPage() {
     }))
   }
   // --- Navigation ---
-  const nextStep = () => { if (currentStep < 5) setCurrentStep(currentStep + 1) }
+  const nextStep = () => { if (currentStep < 4) setCurrentStep(currentStep + 1) }
   const prevStep = () => { if (currentStep > 1) setCurrentStep(currentStep - 1) }
   const completeSetup = () => { console.log("Onboarding completed:", data) }
   // --- Step rendering ---
@@ -168,7 +167,7 @@ export default function OnboardingPage() {
               const isCurrent = currentStep === step.id
               return (
                 <div key={step.id} className="flex flex-col items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${isCompleted ? 'bg-success text-white' : isCurrent ? 'bg-legal-accent text-white' : 'bg-legal-bg-secondary text-legal-secondary border-2 border-legal-border'}`}>
+                  <div className={`w-12 h-12 -full flex items-center justify-center mb-2 transition-all duration-300 ${isCompleted ? 'bg-success text-white' : isCurrent ? 'bg-legal-accent text-white' : 'bg-legal-bg-secondary text-legal-secondary border-2 border-legal-border'}`}>
                   {isCompleted ? <CheckCircle className="h-6 w-6" /> : <Icon className="h-6 w-6" />}
                   </div>
                   <span className={`text-sm font-medium text-center ${isCompleted ? 'text-success' : isCurrent ? 'text-legal-accent' : 'text-legal-secondary'}`}>{step.title}</span>
@@ -188,12 +187,12 @@ export default function OnboardingPage() {
         </div>
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={prevStep} disabled={currentStep === 1} className="border-legal-border text-legal-accent hover:bg-legal-bg-secondary">Previous</Button>
+          <Button variant="outline" onClick={prevStep} disabled={currentStep === 1} className="border-legal-border rounded-none text-legal-accent hover:bg-legal-bg-secondary">Previous</Button>
           <div className="flex gap-4">
             {currentStep < 4 ? (
-              <Button onClick={nextStep} disabled={!isCurrentStepValid()} className="btn-legal-primary">Continue</Button>
+              <Button onClick={nextStep} disabled={!isCurrentStepValid()} className="rounded-none btn-legal-primary rounded-none">Continue</Button>
             ) : (
-              <Button onClick={completeSetup} disabled={!isCurrentStepValid()} className="btn-legal-primary">Complete Setup</Button>
+              <Button onClick={completeSetup} disabled={!isCurrentStepValid()} className="btn-legal-primary rounded-none">Complete Setup</Button>
             )}
           </div>
         </div>

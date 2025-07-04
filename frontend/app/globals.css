@@ -94,7 +94,7 @@
 
 /* Enhanced Button Styles for Legal Theme */
 .btn-legal-primary {
-  @apply bg-amber-700 hover:bg-amber-800 text-white dark:bg-amber-800 dark:hover:bg-amber-700 shadow-lg hover:shadow-xl transition-all duration-300 border-0 rounded-lg px-8 py-3;
+  @apply bg-amber-700 hover:bg-amber-800 text-white dark:bg-amber-800 dark:hover:bg-amber-700 shadow-lg hover:shadow-xl transition-all duration-300 border-0 px-8 py-3;
 }
 
 .btn-legal-secondary {
@@ -126,17 +126,17 @@
 /* Legal Typography */
 .legal-heading {
   @apply text-black dark:text-white font-bold;
-  font-family: "Playfair Display", "Georgia", serif;
+  font-family: "Baskervville", "Georgia", serif;
 }
 
 .legal-subheading {
   @apply text-black dark:text-white font-semibold;
-  font-family: "Playfair Display", "Georgia", serif;
+  font-family: "Baskervville", "Georgia", serif;
 }
 
 .legal-text {
   @apply text-black dark:text-white;
-  font-family: "Source Serif Pro", "Georgia", serif;
+  font-family: "Montserrat", serif;
 }
 
 .legal-text-muted {

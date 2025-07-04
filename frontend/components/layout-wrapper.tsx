@@ -9,16 +9,17 @@ import { usePathname } from "next/navigation"
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth()
   const pathname = usePathname()
-  
+  console.log(pathname)
   // Check if we're on a page that should show the sidebar
   const showSidebar = user && pathname && ![
-    "/", 
-    "/features", 
-    "/how-it-works", 
-    "/technology", 
-    "/market", 
-    "/pricing", 
-    "/login", 
+    "/",
+    "/features",
+    "/how-it-works",
+    "/technology",
+    "/market",
+    "/pricing",
+    "/login",
+    "/onboarding",
     "/signup"
   ].includes(pathname)
 

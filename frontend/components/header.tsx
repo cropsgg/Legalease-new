@@ -136,7 +136,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          {user ? (
+          {user && pathname !== "/onboarding" ? (
             // Authenticated User Navigation
             <nav className="hidden lg:flex items-center space-x-1">
               {authenticatedNavItems.map((item) => {
@@ -159,7 +159,7 @@ export default function Header() {
                 );
               })}
             </nav>
-          ) : (
+          ) : !user ? (
             // Public Navigation
             <nav className="hidden md:flex items-center space-x-8">
               {publicNavItems.map((item) => (
@@ -177,7 +177,7 @@ export default function Header() {
                 </Link>
               ))}
             </nav>
-          )}
+          ) : null}
 
           {/* Right Side Actions */}
           <div className="hidden md:flex items-center space-x-3">
