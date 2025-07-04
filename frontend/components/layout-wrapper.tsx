@@ -37,7 +37,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full legal-bg-primary">
-          <AppSidebar />
+        <AppSidebar />
           <div className="flex-1 flex flex-col">
             <main className="flex-1 overflow-auto">
               {children}

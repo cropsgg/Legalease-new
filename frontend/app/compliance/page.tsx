@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Shield, 
+import {
+  Shield,
   CheckCircle, 
-  AlertTriangle, 
-  Clock, 
-  FileText, 
+  AlertTriangle,
+  Clock,
+  FileText,
   Download,
   Eye,
   Calendar,
@@ -155,24 +155,24 @@ export default function CompliancePage() {
   return (
     <div className="min-h-screen legal-bg-primary p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+      {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 legal-icon-bg rounded-xl flex items-center justify-center">
               <Shield className="w-5 h-5 text-white" />
             </div>
-            <div>
+        <div>
               <h1 className="text-3xl legal-heading">Compliance Dashboard</h1>
               <p className="text-legal-secondary legal-body">Monitor and manage your regulatory compliance status</p>
-            </div>
-          </div>
         </div>
+        </div>
+      </div>
 
         {/* Compliance Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="legal-card-hover border-legal-border">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
                 <div>
                   <p className="text-legal-secondary legal-body text-sm">Overall Compliance</p>
                   <p className="text-2xl font-bold text-legal-dark-text legal-heading">
@@ -197,21 +197,21 @@ export default function CompliancePage() {
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                   <CheckCircle className="w-6 h-6 text-green-600" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
           <Card className="legal-card-hover border-legal-border">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
                   <p className="text-legal-secondary legal-body text-sm">Pending</p>
                   <p className="text-2xl font-bold text-amber-600 legal-heading">{complianceStats.pending}</p>
                 </div>
                 <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
                   <Clock className="w-6 h-6 text-amber-600" />
                 </div>
-              </div>
+                  </div>
             </CardContent>
           </Card>
 
@@ -226,14 +226,14 @@ export default function CompliancePage() {
                 </div>
                 <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+      </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 legal-card p-2 h-auto">
             <TabsTrigger 
               value="overview" 
@@ -263,10 +263,10 @@ export default function CompliancePage() {
               <BookOpen className="w-4 h-4" />
               <span className="hidden sm:inline legal-body">Resources</span>
             </TabsTrigger>
-          </TabsList>
+        </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
             {/* Quick Actions */}
             <Card className="legal-card-hover border-legal-border">
               <CardHeader>
@@ -378,7 +378,7 @@ export default function CompliancePage() {
                             <h3 className="font-semibold text-legal-dark-text legal-heading">{item.title}</h3>
                             {getStatusBadge(item.status)}
                             {getPriorityBadge(item.priority)}
-                          </div>
+          </div>
                           <p className="text-legal-secondary legal-body mb-3">{item.description}</p>
                           
                           <div className="flex items-center space-x-6 text-sm text-legal-secondary">
@@ -389,17 +389,17 @@ export default function CompliancePage() {
                             <div className="flex items-center space-x-1">
                               <Building className="w-4 h-4" />
                               <span className="legal-body">{item.category}</span>
-                            </div>
-                          </div>
+            </div>
+          </div>
 
                           <div className="mt-4">
                             <div className="flex items-center justify-between text-sm mb-2">
                               <span className="text-legal-secondary legal-body">Progress</span>
                               <span className="font-medium text-legal-dark-text legal-body">{item.progress}%</span>
-                            </div>
+                      </div>
                             <Progress value={item.progress} className="h-2" />
-                          </div>
-                        </div>
+                      </div>
+                    </div>
                       </div>
                       
                       <div className="flex items-center space-x-2 ml-4">
@@ -409,13 +409,13 @@ export default function CompliancePage() {
                         <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
                           <Download className="w-4 h-4" />
                         </Button>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="space-y-6">
@@ -490,10 +490,10 @@ export default function CompliancePage() {
                     <h4 className="font-medium text-legal-dark-text legal-body mb-2">Stakeholder Report</h4>
                     <p className="text-sm text-legal-secondary legal-body">Report for external stakeholders</p>
                   </div>
-                </div>
+          </div>
               </CardContent>
             </Card>
-          </TabsContent>
+        </TabsContent>
 
           {/* Resources Tab */}
           <TabsContent value="resources" className="space-y-6">
@@ -550,11 +550,11 @@ export default function CompliancePage() {
                         <div className="flex items-center space-x-3">
                           <Users className="w-5 h-5 text-legal-accent" />
                           <span className="text-legal-dark-text legal-body">{training}</span>
-                        </div>
+                    </div>
                         <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
                           <Eye className="w-4 h-4" />
                         </Button>
-                      </div>
+                    </div>
                     ))}
                   </div>
                 </CardContent>
@@ -582,11 +582,11 @@ export default function CompliancePage() {
                   <Button className="btn-legal-primary">
                     Contact Support
                   </Button>
-                </div>
+          </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+        </TabsContent>
+      </Tabs>
       </div>
     </div>
   )

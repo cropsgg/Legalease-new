@@ -18,6 +18,7 @@ import {
   Crown,
   ChevronUp,
   PanelLeft,
+  Hash,
 } from "lucide-react"
 import {
   Sidebar,
@@ -73,6 +74,12 @@ const navigationItems = [
     url: "/assistant",
     icon: Bot,
     description: "Chat-based legal help",
+  },
+  {
+    title: "Notary",
+    url: "/notary",
+    icon: Hash,
+    description: "Blockchain document notarization",
   },
   {
     title: "Settings",

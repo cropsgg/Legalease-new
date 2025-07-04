@@ -10,13 +10,13 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { 
+import {
   HelpCircle, 
-  Search, 
+  Search,
   MessageCircle, 
   BookOpen, 
-  Video, 
-  FileText, 
+  Video,
+  FileText,
   Mail,
   Phone,
   Clock,
@@ -72,8 +72,8 @@ const faqData: FAQItem[] = [
     category: "Getting Started",
     helpful: 89,
     notHelpful: 3
-  },
-  {
+    },
+    {
     id: "2", 
     question: "What file formats are supported?",
     answer: "LegalEase supports PDF, Microsoft Word (DOC, DOCX), Rich Text Format (RTF), and plain text (TXT) files. For best results, we recommend using searchable PDFs or Word documents.",
@@ -88,16 +88,16 @@ const faqData: FAQItem[] = [
     category: "AI Features",
     helpful: 94,
     notHelpful: 5
-  },
-  {
+    },
+    {
     id: "4",
     question: "Can I customize compliance workflows?",
     answer: "Yes! Professional and Enterprise plans include custom workflow creation. You can define approval processes, set automated reminders, and create multi-step compliance procedures tailored to your organization's needs.",
     category: "Workflows",
     helpful: 67,
     notHelpful: 1
-  },
-  {
+    },
+    {
     id: "5",
     question: "Is my data secure?",
     answer: "Absolutely. We use enterprise-grade encryption, SOC 2 Type II compliance, and follow strict data privacy regulations including GDPR and CCPA. Your documents are encrypted at rest and in transit, and we never share your data with third parties.",
@@ -144,26 +144,26 @@ const articles: Article[] = [
     difficulty: "Beginner",
     lastUpdated: "2023-12-05"
   }
-]
+  ]
 
 const videoTutorials: VideoTutorial[] = [
-  {
+    {
     id: "1",
     title: "LegalEase Platform Overview",
     description: "A complete walkthrough of the LegalEase platform and its features",
     duration: "15:30",
     thumbnail: "/placeholder.jpg",
     category: "Getting Started"
-  },
-  {
+    },
+    {
     id: "2",
     title: "Document Upload and Analysis",
     description: "Step-by-step guide to uploading documents and understanding AI analysis",
     duration: "8:45",
     thumbnail: "/placeholder.jpg",
     category: "Documents"
-  },
-  {
+    },
+    {
     id: "3",
     title: "Creating Custom Workflows",
     description: "Learn how to create and manage custom compliance workflows",
@@ -224,13 +224,13 @@ export default function HelpPage() {
   return (
     <div className="min-h-screen legal-bg-primary p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+      {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-10 h-10 legal-icon-bg rounded-xl flex items-center justify-center">
               <HelpCircle className="w-5 h-5 text-white" />
-            </div>
-            <div>
+      </div>
+                <div>
               <h1 className="text-3xl legal-heading">Help Center</h1>
               <p className="text-legal-secondary legal-body">Find answers, guides, and get support</p>
             </div>
@@ -238,18 +238,18 @@ export default function HelpPage() {
 
           {/* Search Bar */}
           <Card className="legal-card border-legal-border">
-            <CardContent className="p-6">
+        <CardContent className="p-6">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-legal-secondary" />
-                <Input
+            <Input
                   placeholder="Search for help articles, FAQs, or guides..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
                   className="legal-input pl-12 py-4 text-base"
-                />
-              </div>
-            </CardContent>
-          </Card>
+            />
+          </div>
+        </CardContent>
+      </Card>
         </div>
 
         {/* Quick Help Links */}
@@ -273,7 +273,7 @@ export default function HelpPage() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 legal-card p-2 h-auto">
             <TabsTrigger 
               value="faq" 
@@ -303,7 +303,7 @@ export default function HelpPage() {
               <MessageCircle className="w-4 h-4" />
               <span className="hidden sm:inline legal-body">Contact</span>
             </TabsTrigger>
-          </TabsList>
+        </TabsList>
 
           {/* FAQ Tab */}
           <TabsContent value="faq" className="space-y-6">
@@ -407,11 +407,11 @@ export default function HelpPage() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+          </div>
 
             {/* Featured Articles */}
             <Card className="legal-card-hover border-legal-border">
-              <CardHeader>
+            <CardHeader>
                 <CardTitle className="legal-heading flex items-center space-x-2">
                   <Star className="w-5 h-5 text-amber-500" />
                   <span>Featured Articles</span>
@@ -419,10 +419,10 @@ export default function HelpPage() {
                 <CardDescription className="text-legal-secondary legal-body">
                   Essential guides for getting the most out of LegalEase
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
                     "Complete Guide to Document Analysis",
                     "Setting Up Your First Compliance Workflow",
                     "Understanding Legal AI Recommendations",
@@ -436,12 +436,12 @@ export default function HelpPage() {
                         <span className="font-medium text-legal-dark-text legal-body">{title}</span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-legal-secondary" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
           {/* Videos Tab */}
           <TabsContent value="videos" className="space-y-6">
@@ -449,7 +449,7 @@ export default function HelpPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {videoTutorials.map((video) => (
                 <Card key={video.id} className="legal-card-hover border-legal-border cursor-pointer">
-                  <CardContent className="p-6">
+                <CardContent className="p-6">
                     <div className="space-y-4">
                       {/* Video Thumbnail */}
                       <div className="relative bg-legal-bg-secondary/30 rounded-xl h-40 flex items-center justify-center">
@@ -468,21 +468,21 @@ export default function HelpPage() {
                           {video.category}
                         </Badge>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
             {/* Video Series */}
             <Card className="legal-card-hover border-legal-border">
-              <CardHeader>
+            <CardHeader>
                 <CardTitle className="legal-heading">Getting Started Series</CardTitle>
                 <CardDescription className="text-legal-secondary legal-body">
                   Complete video course for new users
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
+            </CardHeader>
+            <CardContent>
                 <div className="space-y-3">
                   {[
                     { title: "Welcome to LegalEase", duration: "3:45", completed: true },
@@ -507,11 +507,11 @@ export default function HelpPage() {
                       </div>
                       <ChevronRight className="w-4 h-4 text-legal-secondary" />
                     </div>
-                  ))}
+                ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
           {/* Contact Tab */}
           <TabsContent value="contact" className="space-y-6">
@@ -643,10 +643,10 @@ export default function HelpPage() {
 
                 {/* Status & Resources */}
                 <Card className="legal-card-hover border-legal-border">
-                  <CardHeader>
+            <CardHeader>
                     <CardTitle className="legal-heading">System Status & Resources</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+            </CardHeader>
+            <CardContent>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -656,31 +656,31 @@ export default function HelpPage() {
                         <div className="flex items-center space-x-1">
                           <span className="text-green-600 text-sm legal-body">All systems operational</span>
                           <ExternalLink className="w-3 h-3 text-legal-secondary" />
-                        </div>
-                      </div>
+                    </div>
+                    </div>
                       
                       <div className="flex items-center justify-between">
                         <span className="text-legal-dark-text legal-body">API Documentation</span>
                         <div className="flex items-center space-x-1">
                           <span className="text-legal-accent text-sm legal-body">View docs</span>
                           <ExternalLink className="w-3 h-3 text-legal-secondary" />
-                        </div>
-                      </div>
+                    </div>
+                  </div>
                       
                       <div className="flex items-center justify-between">
                         <span className="text-legal-dark-text legal-body">Feature Requests</span>
                         <div className="flex items-center space-x-1">
                           <span className="text-legal-accent text-sm legal-body">Submit idea</span>
                           <Lightbulb className="w-3 h-3 text-legal-secondary" />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+        </TabsContent>
+      </Tabs>
       </div>
     </div>
   )
