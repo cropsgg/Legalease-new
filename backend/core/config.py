@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     AI_PROVIDER: str = "openai"  # Default to OpenAI
     
     # Browser Automation
-    BROWSER_USE_HEADLESS: bool = True
+    BROWSER_USE_HEADLESS: bool = False
     BROWSER_USE_LLM_PROVIDER: str = "openai"  # Changed default to OpenAI
     
     @property
