@@ -49,6 +49,9 @@ export function TransactionStatus({
     isEstimatingGas,
     isTransacting,
     transactionStats,
+    hasRecentFailures,
+    isHealthy,
+    recoverTransaction,
   } = useNotaryContract({
     onTransactionConfirmed: (id, receipt) => {
       const transaction = transactions.find(tx => tx.id === id)
@@ -75,12 +78,12 @@ export function TransactionStatus({
           console.error('❌ Gas estimation failed:', error)
           // Set a fallback gas estimate so the button remains clickable
           const fallbackEstimate = {
-            gasLimit: BigInt(150000),
-            maxFeePerGas: parseEther('0.000000020'), // 20 gwei
-            maxPriorityFeePerGas: parseEther('0.000000005'), // 5 gwei
-            estimatedCostEth: formatEther(BigInt(150000) * parseEther('0.000000020')),
+            gasLimit: BigInt(400000), // Much higher to prevent out of gas
+            maxFeePerGas: parseEther('0.000000030'), // 30 gwei fallback
+            maxPriorityFeePerGas: parseEther('0.000000010'), // 10 gwei fallback
+            estimatedCostEth: formatEther(BigInt(400000) * parseEther('0.000000030')),
           }
-          console.log('🔄 Using fallback gas estimate:', fallbackEstimate)
+          console.log('🔄 Using high fallback gas estimate:', fallbackEstimate)
           setGasEstimate(fallbackEstimate)
           setUsingFallbackGas(true)
         }
@@ -230,6 +233,12 @@ export function TransactionStatus({
                     <em className="text-yellow-600">Note: Using estimated gas costs (network unavailable)</em>
                   </>
                 )}
+                {gasEstimate.gasLimit > BigInt(200000) && (
+                  <>
+                    <br />
+                    <em className="text-orange-600">High gas limit ({gasEstimate.gasLimit.toLocaleString()}) to prevent out-of-gas errors</em>
+                  </>
+                )}
               </AlertDescription>
             </Alert>
           </div>
@@ -272,6 +281,23 @@ export function TransactionStatus({
               By clicking "Notarize on Blockchain", you agree to pay the gas fee 
               and create a permanent record on Base blockchain.
             </div>
+            
+            {/* Helpful Tips */}
+            {(hasRecentFailures || !isHealthy) && (
+              <Alert className="mt-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Having issues? Try these tips:</strong>
+                  <ul className="mt-2 space-y-1 text-xs list-disc list-inside">
+                    <li>Ensure you have sufficient ETH for gas fees (~0.012 ETH recommended)</li>
+                    <li>Check you're connected to Base Sepolia network (Chain ID: 84532)</li>
+                    <li>Try refreshing the page and reconnecting your wallet</li>
+                    <li>Wait a few minutes between transactions during network congestion</li>
+                    <li>Check transaction status on <a href="https://sepolia.basescan.org" target="_blank" rel="noopener noreferrer" className="text-legal-accent underline">BaseScan</a></li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         ) : (
           <TransactionProgress transaction={currentTransaction} onCopy={copyToClipboard} copied={copied} />
@@ -309,6 +335,46 @@ export function TransactionStatus({
                 <div className="text-lg font-bold text-red-600">{transactionStats.failed}</div>
                 <div className="text-xs text-legal-secondary">Failed</div>
               </div>
+            </div>
+            
+            {/* System Health Status */}
+            <div className="mt-4 pt-4 border-t border-legal-border/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-legal-dark-text">System Status</span>
+                <Badge 
+                  variant={isHealthy ? "default" : "destructive"}
+                  className={isHealthy ? "bg-green-100 text-green-800" : ""}
+                >
+                  {isHealthy ? "✅ Healthy" : "⚠️ Issues"}
+                </Badge>
+              </div>
+              
+              {hasRecentFailures && (
+                <Alert className="mt-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    Recent transaction failures detected. Try increasing gas limit or check network status.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {transactionStats.success_rate < 50 && transactionStats.total > 2 && (
+                <Alert className="mt-2" variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    Low success rate ({transactionStats.success_rate.toFixed(0)}%). Consider checking wallet balance and network connection.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {transactionStats.success_rate >= 80 && transactionStats.total > 2 && (
+                <Alert className="mt-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    Excellent success rate ({transactionStats.success_rate.toFixed(0)}%)! System performing well.
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </div>
         )}
@@ -486,7 +552,6 @@ function TransactionProgress({ transaction, onCopy, copied }: TransactionProgres
           </AlertDescription>
         </Alert>
       )}
-
       {/* Success Message */}
       {transaction.status === 'confirmed' && (
         <Alert>
@@ -494,7 +559,7 @@ function TransactionProgress({ transaction, onCopy, copied }: TransactionProgres
           <AlertDescription>
             <strong>Document Successfully Notarized!</strong>
             <br />
-            Your document hash has been permanently recorded on the blockchain. 
+            Your document hash has now been permanently recorded on the blockchain. 
             This serves as cryptographic proof of your document's existence and integrity.
           </AlertDescription>
         </Alert>

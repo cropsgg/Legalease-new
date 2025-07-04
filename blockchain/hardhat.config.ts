@@ -22,13 +22,7 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       chainId: 8453,
     },
-    // Base Goerli Testnet
-    "base-goerli": {
-      url: process.env.BASE_GOERLI_RPC || "https://goerli.base.org",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 84531,
-    },
-    // Base Sepolia Testnet (newer testnet)
+    // Base Sepolia Testnet (current testnet)
     "base-sepolia": {
       url: process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
@@ -38,7 +32,6 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       base: process.env.BASESCAN_API_KEY || "",
-      "base-goerli": process.env.BASESCAN_API_KEY || "",
       "base-sepolia": process.env.BASESCAN_API_KEY || "",
     },
     customChains: [
@@ -48,14 +41,6 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.basescan.org/api",
           browserURL: "https://basescan.org",
-        },
-      },
-      {
-        network: "base-goerli",
-        chainId: 84531,
-        urls: {
-          apiURL: "https://api-goerli.basescan.org/api",
-          browserURL: "https://goerli.basescan.org",
         },
       },
       {

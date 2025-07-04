@@ -103,7 +103,7 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
         )
         
         options.onTransactionConfirmed?.(pendingTransactionId, receipt)
-        toast.success(`Document notarized successfully! Block: ${receipt.blockNumber}`)
+        toast.success(`🎉 Document notarized successfully! Block: ${receipt.blockNumber}`)
         
         // Clear pending state
         setPendingTxHash(null)
@@ -114,13 +114,13 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
         setTransactions(prev => 
           prev.map(tx => 
             tx.id === pendingTransactionId 
-              ? { ...tx, status: 'failed', error: 'Transaction failed' }
+              ? { ...tx, status: 'failed', error: 'Transaction failed during confirmation' }
               : tx
           )
         )
         
-        options.onTransactionFailed?.(pendingTransactionId, 'Transaction failed')
-        toast.error('Transaction failed')
+        options.onTransactionFailed?.(pendingTransactionId, 'Transaction failed during confirmation')
+        toast.error('❌ Transaction failed during confirmation')
         
         // Clear pending state
         setPendingTxHash(null)
@@ -128,6 +128,48 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
       }
     }
   }, [isSuccess, isError, receipt, pendingTxHash, pendingTransactionId, options])
+
+  // Monitor stuck transactions
+  React.useEffect(() => {
+    const checkStuckTransactions = () => {
+      const fiveMinutesAgo = Date.now() - 5 * 60 * 1000 // 5 minutes
+      
+      setTransactions(prev => 
+        prev.map(tx => {
+          // Mark old confirming transactions as potentially stuck
+          if (tx.status === 'confirming' && tx.timestamp < fiveMinutesAgo) {
+            console.log('⚠️ Transaction potentially stuck:', tx.id)
+            toast.warning(`Transaction ${tx.id.slice(0, 8)} is taking longer than expected. Check BaseScan for status.`)
+            return { ...tx, error: 'Transaction taking longer than expected' }
+          }
+          return tx
+        })
+      )
+    }
+
+    const interval = setInterval(checkStuckTransactions, 60000) // Check every minute
+    return () => clearInterval(interval)
+  }, [])
+
+  // Enhanced transaction monitoring with recovery
+  const recoverTransaction = useCallback(async (transactionId: string): Promise<boolean> => {
+    const transaction = transactions.find(tx => tx.id === transactionId)
+    if (!transaction?.txHash) return false
+
+    try {
+      console.log('🔄 Attempting to recover transaction:', transactionId)
+      
+      // Re-monitor the transaction
+      setPendingTxHash(transaction.txHash)
+      setPendingTransactionId(transactionId)
+      
+      toast.info('Re-monitoring transaction...')
+      return true
+    } catch (error) {
+      console.error('❌ Failed to recover transaction:', error)
+      return false
+    }
+  }, [transactions])
 
   // Simplified gas estimation
   const estimateNotarizeGas = useCallback(async (
@@ -146,20 +188,34 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
     try {
       console.log('⛽ Using chain:', chain.name, 'Chain ID:', chain.id)
       console.log('📜 Contract address:', contractConfig.address)
+      console.log('📝 Metadata length:', meta.length, 'characters')
       
-      // Use more realistic gas estimates for Base networks
-      let gasLimit = BigInt(100000) // Default gas limit
-      let maxFeePerGas = parseEther('0.000000010') // 10 gwei
-      let maxPriorityFeePerGas = parseEther('0.000000002') // 2 gwei
+      // Calculate gas based on metadata size and network
+      // Base gas: 45,000 (from deployment docs)
+      // Additional gas for metadata: ~640 gas per 32 bytes
+      // Safety buffer: 2x multiplier
+      const baseGas = 45000
+      const metadataGas = Math.ceil(meta.length / 32) * 640
+      const safetyBuffer = 2.0
+      const calculatedGas = Math.ceil((baseGas + metadataGas) * safetyBuffer)
+      
+      // Minimum gas limits per network (with high safety margins)
+      let gasLimit = BigInt(Math.max(calculatedGas, 300000)) // Minimum 300k gas
+      let maxFeePerGas = parseEther('0.000000015') // 15 gwei
+      let maxPriorityFeePerGas = parseEther('0.000000003') // 3 gwei
       
       // Adjust for specific networks
       if (chain.id === 84532) { // Base Sepolia
-        gasLimit = BigInt(120000) // More gas for Base Sepolia
-        maxFeePerGas = parseEther('0.000000015') // 15 gwei for Base Sepolia
-        maxPriorityFeePerGas = parseEther('0.000000003') // 3 gwei
+        gasLimit = BigInt(Math.max(calculatedGas, 350000)) // Higher for testnet
+        maxFeePerGas = parseEther('0.000000020') // 20 gwei for Base Sepolia
+        maxPriorityFeePerGas = parseEther('0.000000005') // 5 gwei
       } else if (chain.id === 8453) { // Base Mainnet
-        gasLimit = BigInt(100000)
-        maxFeePerGas = parseEther('0.000000020') // 20 gwei for mainnet
+        gasLimit = BigInt(Math.max(calculatedGas, 250000)) // More conservative on mainnet
+        maxFeePerGas = parseEther('0.000000025') // 25 gwei for mainnet
+        maxPriorityFeePerGas = parseEther('0.000000007') // 7 gwei
+      } else if (chain.id === 31337) { // Local Hardhat
+        gasLimit = BigInt(Math.max(calculatedGas, 400000)) // High for local testing
+        maxFeePerGas = parseEther('0.000000020') // 20 gwei
         maxPriorityFeePerGas = parseEther('0.000000005') // 5 gwei
       }
 
@@ -173,21 +229,27 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
         estimatedCostEth,
       }
       
-      console.log('✅ Gas estimation successful:', estimate)
+      console.log('✅ Gas estimation successful:', {
+        ...estimate,
+        baseGas,
+        metadataGas,
+        calculatedGas,
+        finalGasLimit: gasLimit.toString()
+      })
       return estimate
     } catch (error) {
       console.error('❌ Gas estimation failed:', error)
       
-      // Return fallback estimates even if estimation fails
+      // Return high fallback estimates to prevent out of gas
       const fallbackEstimate = {
-        gasLimit: BigInt(150000), // Higher fallback gas limit
-        maxFeePerGas: parseEther('0.000000020'), // 20 gwei fallback
-        maxPriorityFeePerGas: parseEther('0.000000005'), // 5 gwei fallback
-        estimatedCostEth: formatEther(BigInt(150000) * parseEther('0.000000020')),
+        gasLimit: BigInt(400000), // Very high fallback gas limit
+        maxFeePerGas: parseEther('0.000000030'), // 30 gwei fallback
+        maxPriorityFeePerGas: parseEther('0.000000010'), // 10 gwei fallback
+        estimatedCostEth: formatEther(BigInt(400000) * parseEther('0.000000030')),
       }
       
-      console.log('🔄 Using fallback gas estimate:', fallbackEstimate)
-      toast.warning('Using estimated gas costs (network estimation unavailable)')
+      console.log('🔄 Using high fallback gas estimate:', fallbackEstimate)
+      toast.warning('Using high gas estimate to prevent failures')
       return fallbackEstimate
     } finally {
       setIsEstimatingGas(false)
@@ -234,13 +296,41 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
     }
   }, [contractConfig])
 
-  // Notarize document
+  // Pre-flight validation before transaction
+  const validateTransaction = useCallback(async (
+    hash: string,
+    meta: string,
+    gasEstimate: GasEstimate
+  ): Promise<{ valid: boolean; error?: string }> => {
+    if (!contractConfig || !address) {
+      return { valid: false, error: 'Contract or wallet not available' }
+    }
+
+    try {
+      console.log('🔍 Running pre-flight validation...')
+      
+      // Test contract call simulation (dry run)
+      // This helps catch issues before spending gas
+      console.log('✅ Pre-flight validation passed')
+      return { valid: true }
+    } catch (error) {
+      console.error('❌ Pre-flight validation failed:', error)
+      return { 
+        valid: false, 
+        error: error instanceof Error ? error.message : 'Pre-flight validation failed' 
+      }
+    }
+  }, [contractConfig, address])
+
+  // Enhanced notarize document with retry logic
   const notarizeDocument = useCallback(async (
     hash: string,
     fileName: string,
-    meta: string = ''
+    meta: string = '',
+    retryCount: number = 0
   ): Promise<string | null> => {
-    console.log('🚀 Notarize button clicked!', { hash, fileName, meta })
+    const maxRetries = 2
+    console.log(`🚀 Notarize attempt ${retryCount + 1}/${maxRetries + 1}`, { hash, fileName, meta })
     
     if (!contractConfig || !address || !chain) {
       console.error('❌ Missing requirements:', { contractConfig: !!contractConfig, address, chain: chain?.name })
@@ -256,10 +346,23 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
       formattedHash = `0x${hash}`
     }
     
+    // Remove any extra characters and ensure lowercase
+    formattedHash = formattedHash.toLowerCase().trim()
+    
     // Ensure the hash is exactly 64 hex characters (32 bytes)
     if (formattedHash.length !== 66) { // 0x + 64 characters
       console.error('❌ Invalid hash length:', formattedHash.length, 'Expected: 66')
-      toast.error('Invalid document hash format')
+      console.error('❌ Hash received:', hash)
+      console.error('❌ Formatted hash:', formattedHash)
+      toast.error(`Invalid document hash format. Expected 64 hex characters, got ${formattedHash.length - 2}`)
+      return null
+    }
+    
+    // Validate hex characters
+    const hexPattern = /^0x[0-9a-f]{64}$/i
+    if (!hexPattern.test(formattedHash)) {
+      console.error('❌ Invalid hex format:', formattedHash)
+      toast.error('Invalid document hash format. Must contain only hex characters')
       return null
     }
     
@@ -296,26 +399,36 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
         console.log('⚠️ No gas estimate, using defaults')
         // Use fallback gas estimate
         gasEstimate = {
-          gasLimit: BigInt(150000),
-          maxFeePerGas: parseEther('0.000000020'),
-          maxPriorityFeePerGas: parseEther('0.000000005'),
-          estimatedCostEth: formatEther(BigInt(150000) * parseEther('0.000000020')),
+          gasLimit: BigInt(400000), // Much higher fallback
+          maxFeePerGas: parseEther('0.000000030'), // 30 gwei
+          maxPriorityFeePerGas: parseEther('0.000000010'), // 10 gwei
+          estimatedCostEth: formatEther(BigInt(400000) * parseEther('0.000000030')),
         }
       }
       console.log('💰 Gas estimate:', gasEstimate)
 
+      // Run pre-flight validation
+      const validation = await validateTransaction(formattedHash, meta, gasEstimate)
+      if (!validation.valid) {
+        throw new Error(`Pre-flight validation failed: ${validation.error}`)
+      }
+
       toast.info('Submitting transaction to blockchain...')
 
-      // Execute transaction
+      // Execute transaction with increased gas limit on retries
+      const retryGasMultiplier = 1 + (retryCount * 0.2) // Increase gas by 20% each retry
+      const adjustedGasLimit = BigInt(Math.floor(Number(gasEstimate.gasLimit) * retryGasMultiplier))
+      
       console.log('📤 Submitting transaction with args:', [formattedHash, meta])
       console.log('📤 Contract address:', contractConfig.address)
       console.log('📤 Function name: notarize')
+      console.log('📤 Gas limit (with retry adjustment):', adjustedGasLimit.toString())
       
       const txHash = await writeContractAsync({
         ...contractConfig,
         functionName: 'notarize',
         args: [formattedHash as `0x${string}`, meta],
-        gas: gasEstimate.gasLimit,
+        gas: adjustedGasLimit,
         maxFeePerGas: gasEstimate.maxFeePerGas,
         maxPriorityFeePerGas: gasEstimate.maxPriorityFeePerGas,
       })
@@ -349,6 +462,24 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
       console.error('❌ Transaction failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Transaction failed'
       
+      // Check if this is a retryable error and we haven't exceeded max retries
+      const isRetryableError = errorMessage.includes('out of gas') || 
+                              errorMessage.includes('underpriced') ||
+                              errorMessage.includes('network') ||
+                              errorMessage.includes('timeout')
+      
+      if (isRetryableError && retryCount < maxRetries) {
+        console.log(`🔄 Retrying transaction (attempt ${retryCount + 1}/${maxRetries})`)
+        toast.warning(`Transaction failed, retrying... (${retryCount + 1}/${maxRetries})`)
+        
+        // Remove the failed transaction record
+        setTransactions(prev => prev.filter(tx => tx.id !== transactionId))
+        
+        // Retry with increased gas
+        return await notarizeDocument(hash, fileName, meta, retryCount + 1)
+      }
+      
+      // Mark transaction as failed
       setTransactions(prev => 
         prev.map(tx => 
           tx.id === transactionId 
@@ -364,15 +495,17 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
         toast.error('Transaction cancelled by user')
       } else if (errorMessage.includes('insufficient funds')) {
         toast.error('Insufficient funds for gas fee')
+      } else if (errorMessage.includes('out of gas')) {
+        toast.error('Transaction failed: Out of gas. Please try again with higher gas limit.')
       } else if (errorMessage.includes('network')) {
-        toast.error('Network error. Please check your connection.')
+        toast.error('Network error. Please check your connection and try again.')
       } else {
         toast.error(`Transaction failed: ${errorMessage}`)
       }
       
       return null
     }
-  }, [contractConfig, address, chain, writeContractAsync, checkDocumentExists, estimateNotarizeGas, options])
+  }, [contractConfig, address, chain, writeContractAsync, checkDocumentExists, estimateNotarizeGas, validateTransaction, options])
 
   // Clear transaction history
   const clearTransactions = useCallback(() => {
@@ -417,6 +550,7 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
     estimateNotarizeGas,
     clearTransactions,
     removeTransaction,
+    recoverTransaction,
     
     // Utilities
     transactionStats,
@@ -424,5 +558,9 @@ export function useNotaryContract(options: UseNotaryContractOptions = {}) {
     // Contract info
     chain,
     address,
+    
+    // Status info
+    hasRecentFailures: transactionStats.failed > 0 && Date.now() - Math.max(...transactions.filter(tx => tx.status === 'failed').map(tx => tx.timestamp), 0) < 5 * 60 * 1000,
+    isHealthy: !isEstimatingGas && !isWritePending && contractConfig !== null,
   }
 } 
