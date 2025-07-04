@@ -20,12 +20,6 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DBNAME}"
     
-    # Supabase Configuration
-    SUPABASE_URL: str
-    SUPABASE_SERVICE_ROLE_KEY: str
-    SUPABASE_ANON_KEY: str
-    SUPABASE_JWT_SECRET: str
-    
     # Security
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 3600
     
