@@ -1,0 +1,3 @@
+[submodule "backend/web-ui"]
+	path = backend/web-ui
+	url = https://github.com/browser-use/web-ui.git
