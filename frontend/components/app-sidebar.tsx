@@ -19,6 +19,7 @@ import {
   ChevronUp,
   PanelLeft,
   Hash,
+  Edit3,
 } from "lucide-react"
 import {
   Sidebar,
@@ -56,6 +57,12 @@ const navigationItems = [
     url: "/dashboard",
     icon: LayoutDashboard,
     description: "Overview & analytics",
+  },
+  {
+    title: "Editor",
+    url: "/editor",
+    icon: Edit3,
+    description: "AI-powered markdown editor",
   },
   {
     title: "Workflows",
