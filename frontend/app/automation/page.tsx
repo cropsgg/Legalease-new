@@ -563,6 +563,16 @@ export default function AutomationsPage() {
           currentAction: undefined
         }))
         addMessage('system', data.message, 'success')
+        setIsTyping(false)
+        break
+      
+      case 'typing':
+        setIsTyping(true)
+        break
+      
+      case 'chat_response':
+        addMessage('assistant', data.message, 'success')
+        setIsTyping(false)
         break
       
       case 'error':
