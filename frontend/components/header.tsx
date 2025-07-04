@@ -49,6 +49,12 @@ export default function Header() {
   // Navigation items for authenticated users
   const authenticatedNavItems = [
     {
+      name: "Onboarding",
+      href: "/onboarding",
+      icon: LayoutDashboard,
+      description: "SME Onboarding",
+    },
+    {
       name: "Dashboard",
       href: "/dashboard",
       icon: LayoutDashboard,

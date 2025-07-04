@@ -46,6 +46,12 @@ import { cn } from "@/lib/utils"
 // Navigation items for the sidebar
 const navigationItems = [
   {
+    title: "Onboarding",
+    url: "/onboarding",
+    icon: LayoutDashboard,
+    description: "SME Overboarding",
+  },
+  {
     title: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
