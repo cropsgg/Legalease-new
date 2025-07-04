@@ -1,19 +1,22 @@
-from sqlalchemy import String, DateTime, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
-import uuid
 from typing import Optional
-from core.database import Base
-from models.user import User
+from bson import ObjectId
 
-class Company(Base):
-    __tablename__ = "companies"
-
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-
-    # Relationships
-    owner = relationship("User", back_populates="companies") 
+class Company(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_encoders={ObjectId: str},
+        json_schema_extra={
+            "example": {
+                "name": "Example Company",
+                "owner_id": "507f1f77bcf86cd799439011"
+            }
+        }
+    )
+    
+    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
+    name: str
+    owner_id: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 
@@ -12,13 +12,12 @@ class CompanyUpdate(BaseModel):
     name: Optional[str] = None
 
 class CompanyInDB(CompanyBase):
-    id: UUID4
-    owner_id: UUID4
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: str
+    owner_id: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 class Company(CompanyInDB):
     pass 

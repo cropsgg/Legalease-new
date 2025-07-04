@@ -6,7 +6,7 @@ import uvicorn
 
 from core.config import settings
 from core.database import get_database
-from api.v1 import automation, companies, tax_filing, business
+from api.v1 import automation, companies, tax_filing, business, auth
 
 # Configure logging
 logging.basicConfig(
@@ -69,6 +69,7 @@ async def health_check():
         )
 
 # Include routers
+app.include_router(auth.router, prefix=settings.API_V1_STR, tags=["Authentication"])
 app.include_router(automation.router, prefix=settings.API_V1_STR, tags=["Automation"])
 app.include_router(companies.router, prefix=settings.API_V1_STR, tags=["Companies"])
 app.include_router(tax_filing.router, prefix=settings.API_V1_STR, tags=["Tax Filing"])
