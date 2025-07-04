@@ -20,6 +20,7 @@ import {
   PanelLeft,
   Hash,
   Edit3,
+  MessageCircle,
 } from "lucide-react"
 import {
   Sidebar,
@@ -77,6 +78,12 @@ const navigationItems = [
     description: "Upload & AI analysis",
   },
   {
+    title: "Agents",
+    url: "/agents",
+    icon: Bot,
+    description: "AI agent management",
+  },
+  {
     title: "Compliance",
     url: "/compliance",
     icon: Shield,
@@ -87,6 +94,12 @@ const navigationItems = [
     url: "/automation",
     icon: Bot,
     description: "Chat-based legal help",
+  },
+  {
+    title: "Chat",
+    url: "/chat",
+    icon: MessageCircle,
+    description: "Conversational AI interface",
   },
   {
     title: "Notary",
