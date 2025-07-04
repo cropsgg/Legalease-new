@@ -12,13 +12,10 @@ const api = axios.create({
   timeout: 10000, // 10 seconds timeout
 })
 
-// Request interceptor to add auth token
+// Request interceptor - no need for tokens in email-only auth
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    // No token needed for email-only auth
     return config
   },
   (error) => {
@@ -33,9 +30,9 @@ api.interceptors.response.use(
   },
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('user')
+      // Clear user data on auth error
+      localStorage.removeItem('current_user')
+      localStorage.removeItem('current_user_email')
       window.location.href = '/login'
     }
     return Promise.reject(error)
@@ -44,37 +41,46 @@ api.interceptors.response.use(
 
 // API endpoints
 export const authAPI = {
-  // Register new user
+  // Register new user (email-only)
   register: async (userData: {
     email: string
-    password: string
-    firstName?: string
-    lastName?: string
-    companyName?: string
+    full_name: string
   }) => {
     const response = await api.post('/api/v1/auth/register', {
       email: userData.email,
-      password: userData.password,
+      full_name: userData.full_name,
     })
     return response.data
   },
 
-  // Login user
-  login: async (credentials: { username: string; password: string }) => {
-    const response = await api.post('/api/v1/auth/jwt/login', credentials)
+  // Login user (email-only)
+  login: async (credentials: { email: string }) => {
+    const response = await api.post('/api/v1/auth/login', credentials)
     return response.data
   },
 
-  // Get current user
-  getCurrentUser: async () => {
-    const response = await api.get('/api/v1/users/me')
+  // Get user by email
+  getUserByEmail: async (email: string) => {
+    const response = await api.get(`/api/v1/auth/user/${email}`)
     return response.data
   },
 
-  // Logout (client-side only for JWT)
+  // Get all users (for admin)
+  getUsers: async () => {
+    const response = await api.get('/api/v1/auth/users')
+    return response.data
+  },
+
+  // Update user
+  updateUser: async (email: string, userData: any) => {
+    const response = await api.put(`/api/v1/auth/user/${email}`, userData)
+    return response.data
+  },
+
+  // Logout (client-side only for email-only auth)
   logout: () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user')
+    localStorage.removeItem('current_user')
+    localStorage.removeItem('current_user_email')
   },
 }
 

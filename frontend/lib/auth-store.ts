@@ -6,11 +6,11 @@ import { authAPI, companiesAPI, handleAPIError } from './api'
 export interface User {
   id: string
   email: string
+  full_name: string
   role: 'user' | 'admin'
-  is_active: boolean
-  is_superuser: boolean
   created_at: string
   updated_at?: string | null
+  last_login?: string | null
   // Extended user data
   firstName?: string
   lastName?: string
@@ -29,14 +29,13 @@ export interface Company {
 export interface AuthState {
   // State
   user: User | null
-  token: string | null
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
   companies: Company[]
   
   // Actions
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string) => Promise<void>
   register: (userData: RegisterData) => Promise<void>
   logout: () => void
   loginAsGuest: () => void
@@ -53,12 +52,11 @@ export interface AuthState {
 
 export interface RegisterData {
   email: string
-  password: string
+  full_name: string
   firstName?: string
   lastName?: string
   companyName?: string
   companySize?: string
-  role?: string
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -66,30 +64,26 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       // Initial state
       user: null,
-      token: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
       companies: [],
 
-      // Login action
-      login: async (email: string, password: string) => {
+      // Login action (email-only)
+      login: async (email: string) => {
         set({ isLoading: true, error: null })
         
         try {
-          // Call login API
-          const response = await authAPI.login({ username: email, password })
-          const { access_token, token_type } = response
+          // Call login API with email only
+          const response = await authAPI.login({ email })
+          const userData = response.user
           
-          // Store token
-          localStorage.setItem('access_token', access_token)
-          
-          // Get user data
-          const userData = await authAPI.getCurrentUser()
+          // Store user data
+          localStorage.setItem('current_user', JSON.stringify(userData))
+          localStorage.setItem('current_user_email', email)
           
           set({
             user: { ...userData, isGuest: false },
-            token: access_token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -100,27 +94,50 @@ export const useAuthStore = create<AuthState>()(
           
         } catch (error: any) {
           const errorInfo = handleAPIError(error)
-          set({
-            isLoading: false,
-            error: errorInfo.message,
-            user: null,
-            token: null,
-            isAuthenticated: false,
-          })
+          
+          // If user not found, suggest signup
+          if (error.response?.status === 401 && errorInfo.message.includes('not found')) {
+            set({
+              isLoading: false,
+              error: 'Email not found. Please sign up first.',
+              user: null,
+              isAuthenticated: false,
+            })
+          } else {
+            set({
+              isLoading: false,
+              error: errorInfo.message,
+              user: null,
+              isAuthenticated: false,
+            })
+          }
           throw error
         }
       },
 
-      // Register action
+      // Register action (email + full name)
       register: async (userData: RegisterData) => {
         set({ isLoading: true, error: null })
         
         try {
           // Register user
-          const newUser = await authAPI.register(userData)
+          const response = await authAPI.register({
+            email: userData.email,
+            full_name: userData.full_name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim()
+          })
           
-          // Auto-login after registration
-          await get().login(userData.email, userData.password)
+          const newUser = response.user
+          
+          // Store user data
+          localStorage.setItem('current_user', JSON.stringify(newUser))
+          localStorage.setItem('current_user_email', userData.email)
+          
+          set({
+            user: { ...newUser, isGuest: false },
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          })
           
           // Create company if provided
           if (userData.companyName) {
@@ -142,9 +159,8 @@ export const useAuthStore = create<AuthState>()(
         const guestUser: User = {
           id: `guest_${Date.now()}`,
           email: 'guest@legalease.com',
+          full_name: 'Guest User',
           role: 'user',
-          is_active: true,
-          is_superuser: false,
           created_at: new Date().toISOString(),
           firstName: 'Guest',
           lastName: 'User',
@@ -153,7 +169,6 @@ export const useAuthStore = create<AuthState>()(
         
         set({
           user: guestUser,
-          token: null,
           isAuthenticated: true,
           error: null,
         })
@@ -165,7 +180,8 @@ export const useAuthStore = create<AuthState>()(
         }))
         
         // Clear any regular auth
-        localStorage.removeItem('access_token')
+        localStorage.removeItem('current_user')
+        localStorage.removeItem('current_user_email')
       },
 
       // Upgrade guest to user
@@ -200,7 +216,6 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem('guest_session')
         set({
           user: null,
-          token: null,
           isAuthenticated: false,
           error: null,
           companies: [],
@@ -209,25 +224,26 @@ export const useAuthStore = create<AuthState>()(
 
       // Get current user
       getCurrentUser: async () => {
-        const token = localStorage.getItem('access_token')
-        if (!token) return
+        const currentUserEmail = localStorage.getItem('current_user_email')
+        const currentUser = localStorage.getItem('current_user')
+        
+        if (!currentUserEmail || !currentUser) return
         
         set({ isLoading: true })
         
         try {
-          const userData = await authAPI.getCurrentUser()
+          const userData = await authAPI.getUserByEmail(currentUserEmail)
           set({
             user: { ...userData, isGuest: false },
-            token,
             isAuthenticated: true,
             isLoading: false,
           })
         } catch (error: any) {
-          // Token might be invalid
-          localStorage.removeItem('access_token')
+          // User data might be invalid
+          localStorage.removeItem('current_user')
+          localStorage.removeItem('current_user_email')
           set({
             user: null,
-            token: null,
             isAuthenticated: false,
             isLoading: false,
           })
@@ -296,7 +312,6 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
     }
@@ -324,9 +339,9 @@ export const initializeAuth = () => {
     }
   }
   
-  // Check for regular auth token
-  const token = localStorage.getItem('access_token')
-  if (token && !store.user) {
+  // Check for regular auth
+  const currentUser = localStorage.getItem('current_user')
+  if (currentUser && !store.user) {
     store.getCurrentUser()
   }
 }
