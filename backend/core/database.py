@@ -1,12 +1,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
-from supabase import create_client, Client
 from typing import AsyncGenerator
 from .config import settings
 
 # Database engine and models
 engine = create_async_engine(
-    f"postgresql+asyncpg://{settings.USER}:{settings.PASSWORD}@{settings.HOST}:{settings.PORT}/{settings.DBNAME}",
+    settings.DATABASE_CONNECTION_URL,
     pool_size=20,  # Increased pool size for session pooler
     max_overflow=10,
     pool_pre_ping=True,
@@ -25,33 +24,10 @@ AsyncSessionLocal = sessionmaker(
 # Base class for SQLAlchemy models
 Base = declarative_base()
 
-# Supabase client singleton
-_supabase: Client | None = None
-
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency for getting database session"""
     async with AsyncSessionLocal() as session:
         try:
             yield session
         finally:
-            await session.close()
-
-def get_supabase() -> Client:
-    """Get or create Supabase client instance"""
-    global _supabase
-    if not _supabase:
-        try:
-            _supabase = create_client(
-                settings.SUPABASE_URL,
-                settings.SUPABASE_SERVICE_ROLE_KEY,
-                options={
-                    'postgrest_client_timeout': 30,
-                    'headers': {
-                        'X-Client-Info': 'legalease-backend'
-                    }
-                }
-            )
-        except Exception as e:
-            print(f"Error initializing Supabase client: {e}")
-            raise
-    return _supabase 
+            await session.close() 

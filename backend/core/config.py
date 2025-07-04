@@ -1,27 +1,20 @@
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 from functools import lru_cache
+import os
 
 class Settings(BaseSettings):
     # Application
     PROJECT_NAME: str = "LegalEase API"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
-    
-    # Database Configuration
-    USER: str = "postgres.urjxmruuystlzadljxld"
-    PASSWORD: str = "Ronitraj_963"
-    HOST: str = "aws-0-ap-southeast-1.pooler.supabase.com"
-    PORT: int = 5432
-    DBNAME: str = "postgres"
-    
-    # Construct Database URL
-    @property
-    def DATABASE_URL(self) -> str:
-        return f"postgresql+asyncpg://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DBNAME}"
-    
-    # Security
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 3600
+
+    # MongoDB Configuration
+    MONGODB_URL: str = "mongodb+srv://raunitr786:E6GZuI9hJa7LJV6u@cluster0.rylgbat.mongodb.net/"
+    MONGODB_DB_NAME: str = "legalease"
+    MONGODB_MIN_POOL_SIZE: int = 10
+    MONGODB_MAX_POOL_SIZE: int = 50
+    MONGODB_TIMEOUT_MS: int = 30000  # 30 seconds
     
     # CORS
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
@@ -35,32 +28,67 @@ class Settings(BaseSettings):
     BROWSER_USE_HEADLESS: bool = False
     BROWSER_USE_LLM_PROVIDER: str = "openai"  # Changed default to OpenAI
     
+    # File Upload
+    UPLOAD_DIR: str = "uploads"
+    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
+    ALLOWED_FILE_TYPES: List[str] = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ]
+    
+    # OCR settings
+    OCR_ENABLED: bool = True
+    OCR_TIMEOUT: int = 300  # seconds
+    
+    # Blockchain settings
+    BLOCKCHAIN_ENABLED: bool = False
+    BLOCKCHAIN_NETWORK: str = "testnet"
+    
+    # Email settings
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = "your-email@gmail.com"
+    SMTP_PASSWORD: str = "your-app-password"
+    
+    # Security settings
+    API_KEY_HEADER: str = "X-API-Key"
+    CORS_ORIGINS: List[str] = ["*"]
+    
+    # Application settings
+    APP_NAME: str = "LegalEase"
+    APP_VERSION: str = "1.0.0"
+    DEBUG: bool = True
+    
+    # Task settings
+    TASK_REMINDER_DAYS: int = 7
+    URGENT_TASK_THRESHOLD_DAYS: int = 3
+    
+    # Compliance settings
+    COMPLIANCE_CHECK_INTERVAL: int = 24  # hours
+    MIN_COMPLIANCE_SCORE: float = 70.0
+    
+    # Document settings
+    DOCUMENT_RETENTION_DAYS: int = 365
+    AUTO_DELETE_TEMP_FILES: bool = True
+    
     @property
     def CORS_ORIGINS_LIST(self) -> List[str]:
         return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",")]
-    
-    @property
-    def DATABASE_CONNECTION_URL(self) -> str:
-        """Build DATABASE_URL from individual components or use provided URL"""
-        if self.DATABASE_URL:
-            # Ensure asyncpg format
-            url = self.DATABASE_URL
-            if "postgresql+psycopg2://" in url:
-                return url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
-            elif url.startswith("postgresql://"):
-                return url.replace("postgresql://", "postgresql+asyncpg://")
-            return url
-        
-        # Build from components
-        if all([self.USER, self.PASSWORD, self.HOST, self.DBNAME]):
-            return f"postgresql+asyncpg://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DBNAME}"
-        
-        raise ValueError("Either DATABASE_URL or all database parameters (USER, PASSWORD, HOST, DBNAME) required")
 
     class Config:
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+        # Ensure upload directory exists
+        os.makedirs(self.UPLOAD_DIR, exist_ok=True)
 
 @lru_cache()
 def get_settings() -> Settings:

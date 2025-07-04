@@ -2,13 +2,18 @@ import asyncio
 import base64
 import json
 import uuid
-from typing import Dict, Any
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from typing import Dict, Any, Optional, Generator
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 from browser_use.agent.service import Agent
 from browser_use.llm import ChatOpenAI
 from core.config import settings
 import os
 import logging
+from datetime import datetime
+from fastapi.exceptions import HTTPException
+from starlette.websockets import WebSocketState
+from contextlib import contextmanager
+import traceback
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -29,8 +34,61 @@ chat_sessions: Dict[str, list] = {}
 # Store active WebSocket connections
 active_connections: Dict[str, WebSocket] = {}
 
-# Global automation agent
-automation_agent = None
+# Store automation agents
+automation_agents: Dict[str, Agent] = {}
+
+# Store screenshot tasks
+screenshot_tasks: Dict[str, asyncio.Task] = {}
+
+# Custom exceptions
+class AutomationError(Exception):
+    """Base exception for automation errors"""
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+        super().__init__(message)
+        self.details = details or {}
+
+class BrowserError(AutomationError):
+    """Exception for browser-related errors"""
+    pass
+
+class AgentError(AutomationError):
+    """Exception for agent-related errors"""
+    pass
+
+class SessionError(AutomationError):
+    """Exception for session-related errors"""
+    pass
+
+class AutomationSession:
+    def __init__(self, session_id: str, websocket: WebSocket):
+        self.session_id = session_id
+        self.websocket = websocket
+        self.agent: Optional[Agent] = None
+        self.screenshot_task: Optional[asyncio.Task] = None
+        self.last_activity = datetime.now()
+        self.status = "connected"
+        self.current_task: Optional[str] = None
+        self.step_count = 0
+        self.current_step: Optional[str] = None
+        self.error: Optional[str] = None
+
+    async def send_status(self, status_type: str, message: str, **kwargs):
+        """Send a status update to the client"""
+        try:
+            await self.websocket.send_text(json.dumps({
+                "type": status_type,
+                "message": message,
+                "timestamp": datetime.now().isoformat(),
+                "session_id": self.session_id,
+                "status": self.status,
+                "current_task": self.current_task,
+                "step_count": self.step_count,
+                "current_step": self.current_step,
+                "error": self.error,
+                **kwargs
+            }))
+        except Exception as e:
+            logger.error(f"Failed to send status update: {e}")
 
 def analyze_user_intent(user_message: str) -> Dict[str, Any]:
     """Analyze user message to determine intent"""
@@ -181,11 +239,49 @@ def get_tax_filing_task(user_prompt: str) -> str:
     """
     return base_task
 
-async def initialize_automation():
-    """Initialize the browser automation agent"""
-    global automation_agent
+@contextmanager
+async def error_handler(session: AutomationSession, error_type: str) -> Generator:
+    """Context manager for handling errors and sending error messages to client"""
     try:
-        automation_agent = Agent(
+        yield
+    except Exception as e:
+        error_message = str(e)
+        error_details = {
+            "type": error_type,
+            "traceback": traceback.format_exc(),
+            "session_id": session.session_id
+        }
+        
+        logger.error(f"Error in {error_type}: {error_message}", extra=error_details)
+        
+        if isinstance(e, AutomationError):
+            error_details.update(e.details)
+        
+        if session.websocket.client_state == WebSocketState.CONNECTED:
+            try:
+                await session.send_status(
+                    "error",
+                    error_message,
+                    error_type=error_type,
+                    details=error_details
+                )
+            except Exception as ws_error:
+                logger.error(f"Failed to send error message: {ws_error}")
+        
+        # Update session state
+        session.status = "error"
+        session.error = error_message
+        
+        # Cleanup if necessary
+        if error_type in ["browser", "agent"]:
+            await cleanup_session(session.session_id)
+        
+        raise
+
+async def initialize_automation_agent(session_id: str) -> Agent:
+    """Initialize a new browser automation agent for a session"""
+    try:
+        agent = Agent(
             task="Initialize browser for automation",
             llm=ChatOpenAI(
                 model="gpt-4.1",
@@ -195,7 +291,7 @@ async def initialize_automation():
             headless=False,
             ignore_https_errors=True,
             timeout=30000,
-            source="main",
+            source=f"session_{session_id}",
             context_config={
                 "bypass_csp": True,
                 "javascript_enabled": True,
@@ -212,282 +308,266 @@ async def initialize_automation():
                 ]
             }
         )
-        await automation_agent.start()
-        logger.info("✓ Browser automation initialized")
-        return True
+        return agent
     except Exception as e:
-        logger.error(f"❌ Failed to initialize browser automation: {e}")
-        return False
+        raise AgentError(f"Failed to initialize automation agent: {str(e)}")
 
-async def automation_agent_runner(task: str, websocket: WebSocket, session_id: str):
-    """Run the browser automation agent"""
-    agent = None
-    try:
-        # Update session status
-        if session_id in active_sessions:
-            active_sessions[session_id]['status'] = 'initializing'
-        
-        await websocket.send_text(json.dumps({
-            "type": "status_update",
-            "status": "initializing",
-            "message": "Starting browser automation..."
-        }))
-
-        # Define callback functions
-        async def on_step_start_callback(agent_instance: Agent):
+async def start_screenshot_stream(session: AutomationSession):
+    """Start streaming screenshots for a session"""
+    with error_handler(session, "screenshot"):
+        while True:
+            if session.session_id not in active_sessions:
+                break
+            
+            if not session.agent or not hasattr(session.agent, 'browser_context'):
+                await asyncio.sleep(1)
+                continue
+            
             try:
-                if hasattr(agent_instance.browser_context, 'page'):
-                    current_url = await agent_instance.browser_context.page.url()
-                    await websocket.send_text(json.dumps({
-                        "type": "status_update",
-                        "status": "running",
-                        "url": current_url,
-                        "message": "Executing automation step..."
-                    }))
+                # Capture screenshot
+                screenshot_bytes = await session.agent.browser_context.page.screenshot(
+                    type="jpeg",
+                    quality=70,
+                    full_page=False
+                )
+                screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+                
+                # Get current URL and title
+                current_url = await session.agent.browser_context.page.url()
+                page_title = await session.agent.browser_context.page.title()
+                
+                # Send update
+                await session.send_status(
+                    "screenshot",
+                    "Screenshot update",
+                    screenshot=screenshot_base64,
+                    url=current_url,
+                    title=page_title,
+                    timestamp=datetime.now().isoformat()
+                )
+                
             except Exception as e:
-                logger.error(f"Step start callback error: {e}")
-
-        async def on_step_end_callback(agent_instance: Agent):
-            try:
-                if hasattr(agent_instance.browser_context, 'page'):
-                    # Capture screenshot
-                    screenshot_bytes = await agent_instance.browser_context.page.screenshot(
-                        type="jpeg", 
-                        quality=70,
-                        full_page=False
+                logger.error(f"Screenshot capture error: {e}")
+                if session.websocket.client_state == WebSocketState.CONNECTED:
+                    await session.send_status(
+                        "error",
+                        "Failed to capture screenshot",
+                        error_type="screenshot",
+                        recoverable=True
                     )
-                    screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
-                    
-                    # Get page info
+            
+            # Wait before next capture
+            await asyncio.sleep(1)
+
+async def cleanup_session(session_id: str):
+    """Clean up session resources"""
+    try:
+        if session_id in active_sessions:
+            session = active_sessions[session_id]
+            
+            # Cancel screenshot task
+            if session.screenshot_task:
+                session.screenshot_task.cancel()
+                try:
+                    await session.screenshot_task
+                except asyncio.CancelledError:
+                    pass
+            
+            # Close agent
+            if session.agent:
+                try:
+                    await session.agent.close()
+                except Exception as e:
+                    logger.error(f"Error closing agent: {e}")
+            
+            # Remove session
+            del active_sessions[session_id]
+            logger.info(f"Cleaned up session {session_id}")
+            
+    except Exception as e:
+        logger.error(f"Error during session cleanup: {e}")
+        raise SessionError(f"Failed to clean up session: {str(e)}")
+
+async def handle_automation_step(session: AutomationSession, agent: Agent):
+    """Handle automation step updates"""
+    try:
+        # Step start callback
+        async def on_step_start(agent_instance: Agent):
+            try:
+                session.step_count += 1
+                if hasattr(agent_instance.state, 'current_step'):
+                    session.current_step = str(agent_instance.state.current_step)
+                
+                if hasattr(agent_instance.browser_context, 'page'):
                     current_url = await agent_instance.browser_context.page.url()
                     page_title = await agent_instance.browser_context.page.title()
                     
-                    # Get last action
-                    last_action = "Processing..."
+                    await session.send_status(
+                        "step_start",
+                        f"Starting step {session.step_count}",
+                        url=current_url,
+                        title=page_title,
+                        step=session.current_step
+                    )
+            except Exception as e:
+                logger.error(f"Step start callback error: {e}")
+
+        # Step end callback
+        async def on_step_end(agent_instance: Agent):
+            try:
+                if hasattr(agent_instance.state, 'history'):
+                    last_action = None
                     if agent_instance.state.history.history:
                         last_entry = agent_instance.state.history.history[-1]
                         if hasattr(last_entry, 'result') and last_entry.result:
-                            action_text = str(last_entry.result[-1])
-                            last_action = action_text[:100] + "..." if len(action_text) > 100 else action_text
+                            last_action = str(last_entry.result[-1])
                     
-                    # Send screenshot update
-                    await websocket.send_text(json.dumps({
-                        "type": "screenshot",
-                        "screenshot": screenshot_base64,
-                        "url": current_url,
-                        "title": page_title
-                    }))
-
-                    # Send action log
-                    await websocket.send_text(json.dumps({
-                        "type": "action_log",
-                        "action": last_action,
-                        "message": f"Completed action on: {page_title}"
-                    }))
-
+                    if hasattr(agent_instance.browser_context, 'page'):
+                        current_url = await agent_instance.browser_context.page.url()
+                        page_title = await agent_instance.browser_context.page.title()
+                        
+                        await session.send_status(
+                            "step_complete",
+                            f"Completed step {session.step_count}",
+                            url=current_url,
+                            title=page_title,
+                            action=last_action
+                        )
             except Exception as e:
                 logger.error(f"Step end callback error: {e}")
-                await websocket.send_text(json.dumps({
-                    "type": "error",
-                    "message": f"Screenshot capture failed: {str(e)}"
-                }))
 
-        # Create the agent
-        agent = Agent(
-            task=task,
-            llm=ChatOpenAI(
-                model="gpt-3.5-turbo",
-                temperature=0.1,
-                api_key=settings.OPENAI_API_KEY,
-            ),
-            headless=False,  # Set to False to see the browser
-            ignore_https_errors=True,
-            timeout=60000,
-            source="web-ui",
-            context_config={
-                "save_recording_path": recording_dir,
-                "performance_mode": True,
-                "bypass_csp": True,
-                "javascript_enabled": True,
-                "viewport": {"width": 1920, "height": 1080},
-                "record_video": {
-                    "dir": recording_dir,
-                    "size": {"width": 1920, "height": 1080}
-                }
-            },
-            browser_config={
-                "args": [
-                    "--no-sandbox",
-                    "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-accelerated-2d-canvas",
-                    "--disable-gpu",
-                    "--window-size=1920,1080"
-                ]
-            },
-            generate_gif=True
-        )
-
-        # Update session
-        if session_id in active_sessions:
-            active_sessions[session_id]['agent'] = agent
-            active_sessions[session_id]['status'] = 'running'
-
-        await websocket.send_text(json.dumps({
-            "type": "status_update",
-            "status": "running",
-            "message": "Browser automation is now running..."
-        }))
-
-        # Run the agent
+        # Run automation with callbacks
         result = await agent.run(
-            on_step_start=on_step_start_callback,
-            on_step_end=on_step_end_callback
+            on_step_start=on_step_start,
+            on_step_end=on_step_end
         )
         
-        # Send completion
-        final_result = result.final_result() if hasattr(result, 'final_result') else str(result)
-        await websocket.send_text(json.dumps({
-            "type": "task_complete",
-            "status": "completed",
-            "message": f"✅ Task completed successfully!",
-            "result": final_result
-        }))
-
-        if session_id in active_sessions:
-            active_sessions[session_id]['status'] = 'completed'
-
+        return result
+        
     except Exception as e:
-        error_msg = f"Automation error: {str(e)}"
-        logger.error(error_msg)
-        await websocket.send_text(json.dumps({
-            "type": "error",
-            "status": "error",
-            "message": error_msg
-        }))
-        
-        if session_id in active_sessions:
-            active_sessions[session_id]['status'] = 'error'
-    
-    finally:
-        # Cleanup
-        if agent:
-            try:
-                await agent.close()
-            except Exception as e:
-                logger.error(f"Error closing agent: {e}")
-        
-        if session_id in active_sessions:
-            del active_sessions[session_id]
-        
-        logger.info(f"Session {session_id} cleaned up")
-
-async def send_screenshot(websocket: WebSocket):
-    """Send browser screenshot to client"""
-    try:
-        if automation_agent and automation_agent.browser:
-            screenshot = await automation_agent.browser.screenshot()
-            current_url = automation_agent.browser.url
-            await websocket.send_json({
-                "type": "screenshot",
-                "screenshot": screenshot,
-                "url": current_url
-            })
-    except Exception as e:
-        logger.error(f"Failed to send screenshot: {e}")
+        session.error = str(e)
+        logger.error(f"Automation step error: {e}")
+        await session.send_status(
+            "error",
+            f"Automation step failed: {str(e)}",
+            step=session.current_step
+        )
+        raise
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for browser automation"""
-    await websocket.accept()
-    client_id = str(id(websocket))
-    active_connections[client_id] = websocket
+    session_id = str(uuid.uuid4())
+    session = None
     
     try:
-        # Send initial connection message
-        await websocket.send_json({
-            "type": "connection",
-            "message": "Connected to automation service! You can now chat or request automation tasks."
-        })
-
-        # Start screenshot update loop
-        screenshot_task = asyncio.create_task(update_screenshots(websocket))
-
+        # Accept connection
+        await websocket.accept()
+        logger.info(f"New WebSocket connection: {session_id}")
+        
+        # Initialize session
+        session = AutomationSession(session_id, websocket)
+        active_sessions[session_id] = session
+        
+        # Initialize agent
+        with error_handler(session, "agent"):
+            session.agent = await initialize_automation_agent(session_id)
+        
+        # Send connection confirmation
+        await session.send_status(
+            "connection",
+            "Connected to automation service",
+            capabilities=["tax_filing", "form_filling", "document_processing"]
+        )
+        
+        # Start screenshot stream
+        session.screenshot_task = asyncio.create_task(
+            start_screenshot_stream(session)
+        )
+        
+        # Main message loop
         while True:
-            data = await websocket.receive_text()
-            message = json.loads(data)
-            
-            if message["type"] == "chat_message":
-                # Process chat message and start automation
-                await handle_automation_request(websocket, message["message"])
-            elif message["type"] == "stop_task":
-                # Stop current automation task
-                if automation_agent:
-                    await automation_agent.stop()
-                await websocket.send_json({
-                    "type": "status_update",
-                    "status": "stopped",
-                    "message": "Task stopped by user"
-                })
-
+            try:
+                # Receive message
+                message = await websocket.receive_text()
+                data = json.loads(message)
+                
+                # Update last activity
+                session.last_activity = datetime.now()
+                
+                # Handle different message types
+                if data["type"] == "chat_message":
+                    with error_handler(session, "automation"):
+                        # Reset step counter
+                        session.step_count = 0
+                        session.current_step = None
+                        session.error = None
+                        
+                        # Update task
+                        session.current_task = data["message"]
+                        session.status = "running"
+                        
+                        # Send acknowledgment
+                        await session.send_status(
+                            "status_update",
+                            "Starting automation task..."
+                        )
+                        
+                        # Update agent task
+                        session.agent.task = data["message"]
+                        
+                        # Run automation with step handling
+                        result = await handle_automation_step(session, session.agent)
+                        
+                        # Send completion
+                        session.status = "completed"
+                        await session.send_status(
+                            "task_complete",
+                            "Task completed successfully",
+                            result=str(result)
+                        )
+                
+                elif data["type"] == "stop_task":
+                    if session.agent:
+                        await session.agent.stop()
+                    session.status = "stopped"
+                    await session.send_status(
+                        "status_update",
+                        "Task stopped by user"
+                    )
+                
+            except json.JSONDecodeError:
+                logger.error("Invalid message format")
+                if session:
+                    await session.send_status(
+                        "error",
+                        "Invalid message format",
+                        error_type="message",
+                        recoverable=True
+                    )
+                continue
+                
     except WebSocketDisconnect:
-        logger.info(f"Client {client_id} disconnected")
+        logger.info(f"WebSocket disconnected: {session_id}")
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
+        if session and session.websocket.client_state == WebSocketState.CONNECTED:
+            await session.send_status(
+                "error",
+                "WebSocket connection error",
+                error_type="connection",
+                details={"error": str(e)}
+            )
     finally:
-        active_connections.pop(client_id, None)
-        screenshot_task.cancel()
-
-async def update_screenshots(websocket: WebSocket):
-    """Continuously update browser screenshots"""
-    try:
-        while True:
-            await send_screenshot(websocket)
-            await asyncio.sleep(1)  # Update every second
-    except asyncio.CancelledError:
-        pass
-    except Exception as e:
-        logger.error(f"Screenshot update error: {e}")
-
-async def handle_automation_request(websocket: WebSocket, message: str):
-    """Handle automation request from user"""
-    try:
-        if not automation_agent:
-            await websocket.send_json({
-                "type": "error",
-                "message": "Browser automation is not available"
-            })
-            return
-
-        # Update task
-        automation_agent.task = message
-        
-        # Send acknowledgment
-        await websocket.send_json({
-            "type": "chat_response",
-            "message": "Starting automation task..."
-        })
-
-        # Start automation
-        result = await automation_agent.run()
-        
-        # Send completion message
-        await websocket.send_json({
-            "type": "task_complete",
-            "message": "Task completed successfully!"
-        })
-
-    except Exception as e:
-        logger.error(f"Automation error: {e}")
-        await websocket.send_json({
-            "type": "error",
-            "message": f"Automation failed: {str(e)}"
-        })
+        # Clean up
+        if session_id in active_sessions:
+            await cleanup_session(session_id)
 
 @router.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "automation": "available" if automation_agent else "not_initialized"
+        "active_sessions": len(active_sessions),
+        "timestamp": datetime.now().isoformat()
     } 
