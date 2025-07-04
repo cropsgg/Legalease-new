@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import ComplianceCalendar from "@/components/compliance-calendar"
 import {
   Shield,
-  CheckCircle, 
+  CheckCircle,
   AlertTriangle,
   Clock,
   FileText,
@@ -138,8 +139,8 @@ export default function CompliancePage() {
     }
   }
 
-  const filteredData = selectedCategory === "all" 
-    ? complianceData 
+  const filteredData = selectedCategory === "all"
+    ? complianceData
     : complianceData.filter(item => item.category.toLowerCase() === selectedCategory.toLowerCase())
 
   const complianceStats = {
@@ -232,32 +233,39 @@ export default function CompliancePage() {
             </Card>
       </div>
 
-        {/* Main Content Tabs */}
+                {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 legal-card p-2 h-auto">
-            <TabsTrigger 
-              value="overview" 
+          <TabsList className="grid w-full grid-cols-5 legal-card p-2 h-auto">
+            <TabsTrigger
+              value="overview"
               className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
             >
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline legal-body">Overview</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="requirements" 
+            <TabsTrigger
+              value="calendar"
+              className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
+            >
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline legal-body">Calendar</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="requirements"
               className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
             >
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline legal-body">Requirements</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="reports" 
+            <TabsTrigger
+              value="reports"
               className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
             >
               <TrendingUp className="w-4 h-4" />
               <span className="hidden sm:inline legal-body">Reports</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="resources" 
+            <TabsTrigger
+              value="resources"
               className="flex items-center space-x-2 py-3 data-[state=active]:bg-legal-bg-secondary data-[state=active]:text-legal-dark-text rounded-xl transition-all duration-200"
             >
               <BookOpen className="w-4 h-4" />
@@ -290,6 +298,19 @@ export default function CompliancePage() {
                     <span className="legal-body">Set Compliance Goals</span>
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Compliance Calendar */}
+            <Card className="legal-card-hover border-legal-border">
+              <CardHeader>
+                <CardTitle className="legal-heading">Compliance Calendar</CardTitle>
+                <CardDescription className="text-legal-secondary legal-body">
+                  Track deadlines and important compliance events
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ComplianceCalendar compact={true} />
               </CardContent>
             </Card>
 
@@ -340,6 +361,11 @@ export default function CompliancePage() {
             </Card>
           </TabsContent>
 
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="space-y-6">
+            <ComplianceCalendar />
+          </TabsContent>
+
           {/* Requirements Tab */}
           <TabsContent value="requirements" className="space-y-6">
             {/* Filter Options */}
@@ -347,7 +373,7 @@ export default function CompliancePage() {
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
                   <label className="text-sm font-medium text-legal-dark-text legal-body">Filter by category:</label>
-                  <select 
+                  <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="legal-input w-auto"
@@ -380,7 +406,7 @@ export default function CompliancePage() {
                             {getPriorityBadge(item.priority)}
           </div>
                           <p className="text-legal-secondary legal-body mb-3">{item.description}</p>
-                          
+
                           <div className="flex items-center space-x-6 text-sm text-legal-secondary">
                             <div className="flex items-center space-x-1">
                               <Calendar className="w-4 h-4" />
@@ -401,7 +427,7 @@ export default function CompliancePage() {
                       </div>
                     </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2 ml-4">
                         <Button variant="ghost" size="sm" className="text-legal-accent hover:text-legal-brown">
                           <Eye className="w-4 h-4" />
