@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
+import Image from "next/image";
 import {
   Menu,
   X,
@@ -119,10 +120,12 @@ export default function Header() {
             href={user ? "/dashboard" : "/"}
             className="flex items-center space-x-2"
           >
-            <div className="w-8 h-8 legal-icon-bg rounded-lg flex items-center justify-center">
-              <Scale className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+              <Image src="/logo.png" alt="LegalEase" width={32} height={32} />
             </div>
-            <span className="text-xl font-bold legal-heading">LegalEase</span>
+            <span className="text-xl font-bold text-legal-brown">
+              LegalEase
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -253,16 +256,21 @@ export default function Header() {
             ) : (
               // Login/Signup Buttons
               <div className="flex items-center space-x-3">
-                <Button
+                {/* <Button
                   variant="ghost"
                   asChild
-                  className="h-9 btn-legal-secondary"
+                  className="h-9 clip-inward-rounded btn-legal-secondary"
                 >
                   <Link href="/login">Login</Link>
-                </Button>
-                <Button className="btn-legal-primary h-9">
-                  <Link href="/signup">Free Consultation</Link>
-                </Button>
+                </Button> */}
+                <button className="relative h-8 group flex items-center px-8 py-2  bg-legal-brown text-white text-md font-normal font-baskervville cursor-pointer overflow-hidden transition-colors duration-300 select-none">
+                  <Link className="z-10" href="/login">
+                    Get Started
+                  </Link>
+                  <span className="absolute left-0 w-[9em] aspect-square bg-[#F8F3EE] opacity-100 rounded-[100%] -translate-x-32"></span>
+                  <span className="absolute right-0 w-[9em] aspect-square bg-[#F8F3EE] opacity-100 rounded-[100%] translate-x-32"></span>
+                </button>
+
               </div>
             )}
           </div>
