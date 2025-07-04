@@ -36,9 +36,6 @@ const defaultBenefits: BenefitItem[] = [
 const BenefitsCard: React.FC<BenefitsCardProps> = ({
   title = "WHAT BENEFITS WILL YOU GET FROM US?",
   subtitle = "We provide high quality law service for you with best integrated people.",
-  buttonText = "FIND ATTORNEY",
-  imageUrl = "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  imageAlt = "Professional lawyer in judge robe holding gavel and book",
   benefits = defaultBenefits,
   onButtonClick,
 }) => {
@@ -71,17 +68,19 @@ const BenefitsCard: React.FC<BenefitsCardProps> = ({
           <div className="lg:col-span-4 flex justify-center">
             <div className="relative">
               {/* Background paper effect */}
-              <div className="absolute inset-0 bg-stone-100 transform rotate-3 rounded-lg shadow-xl"></div>
+              <div className="absolute inset-0 bg-stone-100 transform rotate-3 shadow-xl"></div>
 
               {/* Main image container */}
-              <div className="relative bg-stone-100 rounded-lg overflow-hidden shadow-2xl">
-                <div className="aspect-[3/4] w-full max-w-sm mx-auto">
+              <div className="relative bg-stone-100 overflow-hidden  shadow-2xl">
+                {/* Set explicit height for the image container to avoid height: 0 issue */}
+                <div className="relative w-full max-w-sm mx-auto aspect-[3/4] min-h-[350px]">
                   <Image
-                    src={imageUrl}
-                    alt={imageAlt}
+                    src="/images/LEGALEASE.png"
+                    alt="a lawyer/ca"
                     fill
-                    className="object-cover object-center"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={100}
+                    className="object-cover object-center w-full h-full rounded-lg"
                     priority
                   />
                 </div>

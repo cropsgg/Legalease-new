@@ -1,6 +1,7 @@
 import { Scale, FileText, Phone, Users, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import { Baskervville, Montserrat } from "next/font/google";
+import CountUp from "@/app/components/CountUp/CountUp";
 
 const baskervville = Baskervville({
   subsets: ["latin"],
@@ -102,7 +103,14 @@ export default function HowItWorksSection() {
             <div className="text-center space-y-8">
               <div>
                 <div className="text-5xl font-light text-[#2A2A2A] mb-2">
-                  90%
+                  <CountUp
+                    from={0}
+                    to={90}
+                    separator=","
+                    direction="up"
+                    duration={1}
+                    className="count-up-text"
+                  />
                 </div>
                 <div className="text-[#8B7355] text-sm">
                   Legal
@@ -112,7 +120,14 @@ export default function HowItWorksSection() {
               </div>
               <div>
                 <div className="text-5xl font-light text-[#2A2A2A] mb-2">
-                  98%
+                  <CountUp
+                    from={0}
+                    to={98}
+                    separator=""
+                    direction="up"
+                    duration={1}
+                    className="count-up-text"
+                  />%
                 </div>
                 <div className="text-[#8B7355] text-sm">
                   Project
