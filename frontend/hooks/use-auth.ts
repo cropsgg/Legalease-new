@@ -8,10 +8,10 @@ export const useAuth = () => {
   // Initialize auth on first load
   useEffect(() => {
     if (!store.user && !store.isLoading) {
-      const token = localStorage.getItem('access_token')
+      const currentUser = localStorage.getItem('current_user')
       const guestSession = localStorage.getItem('guest_session')
       
-      if (token) {
+      if (currentUser) {
         store.getCurrentUser()
       } else if (guestSession) {
         try {

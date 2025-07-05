@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from typing import List, Dict, Optional
 from bson import ObjectId
@@ -20,6 +21,9 @@ from schemas.business import (
     TaskStatus,
     TaskPriority
 )
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -68,11 +72,14 @@ async def start_onboarding(
 ):
     """Start the onboarding process with basic info (Step 1)"""
     try:
+        logger.info(f"Starting onboarding for business: {data.get('businessName')}")
+        
         # Validate required fields for step 1
-        required_fields = ["businessName", "legalEntityType", "industry", "incorporationDate"]
+        required_fields = ["businessName", "companyDescription", "legalEntityType", "industry", "incorporationDate"]
         missing_fields = [field for field in required_fields if not data.get(field)]
         
         if missing_fields:
+            logger.warning(f"Missing required fields for onboarding: {missing_fields}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Missing required fields: {', '.join(missing_fields)}"
@@ -81,6 +88,7 @@ async def start_onboarding(
         # Create onboarding record
         onboarding = {
             "businessName": data["businessName"],
+            "companyDescription": data["companyDescription"],
             "legalEntityType": data["legalEntityType"],
             "industry": data["industry"],
             "incorporationDate": data["incorporationDate"],
@@ -91,11 +99,14 @@ async def start_onboarding(
         }
         
         result = db.businesses.insert_one(onboarding)
+        business_id = str(result.inserted_id)
         
         # Get created record
         created_onboarding = db.businesses.find_one({"_id": result.inserted_id})
-        created_onboarding["id"] = str(created_onboarding["_id"])
+        created_onboarding["id"] = business_id
         del created_onboarding["_id"]
+        
+        logger.info(f"Successfully started onboarding for business ID: {business_id}")
         
         return {
             "business": created_onboarding,
@@ -103,7 +114,10 @@ async def start_onboarding(
             "next_step": 2
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"Error starting onboarding: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Failed to start onboarding: {str(e)}"
@@ -194,61 +208,69 @@ async def update_business_details(
 @router.post("/onboarding/{business_id}/documents")
 async def upload_documents(
     business_id: str,
-    incorporation: Optional[UploadFile] = File(None),
-    panCard: Optional[UploadFile] = File(None),
-    gstCertificate: Optional[UploadFile] = File(None),
-    bankStatements: Optional[UploadFile] = File(None),
+    data: dict,
     db = Depends(get_database)
 ):
-    """Upload documents (Step 3)"""
+    """Upload documents - receive MongoDB file IDs (Step 3)"""
     try:
         # Check if business exists
         business = db.businesses.find_one({"_id": ObjectId(business_id)})
         if not business:
             raise HTTPException(status_code=404, detail="Business not found")
         
-        # Check required documents
-        if not incorporation or not panCard:
+        # Validate required documents
+        if not data.get("incorporation") or not data.get("panCard"):
             raise HTTPException(
                 status_code=400,
-                detail="Incorporation certificate and PAN card are required"
+                detail="Incorporation certificate and PAN card file IDs are required"
             )
         
         documents = {}
         
-        # Process each file
-        files_to_process = [
-            ("incorporation", incorporation, True),
-            ("panCard", panCard, True),
-            ("gstCertificate", gstCertificate, False),
-            ("bankStatements", bankStatements, False)
+        # Process document file IDs from our MongoDB storage
+        document_fields = [
+            ("incorporation", True),
+            ("panCard", True),
+            ("gstCertificate", False),
+            ("bankStatements", False)
         ]
         
-        for doc_type, file, is_required in files_to_process:
-            if file and file.filename:
-                # Verify file type
-                if not verify_file_type(file):
+        for doc_type, is_required in document_fields:
+            if data.get(doc_type):
+                file_id = data[doc_type]
+                
+                # Validate that the file exists in our database
+                file_metadata = db.file_metadata.find_one({"_id": ObjectId(file_id)})
+                if not file_metadata:
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Invalid file type for {doc_type}"
+                        detail=f"File ID {file_id} for {doc_type} not found in database"
                     )
                 
-                # Save file
-                file_path = await save_file(file, business_id, doc_type)
-                
-                # Calculate hash
-                file_hash = await calculate_file_hash(file_path)
+                # Validate file type
+                if file_metadata.get("content_type") != "application/pdf":
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"File {file_id} for {doc_type} must be a PDF"
+                    )
                 
                 # Create document record
                 documents[doc_type] = {
-                    "name": file.filename,
+                    "name": file_metadata.get("filename", f"{doc_type}_document"),
                     "type": doc_type,
-                    "file_path": file_path,
-                    "hash": file_hash,
+                    "file_id": file_id,
+                    "filename": file_metadata.get("filename"),
+                    "file_size": file_metadata.get("file_size"),
+                    "file_hash": file_metadata.get("file_hash"),
                     "uploaded_at": datetime.utcnow(),
-                    "size": os.path.getsize(file_path),
-                    "status": "uploaded"
+                    "status": "uploaded",
+                    "source": "mongodb_gridfs"
                 }
+            elif is_required:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Required document {doc_type} is missing"
+                )
         
         # Update business record
         update_data = {
@@ -265,15 +287,18 @@ async def upload_documents(
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Business not found")
         
+        logger.info(f"Successfully saved document references for business {business_id}")
+        
         return {
             "documents": documents,
             "message": "Documents uploaded successfully",
             "next_step": 4
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
+        logger.error(f"Error uploading documents: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Failed to upload documents: {str(e)}"
