@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import {
   Upload,
   FileText,
@@ -88,6 +90,7 @@ import {
   Check,
   AlertTriangle,
   Info,
+  Shield,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -99,9 +102,9 @@ const folderStructure = [
     icon: Folder,
     isOpen: true,
     children: [
-      { id: "itr", name: "ITR Files", icon: FileText, count: 12 },
-      { id: "gst", name: "GST Returns", icon: FileText, count: 8 },
-      { id: "tds", name: "TDS Certificates", icon: FileText, count: 15 },
+      { id: "itr", name: "ITR Files", icon: FileText, count: 4 },
+      { id: "gst", name: "GST Returns", icon: FileText, count: 3 },
+      { id: "tds", name: "TDS Certificates", icon: FileText, count: 2 },
     ],
   },
   {
@@ -110,9 +113,9 @@ const folderStructure = [
     icon: Folder,
     isOpen: false,
     children: [
-      { id: "contracts", name: "Contracts", icon: FileText, count: 24 },
-      { id: "agreements", name: "Agreements", icon: FileText, count: 18 },
-      { id: "notices", name: "Notices", icon: FileText, count: 6 },
+      { id: "contracts", name: "Contracts", icon: FileText, count: 2 },
+      { id: "agreements", name: "Agreements", icon: FileText, count: 1 },
+      { id: "notices", name: "Notices", icon: FileText, count: 1 },
     ],
   },
   {
@@ -121,13 +124,13 @@ const folderStructure = [
     icon: Folder,
     isOpen: false,
     children: [
-      { id: "licenses", name: "Licenses", icon: FileText, count: 9 },
-      { id: "registrations", name: "Registrations", icon: FileText, count: 11 },
+      { id: "licenses", name: "Licenses", icon: FileText, count: 1 },
+      { id: "registrations", name: "Registrations", icon: FileText, count: 1 },
     ],
   },
 ]
 
-// Mock documents data
+// Mock documents data with Ronit Raj as author and unique notary hashes
 const documents = [
   {
     id: 1,
@@ -135,12 +138,13 @@ const documents = [
     type: "pdf",
     folder: "compliance",
     status: "processed",
-    uploadedBy: "John Doe",
+    uploadedBy: "Ronit Raj",
     uploadDate: "2024-03-15",
     modifiedDate: "2024-03-15",
     size: "2.4 MB",
     pages: 24,
     blockchainHash: "0x1234...abcd",
+    notaryHash: "0x7a8b9c...F1e2d3",
     tags: ["compliance", "annual", "2024"],
     ocrData: "Extracted text from document...",
     version: "1.0",
@@ -152,12 +156,13 @@ const documents = [
     type: "spreadsheet",
     folder: "tax/gst",
     status: "pending",
-    uploadedBy: "Jane Smith",
+    uploadedBy: "Ronit Raj",
     uploadDate: "2024-03-14",
     modifiedDate: "2024-03-14",
     size: "1.8 MB",
     pages: 12,
     blockchainHash: "0x5678...efgh",
+    notaryHash: "0x4f5e6d...C9b8a7",
     tags: ["tax", "gst", "march"],
     ocrData: null,
     version: "1.0",
@@ -165,16 +170,17 @@ const documents = [
   },
   {
     id: 3,
-    name: "Employment Contract - John Doe.docx",
+    name: "Employment Contract - Amit Patel.docx",
     type: "document",
     folder: "legal/contracts",
     status: "error",
-    uploadedBy: "HR Team",
+    uploadedBy: "Ronit Raj",
     uploadDate: "2024-03-13",
     modifiedDate: "2024-03-13",
     size: "856 KB",
     pages: 8,
     blockchainHash: null,
+    notaryHash: "0x2d3c4b...E7f6g5",
     tags: ["legal", "contract", "employment"],
     ocrData: null,
     version: "1.0",
@@ -186,50 +192,17 @@ const documents = [
     type: "pdf",
     folder: "legal/agreements",
     status: "processed",
-    uploadedBy: "Legal Team",
+    uploadedBy: "Ronit Raj",
     uploadDate: "2024-03-12",
     modifiedDate: "2024-03-12",
     size: "3.2 MB",
     pages: 32,
     blockchainHash: "0x9abc...ijkl",
+    notaryHash: "0x1e2f3g...H8i7j6",
     tags: ["legal", "agreement", "partnership"],
     ocrData: "Extracted text from agreement...",
     version: "1.0",
     isFavorite: true,
-  },
-  {
-    id: 5,
-    name: "Financial Audit Report Q4.pdf",
-    type: "pdf",
-    folder: "compliance",
-    status: "processed",
-    uploadedBy: "Finance Team",
-    uploadDate: "2024-03-11",
-    modifiedDate: "2024-03-11",
-    size: "4.1 MB",
-    pages: 45,
-    blockchainHash: "0xdef0...mnop",
-    tags: ["finance", "audit", "q4"],
-    ocrData: "Extracted financial data...",
-    version: "1.0",
-    isFavorite: false,
-  },
-  {
-    id: 6,
-    name: "Privacy Policy Update.docx",
-    type: "document",
-    folder: "compliance",
-    status: "pending",
-    uploadedBy: "Legal Team",
-    uploadDate: "2024-03-10",
-    modifiedDate: "2024-03-10",
-    size: "1.2 MB",
-    pages: 16,
-    blockchainHash: null,
-    tags: ["compliance", "privacy", "policy"],
-    ocrData: null,
-    version: "1.0",
-    isFavorite: false,
   },
 ]
 
@@ -244,7 +217,22 @@ export default function DocumentsPage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [expandedFolders, setExpandedFolders] = useState<string[]>(["tax"])
+  const [showNotaryHashes, setShowNotaryHashes] = useState(false)
+  const [loadingHashes, setLoadingHashes] = useState<number[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Handle notary hash toggle
+  const handleNotaryHashToggle = () => {
+    if (!showNotaryHashes) {
+      setLoadingHashes(documents.map(doc => doc.id))
+      setTimeout(() => {
+        setLoadingHashes([])
+        setShowNotaryHashes(true)
+      }, 1000)
+    } else {
+      setShowNotaryHashes(false)
+    }
+  }
 
   // Filter documents based on search and folder
   const filteredDocuments = documents.filter((doc) => {
@@ -276,19 +264,7 @@ export default function DocumentsPage() {
     }
   }
 
-  // Get status color and icon
-  const getStatusInfo = (status: string) => {
-    switch (status) {
-      case "processed":
-        return { color: "text-green-600", bgColor: "bg-green-50", icon: CheckCircle, label: "Processed" }
-      case "pending":
-        return { color: "text-yellow-600", bgColor: "bg-yellow-50", icon: Clock, label: "Pending" }
-      case "error":
-        return { color: "text-red-600", bgColor: "bg-red-50", icon: AlertTriangle, label: "Error" }
-      default:
-        return { color: "text-gray-600", bgColor: "bg-gray-50", icon: FileText, label: "Unknown" }
-    }
-  }
+
 
   // Toggle folder expansion
   const toggleFolder = (folderId: string) => {
@@ -457,6 +433,17 @@ export default function DocumentsPage() {
             </div>
 
             <div className="flex items-center space-x-2">
+              {/* Notary Hash Toggle */}
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4 text-[#8B4513]" />
+                <span className="text-sm text-[#8B7355]">Notary Hashes</span>
+                <Switch
+                  checked={showNotaryHashes}
+                  onCheckedChange={handleNotaryHashToggle}
+                  disabled={loadingHashes.length > 0}
+                />
+              </div>
+
               {/* View Mode Toggles */}
               <div className="flex border border-[#D1C4B8] rounded-lg">
                 <Button
@@ -644,8 +631,6 @@ export default function DocumentsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredDocuments.map((doc) => {
                 const FileIcon = getFileIcon(doc.type)
-                const statusInfo = getStatusInfo(doc.status)
-                const StatusIcon = statusInfo.icon
 
                 return (
                   <Card
@@ -655,8 +640,8 @@ export default function DocumentsPage() {
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
-                        <div className={`w-12 h-12 ${statusInfo.bgColor} rounded-lg flex items-center justify-center`}>
-                          <FileIcon className={`w-6 h-6 ${statusInfo.color}`} />
+                        <div className="w-12 h-12 bg-[#F8F3EE] rounded-lg flex items-center justify-center">
+                          <FileIcon className="w-6 h-6 text-[#8B4513]" />
                         </div>
                         <div className="flex items-center space-x-1">
                           <Checkbox
@@ -706,16 +691,30 @@ export default function DocumentsPage() {
                         <h3 className="font-medium text-[#2A2A2A] text-sm truncate">
                           {doc.name}
                         </h3>
+
+                        {/* Notary Hash Display */}
+                        {(showNotaryHashes || loadingHashes.includes(doc.id)) && (
+                          <div className="flex items-center space-x-2">
+                            <Shield className="w-3 h-3 text-[#8B4513]" />
+                            {loadingHashes.includes(doc.id) ? (
+                              <div className="flex items-center space-x-1">
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#8B4513]"></div>
+                                <span className="text-xs text-[#8B7355]">Loading hash...</span>
+                              </div>
+                            ) : (
+                              <code className="text-xs bg-[#E8DDD1] px-2 py-1 rounded text-[#8B4513]">
+                                {doc.notaryHash}
+                              </code>
+                            )}
+                          </div>
+                        )}
+
                         <div className="flex items-center space-x-2 text-xs text-[#8B7355]">
                           <span>{doc.size}</span>
                           <span>•</span>
                           <span>{doc.pages} pages</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className={`text-xs ${statusInfo.bgColor} ${statusInfo.color}`}>
-                            <StatusIcon className="w-3 h-3 mr-1" />
-                            {statusInfo.label}
-                          </Badge>
                           {doc.blockchainHash && (
                             <Hash className="w-3 h-3 text-[#8B7355]" />
                           )}
@@ -754,15 +753,12 @@ export default function DocumentsPage() {
                         <th className="p-4 text-left text-sm font-medium text-[#2A2A2A]">Type</th>
                         <th className="p-4 text-left text-sm font-medium text-[#2A2A2A]">Modified</th>
                         <th className="p-4 text-left text-sm font-medium text-[#2A2A2A]">Size</th>
-                        <th className="p-4 text-left text-sm font-medium text-[#2A2A2A]">Status</th>
                         <th className="p-4 text-left text-sm font-medium text-[#2A2A2A]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredDocuments.map((doc) => {
                         const FileIcon = getFileIcon(doc.type)
-                        const statusInfo = getStatusInfo(doc.status)
-                        const StatusIcon = statusInfo.icon
 
                         return (
                           <tr key={doc.id} className="border-b border-[#D1C4B8] hover:bg-[#F8F3EE]">
@@ -778,6 +774,22 @@ export default function DocumentsPage() {
                                 <div>
                                   <div className="font-medium text-[#2A2A2A]">{doc.name}</div>
                                   <div className="text-sm text-[#8B7355]">{doc.uploadedBy}</div>
+                                  {/* Notary Hash in List View */}
+                                  {(showNotaryHashes || loadingHashes.includes(doc.id)) && (
+                                    <div className="flex items-center space-x-1 mt-1">
+                                      <Shield className="w-3 h-3 text-[#8B4513]" />
+                                      {loadingHashes.includes(doc.id) ? (
+                                        <div className="flex items-center space-x-1">
+                                          <div className="animate-spin rounded-full h-2 w-2 border-b-2 border-[#8B4513]"></div>
+                                          <span className="text-xs text-[#8B7355]">Loading...</span>
+                                        </div>
+                                      ) : (
+                                        <code className="text-xs bg-[#E8DDD1] px-1 py-0.5 rounded text-[#8B4513]">
+                                          {doc.notaryHash}
+                                        </code>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </td>
@@ -786,12 +798,6 @@ export default function DocumentsPage() {
                               {new Date(doc.modifiedDate).toLocaleDateString()}
                             </td>
                             <td className="p-4 text-sm text-[#8B7355]">{doc.size}</td>
-                            <td className="p-4">
-                              <Badge className={`text-xs ${statusInfo.bgColor} ${statusInfo.color}`}>
-                                <StatusIcon className="w-3 h-3 mr-1" />
-                                {statusInfo.label}
-                              </Badge>
-                            </td>
                             <td className="p-4">
                               <div className="flex items-center space-x-1">
                                 <Button
@@ -942,6 +948,17 @@ export default function DocumentsPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Notary Hash */}
+                  <div>
+                    <span className="text-[#8B7355] text-sm">Notary Hash:</span>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <Shield className="w-4 h-4 text-[#8B4513]" />
+                      <code className="text-xs bg-[#E8DDD1] px-2 py-1 rounded text-[#8B4513]">
+                        {previewDocument.notaryHash}
+                      </code>
+                    </div>
+                  </div>
 
                   {/* OCR Data */}
                   {previewDocument.ocrData && (

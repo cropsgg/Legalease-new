@@ -416,7 +416,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Row 2 - Status Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {statusCards.map((card, index) => {
               const Icon = card.icon;
               return (
@@ -493,7 +493,7 @@ export default function DashboardPage() {
                 </Card>
               );
             })}
-          </div>
+          </div> */}
 
           {/* Row 3 - Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
