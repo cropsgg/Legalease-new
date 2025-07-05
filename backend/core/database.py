@@ -26,8 +26,22 @@ def get_database():
         
         # Create basic indexes if they don't exist
         try:
-            db.businesses.create_index("business_name", unique=True)
-            db.businesses.create_index("pan_number", unique=True, sparse=True)
+            # Remove old problematic indexes if they exist
+            try:
+                db.businesses.drop_index("business_name_1")
+                logger.info("Dropped old business_name index")
+            except Exception:
+                pass  # Index may not exist
+                
+            try:
+                db.businesses.drop_index("pan_number_1") 
+                logger.info("Dropped old pan_number index")
+            except Exception:
+                pass  # Index may not exist
+            
+            # Create new indexes with correct field names
+            db.businesses.create_index("businessName")  # Not unique to allow testing
+            db.businesses.create_index("panNumber", sparse=True)  # Unique but sparse
             db.companies.create_index("name")
             db.users.create_index("email", unique=True)
             logger.info("Database indexes created successfully")

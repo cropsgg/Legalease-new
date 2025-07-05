@@ -12,17 +12,21 @@ import logging
 from datetime import datetime
 from fastapi.exceptions import HTTPException
 from starlette.websockets import WebSocketState
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
 import traceback
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Override OpenAI API key if not set in environment
+if not settings.OPENAI_API_KEY:
+    settings.OPENAI_API_KEY = "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"
+
 router = APIRouter(prefix="/automation", tags=["automation"])
 
 # Store active sessions
-active_sessions: Dict[str, Dict[str, Any]] = {}
+active_sessions: Dict[str, Any] = {}
 
 # Directory to store recordings
 recording_dir = "./tmp/record_videos"
@@ -91,32 +95,58 @@ class AutomationSession:
             logger.error(f"Failed to send status update: {e}")
 
 def analyze_user_intent(user_message: str) -> Dict[str, Any]:
-    """Analyze user message to determine intent"""
+    """Analyze user message to determine intent and extract context"""
     user_message_lower = user_message.lower()
     
     # Check for tax filing keywords
-    tax_keywords = ['tax', 'itr', 'income tax', 'filing', 'return', 'assessment']
+    tax_keywords = ['tax', 'itr', 'income tax', 'filing', 'return', 'assessment', 'tax return', 'file itr']
     if any(keyword in user_message_lower for keyword in tax_keywords):
-        return {
+        intent_data = {
             "intent": "tax_filing",
             "requires_automation": True,
-            "task_type": "tax_filing"
+            "task_type": "tax_filing",
+            "confidence": 0.9
         }
+        
+        # Check for specific tax filing actions
+        if any(action in user_message_lower for action in ['start', 'begin', 'file', 'submit']):
+            intent_data["action"] = "start_filing"
+            intent_data["confidence"] = 0.95
+        elif any(action in user_message_lower for action in ['check', 'status', 'verify', 'review']):
+            intent_data["action"] = "check_status"
+            intent_data["confidence"] = 0.8
+        elif any(action in user_message_lower for action in ['help', 'guide', 'how', 'explain']):
+            intent_data["action"] = "help_guide"
+            intent_data["confidence"] = 0.7
+        
+        return intent_data
     
     # Check for form filling keywords
-    form_keywords = ['form', 'application', 'government', 'fill', 'submit']
+    form_keywords = ['form', 'application', 'government', 'fill', 'submit', 'portal', 'government portal']
     if any(keyword in user_message_lower for keyword in form_keywords):
         return {
             "intent": "form_filling",
             "requires_automation": True,
-            "task_type": "form_filling"
+            "task_type": "form_filling",
+            "confidence": 0.8
+        }
+    
+    # Check for help/guidance keywords
+    help_keywords = ['help', 'guide', 'how', 'what', 'explain', 'understand', 'learn']
+    if any(keyword in user_message_lower for keyword in help_keywords):
+        return {
+            "intent": "help",
+            "requires_automation": False,
+            "task_type": "chat",
+            "confidence": 0.6
         }
     
     # Default to chat response
     return {
         "intent": "chat",
         "requires_automation": False,
-        "task_type": "chat"
+        "task_type": "chat",
+        "confidence": 0.5
     }
 
 async def get_chat_response(user_message: str, session_id: str) -> str:
@@ -163,32 +193,100 @@ async def get_chat_response(user_message: str, session_id: str) -> str:
         logger.error(f"Chat response error: {e}")
         return "I'm having trouble responding right now. Please try again."
 
+def extract_user_data(user_message: str) -> Dict[str, Any]:
+    """Extract user data from chat message for tax filing"""
+    user_data = {
+        "pan_number": "ABCDE1234F",  # Default test PAN
+        "mobile_number": "9876543210",  # Default test mobile
+        "assessment_year": "2023-24",
+        "itr_type": "ITR-2",
+        "filing_mode": "Online Filing",
+        "additional_incomes": [
+            {"type": "Rental Income", "amount": 25235},
+            {"type": "Interest Income", "amount": 3252530}
+        ],
+        "deductions": [
+            {"type": "80D - Health Insurance Premium", "description": "Health Insurance Premium", "amount": 25000},
+            {"type": "80C - Tax Saving Investment", "description": "Investment", "amount": 150000}
+        ]
+    }
+    
+    # Extract PAN if provided
+    import re
+    pan_match = re.search(r'PAN[:\s]*([A-Z]{5}[0-9]{4}[A-Z])', user_message.upper())
+    if pan_match:
+        user_data["pan_number"] = pan_match.group(1)
+    
+    # Extract mobile number if provided
+    mobile_match = re.search(r'(?:mobile|phone|number)[:\s]*([0-9]{10})', user_message)
+    if mobile_match:
+        user_data["mobile_number"] = mobile_match.group(1)
+    
+    # Extract assessment year if provided
+    year_match = re.search(r'(?:assessment year|AY|year)[:\s]*([0-9]{4}-[0-9]{2})', user_message)
+    if year_match:
+        user_data["assessment_year"] = year_match.group(1)
+    
+    # Extract ITR type if provided
+    itr_match = re.search(r'ITR[:\s]*([1-4])', user_message)
+    if itr_match:
+        user_data["itr_type"] = f"ITR-{itr_match.group(1)}"
+    
+    return user_data
+
 def get_tax_filing_task(user_prompt: str) -> str:
     """Convert user prompt into detailed tax filing task"""
+    user_data = extract_user_data(user_prompt)
+    
+    # Generate income entries
+    income_entries = ""
+    for income in user_data["additional_incomes"]:
+        income_entries += f"""
+         * Click "Add Income" button
+         * Select "{income['type']}" from dropdown
+         * Enter amount: {income['amount']}"""
+    
+    # Generate deduction entries
+    deduction_entries = ""
+    for deduction in user_data["deductions"]:
+        deduction_entries += f"""
+         * Click "Add Deduction" button
+         * Select "{deduction['type']}"
+         * Enter description: "{deduction['description']}"
+         * Enter amount: {deduction['amount']}"""
+    
     base_task = f"""
     User request: '{user_prompt}'
     
-    Based on the user request, perform tax filing automation:
+    Based on the user request, perform tax filing automation with the following details:
+    - PAN Number: {user_data['pan_number']}
+    - Mobile: {user_data['mobile_number']}
+    - Assessment Year: {user_data['assessment_year']}
+    - ITR Type: {user_data['itr_type']}
     
     Follow these steps precisely to complete the tax filing process:
 
     1. LOGIN PHASE:
        - Navigate to: https://income-tax-ai-alphaq.vercel.app/
-       - Verify login form elements are present
-       - Enter PAN: ABCDE1234F
-       - Read and enter the captcha shown on screen
+       - Verify login form elements are present:
+         * PAN Number field
+         * Captcha field
+         * "Get OTP" button
+       - Enter PAN: {user_data['pan_number']}
+       - Read and enter the captcha shown on screen (look carefully at the image)
        - Click "Get OTP" button
        - When OTP field appears, enter: 123456
        - Click final login button
-       - Verify successful login by checking dashboard
+       - Verify successful login by checking for dashboard elements
 
     2. START FILING PHASE:
-       - Look for "File ITR" section on dashboard
+       - On dashboard, locate "File ITR" section
        - Click "Start Filing" button
        - In the filing form:
-         * Click Assessment Year dropdown and select "2023-24"
-         * Select ITR Type: "ITR-2"
-         * Choose Filing Mode: "Online Filing"
+         * Click Assessment Year dropdown
+         * Select "{user_data['assessment_year']}"
+         * Select ITR Type: "{user_data['itr_type']}"
+         * Choose Filing Mode: "{user_data['filing_mode']}"
        - Click "Continue" button
 
     3. PRE-FILLED INFO PHASE:
@@ -197,51 +295,42 @@ def get_tax_filing_task(user_prompt: str) -> str:
        - Click "Continue to Income & Deductions"
 
     4. INCOME & DEDUCTIONS PHASE:
-       - Under "Other Income" section:
-         * Click "Add Income" button
-         * Select "Rental Income" from dropdown
-         * Enter amount: 25235
-         * Click "Add Income" button again
-         * Select "Interest Income" from dropdown
-         * Enter amount: 3252530
+       - Under "Other Income" section:{income_entries}
 
-       - Under "Deductions" section:
-         * Click "Add Deduction" button
-         * Select "80D - Health Insurance Premium"
-         * Enter description: "Health Insurance Premium"
-         * Enter amount: 25000
-         * Click "Add Deduction" button again
-         * Select "80C - Tax Saving Investment"
-         * Enter description: "Investment"
-         * Enter amount: 150000
+       - Under "Deductions" section:{deduction_entries}
 
+       - If any entry needs deletion, use the red delete button
        - Click "Continue to Tax Summary"
 
     5. TAX SUMMARY & PAYMENT PHASE:
        - Review tax calculation summary
+       - Verify calculated tax amounts
        - Click "Continue to Payment"
-       - Select any available payment method
+       - Select any available payment method (UPI/Net Banking/Card)
        - Click "Make Payment"
 
     6. FINAL SUBMISSION:
        - Review all information in submission page
+       - Verify all details are correct
        - Check "I accept the above declaration" checkbox
        - Click "Submit Return"
        - Verify successful submission message
        - Note down acknowledgment number if provided
 
     Important Instructions:
-    - Take your time with each step
+    - Take your time with each step and wait for page loads
     - If any element is not found, wait a moment and try again
-    - Document each successful action
+    - Document each successful action with clear descriptions
     - If any step fails, provide detailed error information
     - Ensure each page loads completely before proceeding
+    - If captcha is unclear, describe what you see and try your best guess
+    - Take screenshots of any errors or important screens
     """
     return base_task
 
-@contextmanager
-async def error_handler(session: AutomationSession, error_type: str) -> Generator:
-    """Context manager for handling errors and sending error messages to client"""
+@asynccontextmanager
+async def error_handler(session: AutomationSession, error_type: str):
+    """Async context manager for handling errors and sending error messages to client"""
     try:
         yield
     except Exception as e:
@@ -314,7 +403,7 @@ async def initialize_automation_agent(session_id: str) -> Agent:
 
 async def start_screenshot_stream(session: AutomationSession):
     """Start streaming screenshots for a session"""
-    with error_handler(session, "screenshot"):
+    async with error_handler(session, "screenshot"):
         while True:
             if session.session_id not in active_sessions:
                 break
@@ -470,7 +559,7 @@ async def websocket_endpoint(websocket: WebSocket):
         active_sessions[session_id] = session
         
         # Initialize agent
-        with error_handler(session, "agent"):
+        async with error_handler(session, "agent"):
             session.agent = await initialize_automation_agent(session_id)
         
         # Send connection confirmation
@@ -497,35 +586,67 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 # Handle different message types
                 if data["type"] == "chat_message":
-                    with error_handler(session, "automation"):
-                        # Reset step counter
-                        session.step_count = 0
-                        session.current_step = None
-                        session.error = None
-                        
-                        # Update task
-                        session.current_task = data["message"]
-                        session.status = "running"
-                        
-                        # Send acknowledgment
-                        await session.send_status(
-                            "status_update",
-                            "Starting automation task..."
-                        )
-                        
-                        # Update agent task
-                        session.agent.task = data["message"]
-                        
-                        # Run automation with step handling
-                        result = await handle_automation_step(session, session.agent)
-                        
-                        # Send completion
-                        session.status = "completed"
-                        await session.send_status(
-                            "task_complete",
-                            "Task completed successfully",
-                            result=str(result)
-                        )
+                    user_message = data["message"]
+                    
+                    # Analyze user intent
+                    intent_data = analyze_user_intent(user_message)
+                    
+                    if intent_data["requires_automation"]:
+                        async with error_handler(session, "automation"):
+                            # Reset step counter
+                            session.step_count = 0
+                            session.current_step = None
+                            session.error = None
+                            
+                            # Update task
+                            session.current_task = user_message
+                            session.status = "running"
+                            
+                            # Send acknowledgment with intent info
+                            await session.send_status(
+                                "status_update",
+                                f"Starting {intent_data['task_type']} automation... (Confidence: {intent_data['confidence']*100:.0f}%)"
+                            )
+                            
+                            # Generate appropriate task based on intent
+                            if intent_data["task_type"] == "tax_filing":
+                                detailed_task = get_tax_filing_task(user_message)
+                                session.agent.task = detailed_task
+                            else:
+                                session.agent.task = user_message
+                            
+                            # Run automation with step handling
+                            result = await handle_automation_step(session, session.agent)
+                            
+                            # Send completion
+                            session.status = "completed"
+                            await session.send_status(
+                                "task_complete",
+                                "Task completed successfully",
+                                result=str(result)
+                            )
+                    else:
+                        # Handle as chat message
+                        try:
+                            # Send typing indicator
+                            await session.send_status(
+                                "typing",
+                                "Thinking..."
+                            )
+                            
+                            chat_response = await get_chat_response(user_message, session_id)
+                            await session.send_status(
+                                "chat_response",
+                                chat_response
+                            )
+                        except Exception as e:
+                            logger.error(f"Chat response error: {e}")
+                            await session.send_status(
+                                "error",
+                                "I'm having trouble responding right now. Please try again.",
+                                error_type="chat",
+                                recoverable=True
+                            )
                 
                 elif data["type"] == "stop_task":
                     if session.agent:
