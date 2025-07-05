@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { validateFiles, createFileId, formatFileSize, type FileValidationResult } from '@/lib/file-utils/file-validator'
 import { uploadToIPFS, type IPFSUploadResult, ipfsConfig } from '@/lib/file-utils/ipfs-utils'
 import type { HashWorkerMessage, HashWorkerResponse } from '@/lib/workers/hash-worker'
@@ -49,8 +49,17 @@ const DEFAULT_OPTIONS: UseFileHasherOptions = {
 }
 
 export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
-  const opts = { ...DEFAULT_OPTIONS, ...options }
-  
+  // Memoize options to prevent infinite re-renders
+  const opts = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [
+    options.enableIPFS,
+    options.maxFiles,
+    options.maxFileSize,
+    options.enableWebWorkers,
+    options.onFileProcessed,
+    options.onAllFilesProcessed,
+    options.onError,
+  ])
+
   const [files, setFiles] = useState<ProcessedFile[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [stats, setStats] = useState<FileHasherStats>({
@@ -74,20 +83,20 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
 
     // Create workers (typically 2-4 workers for parallel processing)
     const workerCount = Math.min(4, navigator.hardwareConcurrency || 2)
-    
+
     for (let i = 0; i < workerCount; i++) {
       try {
         const worker = new Worker(
           new URL('../lib/workers/hash-worker.ts', import.meta.url),
           { type: 'module' }
         )
-        
+
         worker.onmessage = handleWorkerMessage
         worker.onerror = (error) => {
           console.error('Worker error:', error)
           opts.onError?.('Web Worker error occurred')
         }
-        
+
         workersRef.current.push(worker)
       } catch (error) {
         console.warn('Failed to create Web Worker:', error)
@@ -104,8 +113,8 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
   // Handle worker messages
   const handleWorkerMessage = useCallback((event: MessageEvent<HashWorkerResponse>) => {
     const response = event.data
-    
-    setFiles(prevFiles => 
+
+    setFiles(prevFiles =>
       prevFiles.map(file => {
         if (file.id === response.id) {
           if (response.success) {
@@ -115,14 +124,14 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
               status: opts.enableIPFS ? 'uploading' as const : 'completed' as const,
               processingTime: response.processingTime,
             }
-            
+
             // If IPFS is enabled, start IPFS upload
             if (opts.enableIPFS) {
               handleIPFSUpload(updatedFile)
             } else {
               opts.onFileProcessed?.(updatedFile)
             }
-            
+
             return updatedFile
           } else {
             const errorFile = {
@@ -131,7 +140,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
               error: response.error || 'Hashing failed',
               processingTime: response.processingTime,
             }
-            
+
             opts.onError?.(response.error || 'Hashing failed', errorFile)
             return errorFile
           }
@@ -145,7 +154,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
   const handleIPFSUpload = useCallback(async (file: ProcessedFile) => {
     try {
       const ipfsResult = await uploadToIPFS(file.file, ipfsConfig)
-      
+
       setFiles(prevFiles =>
         prevFiles.map(f => {
           if (f.id === file.id) {
@@ -155,7 +164,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
               ipfsCID: ipfsResult.cid,
               ipfsUrl: ipfsResult.url,
             }
-            
+
             opts.onFileProcessed?.(updatedFile)
             return updatedFile
           }
@@ -164,7 +173,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
       )
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'IPFS upload failed'
-      
+
       setFiles(prevFiles =>
         prevFiles.map(f => {
           if (f.id === file.id) {
@@ -173,7 +182,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
               status: 'error' as const,
               error: errorMessage,
             }
-            
+
             opts.onError?.(errorMessage, errorFile)
             return errorFile
           }
@@ -186,16 +195,16 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
   // Hash file using Web Crypto API (fallback when Web Workers are not available)
   const hashFileDirectly = useCallback(async (file: File): Promise<string> => {
     const startTime = performance.now()
-    
+
     const arrayBuffer = await file.arrayBuffer()
     const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
-    
+
     const hashArray = Array.from(new Uint8Array(hashBuffer))
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-    
+
     const processingTime = performance.now() - startTime
     console.log(`Direct hash completed in ${processingTime.toFixed(2)}ms`)
-    
+
     return `0x${hashHex}`
   }, [])
 
@@ -219,7 +228,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
         ...validation.globalErrors,
         ...validation.results.flatMap(r => r.errors)
       ].join(', ')
-      
+
       opts.onError?.(errorMessage)
       setIsProcessing(false)
       return
@@ -240,8 +249,8 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
       // Use Web Workers for parallel processing
       processedFiles.forEach((processedFile, index) => {
         const worker = workersRef.current[index % workersRef.current.length]
-        
-        setFiles(prev => 
+
+        setFiles(prev =>
           prev.map(f => f.id === processedFile.id ? { ...f, status: 'hashing' } : f)
         )
 
@@ -261,12 +270,12 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
       // Fallback to direct processing
       for (const processedFile of processedFiles) {
         try {
-          setFiles(prev => 
+          setFiles(prev =>
             prev.map(f => f.id === processedFile.id ? { ...f, status: 'hashing' } : f)
           )
 
           const hash = await hashFileDirectly(processedFile.file)
-          
+
           setFiles(prev =>
             prev.map(f => {
               if (f.id === processedFile.id) {
@@ -275,11 +284,11 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
                   hash,
                   status: opts.enableIPFS ? 'uploading' as const : 'completed' as const,
                 }
-                
+
                 if (!opts.enableIPFS) {
                   opts.onFileProcessed?.(updatedFile)
                 }
-                
+
                 return updatedFile
               }
               return f
@@ -295,7 +304,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Processing failed'
-          
+
           setFiles(prev =>
             prev.map(f => {
               if (f.id === processedFile.id) {
@@ -304,7 +313,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
                   status: 'error' as const,
                   error: errorMessage,
                 }
-                
+
                 opts.onError?.(errorMessage, errorFile)
                 return errorFile
               }
@@ -316,7 +325,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
     }
 
     setIsProcessing(false)
-  }, [opts, hashFileDirectly, handleIPFSUpload])
+  }, [opts.maxFileSize, opts.maxFiles, opts.enableWebWorkers, opts.enableIPFS, opts.onError, opts.onFileProcessed, hashFileDirectly, handleIPFSUpload])
 
   // Clear all files
   const clearFiles = useCallback(() => {
@@ -344,7 +353,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
     const errorFiles = files.filter(f => f.status === 'error').length
     const totalSize = files.reduce((sum, f) => sum + f.file.size, 0)
     const totalProcessingTime = files.reduce((sum, f) => sum + (f.processingTime || 0), 0)
-    
+
     setStats({
       totalFiles,
       completedFiles,
@@ -359,7 +368,7 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
     if (totalFiles > 0 && completedFiles + errorFiles === totalFiles) {
       opts.onAllFilesProcessed?.(files)
     }
-  }, [files, opts])
+  }, [files, opts.onAllFilesProcessed])
 
   // Initialize workers on mount
   useEffect(() => {
@@ -381,4 +390,4 @@ export function useFileHasher(options: Partial<UseFileHasherOptions> = {}) {
     // Configuration
     options: opts,
   }
-} 
+}
