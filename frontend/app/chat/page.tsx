@@ -44,7 +44,6 @@ import {
   History,
   Brain,
   FileImage,
-  FilePdf,
   FileSpreadsheet,
   MessageCircle,
   ChevronLeft,
@@ -156,83 +155,79 @@ const agents = [
   },
 ];
 
-// Sample messages
-const sampleMessages: Message[] = [
-  {
-    id: "1",
-    type: "system",
-    content: "Welcome to LegalEase Chat! I'm here to help with your legal and compliance needs.",
-    timestamp: new Date(Date.now() - 300000),
-  },
-  {
-    id: "2",
-    type: "user",
-    content: "I need help filing my GST return for this quarter",
-    timestamp: new Date(Date.now() - 240000),
-    sender: "You",
-  },
-  {
-    id: "3",
-    type: "agent",
-    content: "I'll help you file your GST return. Let me gather the necessary information and documents.",
-    timestamp: new Date(Date.now() - 180000),
-    sender: "Tax Filing Copilot",
-    avatar: "/api/placeholder/32/32",
-  },
-  {
-    id: "4",
-    type: "action",
-    content: "Fetching data from database...",
-    timestamp: new Date(Date.now() - 120000),
-    actionType: "fetching",
-    progress: 45,
-  },
-  {
-    id: "5",
-    type: "agent",
-    content: "I've found your previous GST returns and business data. I can help you prepare and file your GST return. Would you like me to proceed?",
-    timestamp: new Date(Date.now() - 60000),
-    sender: "Tax Filing Copilot",
-    avatar: "/api/placeholder/32/32",
-  },
-  {
-    id: "6",
-    type: "confirmation",
-    content: "Confirm filing GST return?",
-    timestamp: new Date(Date.now() - 30000),
-    confirmation: {
-      title: "File GST Return",
-      description: "I'll prepare and file your GST return for Q3 2024. This will include all your sales and purchase data.",
-      confirmLabel: "Yes, File Return",
-      cancelLabel: "Cancel",
-      onConfirm: () => console.log("Confirmed"),
-      onCancel: () => console.log("Cancelled"),
-    },
-  },
-];
+// Business context for AI agents
+const getBusinessContext = (): string => {
+  return `
+BUSINESS PROFILE:
+Company Name: Ashok Enterprises PRIVATE LIMITED
+CIN: U72200KA2024PTC987654
+Date of Incorporation: 15 April 2024
+Business Category: Private Limited Company, Non-Government
+Registered Office: #42, 3rd Floor, Innov8 Tower, 123 Silicon Avenue, Electronics City II, Bengaluru – 560100
+Email ID: compliance@ashokeneterprises.in
+Authorised Capital: ₹10,00,000
+Paid-up Capital: ₹5,00,000
+Nature of Business: Research and Development in physical and engineering sciences (NIC Code: 72200)
+
+DIRECTORS & SHAREHOLDING:
+- Rahul Narayan: 60% (30,000 shares) - DIN: 09876543
+- Priya Sharma: 40% (20,000 shares) - DIN: 09876544
+
+FINANCIAL INFORMATION (FY 2024-25):
+- Gross Turnover: ₹3.82 Crores
+- Total Taxable Income: ₹1.06 Crores  
+- Tax Payable: ₹28.04 Lakhs
+- GST Registration: Active from 20 April 2024
+- HSN Codes: 84795000 (Industrial Robots), 85176290 (Control Units)
+
+CURRENT STATUS:
+- All TDS Statements (24Q & 26Q) filed without defaults
+- GST filings current and compliant
+- Annual return (Form MGT-7) filed for FY 2024-25
+- No pending legal notices or compliance defaults
+`;
+};
+
+// Initial welcome message
+const getWelcomeMessage = (agentName: string): Message => ({
+  id: "welcome",
+  type: "agent",
+  content: `Hello! I'm your ${agentName}. I have access to your complete business profile and compliance history for Ashok Enterprises PRIVATE LIMITED. How can I assist you today with your legal and compliance needs?`,
+  timestamp: new Date(),
+  sender: agentName,
+  avatar: "/api/placeholder/32/32",
+  status: "sent"
+});
 
 export default function ChatPage() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>(sampleMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [selectedAgent, setSelectedAgent] = useState(agents[0]);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [conversationHistory, setConversationHistory] = useState<{ role: string; content: string }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize welcome message when component mounts or agent changes
+  useEffect(() => {
+    setMessages([getWelcomeMessage(selectedAgent.name)]);
+    setConversationHistory([]);
+  }, [selectedAgent]);
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle send message
+  // Handle send message with OpenAI integration
   const handleSendMessage = async () => {
     if (!inputValue.trim() && attachments.length === 0) return;
 
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       type: "user",
       content: inputValue,
@@ -242,26 +237,69 @@ export default function ChatPage() {
       status: "sending",
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    const currentInput = inputValue;
+    setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     setAttachments([]);
     setIsProcessing(true);
 
-    // Simulate agent response
-    setTimeout(() => {
-      const agentResponse: Message = {
+    // Add user message to conversation history
+    const updatedHistory = [...conversationHistory, { role: "user", content: currentInput }];
+    setConversationHistory(updatedHistory);
+
+    try {
+      // Make API call to OpenAI
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: updatedHistory,
+          agentId: selectedAgent.id,
+          context: getBusinessContext(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from AI');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const agentResponse: Message = {
+          id: data.message.id,
+          type: "agent",
+          content: data.message.content,
+          timestamp: new Date(data.message.timestamp),
+          sender: selectedAgent.name,
+          avatar: selectedAgent.avatar,
+          status: "sent",
+        };
+
+        setMessages(prev => [...prev, agentResponse]);
+        
+        // Add agent response to conversation history
+        setConversationHistory(prev => [...prev, { role: "assistant", content: data.message.content }]);
+      } else {
+        throw new Error(data.error || 'Failed to get response');
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: "agent",
-        content: "I'm processing your request. Let me analyze the information and provide you with the best assistance.",
+        type: "system",
+        content: "I apologize, but I'm having trouble connecting right now. Please try again in a moment.",
         timestamp: new Date(),
-        sender: selectedAgent.name,
-        avatar: selectedAgent.avatar,
-        status: "sent",
+        status: "error",
       };
 
-      setMessages(prev => [...prev, agentResponse]);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+    }
   };
 
   // Handle file attachment
@@ -299,6 +337,12 @@ export default function ChatPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Handle agent switching
+  const handleAgentSwitch = (agent: typeof agents[0]) => {
+    setSelectedAgent(agent);
+    // This will trigger the useEffect to reset messages and conversation history
+  };
+
   // Handle key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -310,7 +354,7 @@ export default function ChatPage() {
   // Get file icon
   const getFileIcon = (type: Attachment['type']) => {
     switch (type) {
-      case 'pdf': return FilePdf;
+      case 'pdf': return FileText;
       case 'image': return FileImage;
       case 'spreadsheet': return FileSpreadsheet;
       default: return FileText;
@@ -407,8 +451,11 @@ export default function ChatPage() {
                           </Avatar>
                         </div>
 
-                        <div className="text-xs text-[#8B7355] text-right">
-                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <div className="text-xs text-[#8B7355] text-right flex items-center justify-end space-x-1">
+                          <span>{message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          {message.status === 'sending' && <Clock className="w-3 h-3" />}
+                          {message.status === 'sent' && <CheckCircle className="w-3 h-3" />}
+                          {message.status === 'error' && <AlertCircle className="w-3 h-3 text-red-500" />}
                         </div>
                       </div>
                     </div>
@@ -499,7 +546,9 @@ export default function ChatPage() {
                       <div className="bg-white border border-[#D1C4B8] rounded-2xl rounded-bl-md px-4 py-3">
                         <div className="flex items-center space-x-2">
                           <Loader2 className="w-4 h-4 text-[#8B4513] animate-spin" />
-                          <span className="text-sm text-[#2A2A2A]">Agent is processing...</span>
+                          <span className="text-sm text-[#2A2A2A]">
+                            writing...
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -522,7 +571,7 @@ export default function ChatPage() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type your message... Use @ to mention agents"
+                  placeholder={`Ask ${selectedAgent.name} about legal, tax, or compliance matters...`}
                   className="min-h-[44px] max-h-32 resize-none border-[#D1C4B8] focus:border-[#8B4513] rounded-2xl pr-12"
                   rows={1}
                 />
@@ -587,6 +636,46 @@ export default function ChatPage() {
           </SheetHeader>
 
           <div className="mt-6 space-y-6">
+            {/* Available Agents */}
+            <div>
+              <h3 className="font-semibold text-[#2A2A2A] mb-3 flex items-center">
+                <Bot className="w-4 h-4 mr-2 text-[#8B4513]" />
+                Available Agents
+              </h3>
+              <div className="space-y-2">
+                {agents.map((agent) => {
+                  const AgentIcon = agent.icon;
+                  return (
+                    <div
+                      key={agent.id}
+                      className={cn(
+                        "p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm",
+                        selectedAgent.id === agent.id
+                          ? "border-[#8B4513] bg-[#8B4513]/5"
+                          : "border-[#D1C4B8] hover:border-[#8B4513]/50"
+                      )}
+                      onClick={() => handleAgentSwitch(agent)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-[#8B4513]/10 rounded-lg flex items-center justify-center">
+                          <AgentIcon className="w-4 h-4 text-[#8B4513]" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-[#2A2A2A] text-sm">{agent.name}</h4>
+                            <Badge className={cn("text-xs", getStatusColor(agent.status))}>
+                              {agent.status}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-[#8B7355] mt-1">{agent.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Agent Memory */}
             <div>
               <h3 className="font-semibold text-[#2A2A2A] mb-3 flex items-center">
@@ -598,16 +687,20 @@ export default function ChatPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-[#8B7355]">Context Size</span>
-                      <span className="text-sm font-medium text-[#2A2A2A]">2.5MB</span>
+                      <span className="text-sm font-medium text-[#2A2A2A]">
+                        {Math.round(conversationHistory.length * 0.1)}KB
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#8B7355]">Retention</span>
-                      <span className="text-sm font-medium text-[#2A2A2A]">30 days</span>
+                      <span className="text-sm text-[#8B7355]">Messages</span>
+                      <span className="text-sm font-medium text-[#2A2A2A]">
+                        {conversationHistory.length}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#8B7355]">Shared Context</span>
+                      <span className="text-sm text-[#8B7355]">Business Context</span>
                       <Badge variant="outline" className="text-xs border-green-500 text-green-600">
-                        Enabled
+                        Loaded
                       </Badge>
                     </div>
                   </div>
@@ -623,10 +716,10 @@ export default function ChatPage() {
               </h3>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { label: "File GST", icon: Calculator },
-                  { label: "Check Compliance", icon: Shield },
-                  { label: "Generate Doc", icon: FileText },
-                  { label: "Ask Question", icon: MessageCircle },
+                  { label: "File GST", icon: Calculator, prompt: "I need help filing my GST return for this quarter" },
+                  { label: "Check Compliance", icon: Shield, prompt: "What compliance deadlines are coming up for my company?" },
+                  { label: "Generate Doc", icon: FileText, prompt: "I need to draft an employment contract" },
+                  { label: "Ask Question", icon: MessageCircle, prompt: "I have a general question about my business" },
                 ].map((action, index) => {
                   const ActionIcon = action.icon;
                   return (
@@ -635,12 +728,44 @@ export default function ChatPage() {
                       variant="outline"
                       size="sm"
                       className="border-[#D1C4B8] text-[#8B7355] hover:bg-[#8B4513] hover:text-white h-auto p-3 flex flex-col items-center space-y-1"
+                      onClick={() => {
+                        setInputValue(action.prompt);
+                        setIsSidePanelOpen(false);
+                      }}
                     >
                       <ActionIcon className="w-4 h-4" />
                       <span className="text-xs">{action.label}</span>
                     </Button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Conversation Starters */}
+            <div>
+              <h3 className="font-semibold text-[#2A2A2A] mb-3 flex items-center">
+                <MessageCircle className="w-4 h-4 mr-2 text-[#8B4513]" />
+                Conversation Starters
+              </h3>
+              <div className="space-y-2">
+                {[
+                  "What are the upcoming compliance deadlines for my company?",
+                  "Help me understand my tax obligations for this financial year",
+                  "I received a notice from GST department, what should I do?",
+                  "Draft a non-disclosure agreement for my new hire",
+                  "Explain the benefits of Section 80IAC for startups"
+                ].map((starter, index) => (
+                  <button
+                    key={index}
+                    className="w-full text-left p-2 text-xs text-[#8B7355] hover:text-[#8B4513] hover:bg-[#8B4513]/5 rounded border border-transparent hover:border-[#8B4513]/20 transition-all"
+                    onClick={() => {
+                      setInputValue(starter);
+                      setIsSidePanelOpen(false);
+                    }}
+                  >
+                    "{starter}"
+                  </button>
+                ))}
               </div>
             </div>
           </div>

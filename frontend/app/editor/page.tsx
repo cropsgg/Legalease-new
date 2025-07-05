@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Bold,
   Italic,
@@ -26,78 +29,98 @@ import {
   FileCheck,
   Settings,
   Eye,
-  Code
+  Code,
+  Loader2,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Mock agent commands data
+// AI agent commands data
 const agentCommands = [
   {
     id: "generate-employment-contract",
     command: "@Generate Employment Contract",
-    description: "Create a comprehensive employment contract with all necessary clauses",
-    parameters: ["Company Name", "Employee Name", "Position", "Salary"]
+    description: "Create a comprehensive employment contract using the business context and information provided in the editor"
   },
   {
     id: "file-gst-return",
     command: "@File GST Return",
-    description: "Generate and file GST return with proper documentation",
-    parameters: ["Business Name", "GST Number", "Period", "Turnover"]
+    description: "Generate and file GST return documentation based on the business information and tax details provided"
   },
   {
     id: "draft-legal-notice",
     command: "@Draft Legal Notice",
-    description: "Create a formal legal notice for various purposes",
-    parameters: ["Notice Type", "Recipient", "Subject", "Deadline"]
+    description: "Create a formal legal notice using the business context and specific requirements mentioned in the editor"
   },
   {
     id: "check-compliance-status",
     command: "@Check Compliance Status",
-    description: "Verify compliance status across multiple regulations",
-    parameters: ["Business Type", "Industry", "Location"]
+    description: "Verify compliance status across multiple regulations based on the business details and operational information provided"
   }
 ];
 
 export default function MarkdownEditor() {
   const [editorContent, setEditorContent] = useState(`# Legal Document Draft
 
-Welcome to the LegalEase AI Editor. Use @commands to generate legal documents automatically.
+Welcome to the LegalEase AI Editor. Use @commands to generate legal documents automatically based on the business context below.
 
-## Getting Started
+## Business Profile & Operational History
+
+**Company Name:** Ashok Enterprises PRIVATE LIMITED  
+**CIN:** U72200KA2024PTC987654  
+**Date of Incorporation:** 15 April 2024  
+**Business Category:** Private Limited Company, Non-Government  
+**Registered Office:** #42, 3rd Floor, Innov8 Tower, 123 Silicon Avenue, Electronics City II, Bengaluru – 560100  
+**Email ID:** compliance@ashokeneterprises.in  
+**Authorised Capital:** ₹10,00,000  
+**Paid-up Capital:** ₹5,00,000  
+**Nature of Business:** Research and Development in physical and engineering sciences (NIC Code: 72200)
+
+Ashok Enterprises PRIVATE LIMITED was founded in April 2024 by two technocrats, **Rahul Narayan** and **Priya Sharma**, with the vision to provide specialized R&D services in industrial automation, robotics, and control systems. From its inception, the company has focused on high-value engineering development and B2B consulting for manufacturing clients.
+
+The business commenced operations shortly after incorporation, receiving its Certificate of Commencement of Business on 21 April 2024. The company operates from its technology office in Bengaluru and maintains its primary current account with ICICI Bank.
+
+**Shareholding Structure:**
+- Rahul Narayan: 60% (30,000 shares) - DIN: 09876543
+- Priya Sharma: 40% (20,000 shares) - DIN: 09876544
+
+## Tax & Compliance Summary
+
+**Financial Year 2024–25 (Assessment Year 2025–26):**
+- Gross Turnover: ₹3.82 Crores
+- Total Taxable Income: ₹1.06 Crores
+- Tax Payable: ₹28.04 Lakhs
+- GST Registration: Active from 20 April 2024
+- All TDS Statements (24Q & 26Q) filed without defaults
+
+**HSN Classification:**
+- 84795000 – Industrial Robots
+- 85176290 – Control Units
+
+## Available AI Commands
 
 Type @ to see available commands:
 
-- @Generate Employment Contract
-- @File GST Return
-- @Draft Legal Notice
-- @Check Compliance Status
+- **@Generate Employment Contract** - Create comprehensive employment contracts
+- **@File GST Return** - Generate GST return documentation
+- **@Draft Legal Notice** - Create formal legal notices
+- **@Check Compliance Status** - Verify regulatory compliance
 
-## Document Structure
-
-This editor supports:
-- **Markdown formatting**
-- *Rich text editing*
-- Tables and lists
-- Code blocks
-- Real-time preview
-
-## Agent Integration
-
-The AI agent can help you:
-1. Generate legal documents
-2. Check compliance requirements
-3. File official returns
-4. Draft notices and contracts
-
-Start typing @ to explore commands...`);
+*The AI will automatically use the business information above to generate professional, legally compliant documents.*`);
 
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [selectedCommand, setSelectedCommand] = useState<string | null>(null);
+  const [selectedCommand, setSelectedCommand] = useState<any>(null);
+  const [showPromptDialog, setShowPromptDialog] = useState(false);
+  const [userPrompt, setUserPrompt] = useState<string>("");
   const [agentStatus, setAgentStatus] = useState("idle");
   const [wordCount, setWordCount] = useState(0);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [selectedAgent, setSelectedAgent] = useState("legal-assistant");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [generatedDocument, setGeneratedDocument] = useState<string | null>(null);
+  const [blockchainHash, setBlockchainHash] = useState<string | null>(null);
+  const [agentOutput, setAgentOutput] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
 
   // Calculate word count
@@ -105,6 +128,38 @@ Start typing @ to explore commands...`);
     const words = editorContent.trim().split(/\s+/).filter(word => word.length > 0);
     setWordCount(words.length);
   }, [editorContent]);
+
+  // Get placeholder text for different commands
+  const getPlaceholderText = (command?: string) => {
+    switch (command) {
+      case '@Generate Employment Contract':
+        return `For example:
+"I need an employment contract for Priya Sharma as Chief Technology Officer. Salary: ₹25 LPA, start date: March 1, 2025, probation: 6 months. Include equity participation, remote work flexibility, and IP assignment clauses. She will report to CEO and work from Bangalore office."
+
+The AI will extract: candidate name, position, salary, start date, probation period, benefits, work location, reporting structure, and special clauses automatically.`;
+        
+      case '@File GST Return':
+        return `For example:
+"Generate GST return for Q1 2025 (Jan-Mar). Business: Ashok Enterprises, turnover: ₹95 lakhs, supplies: industrial robots (₹60L) and control units (₹35L), ITC claimed: ₹8 lakhs, interstate sales to Tamil Nadu and Karnataka."
+
+The AI will extract: business name, return period, turnover, taxable supplies, ITC details, HSN codes, and business type automatically.`;
+        
+      case '@Draft Legal Notice':
+        return `For example:
+"Draft a payment default notice to TechCorp Solutions for non-payment of ₹12 lakhs for robotics project delivered on Dec 15, 2024. Contract signed on Oct 1, 2024. Give them 21 days to pay or face legal action including interest at 18% per annum."
+
+The AI will extract: sender, recipient, notice type, amount, deadlines, subject matter, legal grounds, and consequences automatically.`;
+        
+      case '@Check Compliance Status':
+        return `For example:
+"Review compliance status for FY 2024-25. Focus on GST filings, TDS returns, annual filing due dates, and industry-specific R&D compliance. Highlight any pending actions and upcoming deadlines for Q1 2025."
+
+The AI will extract: business name, review period, compliance areas, business type, industry focus, and specific concerns automatically.`;
+        
+      default:
+        return "Describe in natural language what kind of document you need and any specific requirements...";
+    }
+  };
 
   // Handle @ symbol for command palette
   const handleEditorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -119,21 +174,59 @@ Start typing @ to explore commands...`);
     }
   };
 
-  // Insert command into editor
-  const insertCommand = (command: string) => {
-    const newContent = editorContent.replace(/@$/, command);
+  // Insert command into editor and show prompt dialog
+  const insertCommand = (command: any) => {
+    const newContent = editorContent.replace(/@$/, command.command);
     setEditorContent(newContent);
     setShowCommandPalette(false);
     setSelectedCommand(command);
+    setUserPrompt("");
+    setShowPromptDialog(true);
+  };
 
-    // Simulate agent processing
-    setAgentStatus("processing");
+  // Handle document generation with natural language processing
+  const handleDocumentGeneration = async () => {
+    if (!selectedCommand) return;
+
     setIsProcessing(true);
-    setTimeout(() => {
+    setAgentStatus("processing");
+    setError(null);
+    setShowPromptDialog(false);
+
+    try {
+      const response = await fetch('/api/generate-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          command: selectedCommand.command,
+          context: editorContent,
+          specificRequest: userPrompt || `Generate a professional ${selectedCommand.command.replace('@', '').toLowerCase()} based on the business information provided.`
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate document');
+      }
+
+      // Update editor content with generated document
+      setEditorContent(data.document);
+      setGeneratedDocument(data.document);
+      setBlockchainHash(data.blockchainHash);
+      setAgentOutput(data);
       setAgentStatus("completed");
-      setIsProcessing(false);
       setLastSaved(new Date());
-    }, 2000);
+
+    } catch (err) {
+      console.error('Error generating document:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate document');
+      setAgentStatus("error");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   // Format buttons
@@ -174,6 +267,17 @@ Start typing @ to explore commands...`);
     setAgentStatus("saved");
   };
 
+  // Download document
+  const downloadDocument = () => {
+    const element = document.createElement('a');
+    const file = new Blob([editorContent], { type: 'text/markdown' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'legal-document.md';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -182,9 +286,10 @@ Start typing @ to explore commands...`);
         e.preventDefault();
         setShowCommandPalette(true);
       }
-      // Escape to close command palette
+      // Escape to close command palette and prompt dialog
       if (e.key === 'Escape') {
         setShowCommandPalette(false);
+        setShowPromptDialog(false);
       }
     };
 
@@ -203,6 +308,60 @@ Start typing @ to explore commands...`);
               variant="outline"
               size="sm"
               className="border-[#8B4513] text-[#8B4513] hover:bg-[#8B4513] hover:text-white"
+              onClick={() => {
+                setEditorContent(`# Legal Document Draft
+
+Welcome to the LegalEase AI Editor. Use @commands to generate legal documents automatically based on the business context below.
+
+## Business Profile & Operational History
+
+**Company Name:** Ashok Enterprises PRIVATE LIMITED  
+**CIN:** U72200KA2024PTC987654  
+**Date of Incorporation:** 15 April 2024  
+**Business Category:** Private Limited Company, Non-Government  
+**Registered Office:** #42, 3rd Floor, Innov8 Tower, 123 Silicon Avenue, Electronics City II, Bengaluru – 560100  
+**Email ID:** compliance@ashokeneterprises.in  
+**Authorised Capital:** ₹10,00,000  
+**Paid-up Capital:** ₹5,00,000  
+**Nature of Business:** Research and Development in physical and engineering sciences (NIC Code: 72200)
+
+Ashok Enterprises PRIVATE LIMITED was founded in April 2024 by two technocrats, **Rahul Narayan** and **Priya Sharma**, with the vision to provide specialized R&D services in industrial automation, robotics, and control systems. From its inception, the company has focused on high-value engineering development and B2B consulting for manufacturing clients.
+
+The business commenced operations shortly after incorporation, receiving its Certificate of Commencement of Business on 21 April 2024. The company operates from its technology office in Bengaluru and maintains its primary current account with ICICI Bank.
+
+**Shareholding Structure:**
+- Rahul Narayan: 60% (30,000 shares) - DIN: 09876543
+- Priya Sharma: 40% (20,000 shares) - DIN: 09876544
+
+## Tax & Compliance Summary
+
+**Financial Year 2024–25 (Assessment Year 2025–26):**
+- Gross Turnover: ₹3.82 Crores
+- Total Taxable Income: ₹1.06 Crores
+- Tax Payable: ₹28.04 Lakhs
+- GST Registration: Active from 20 April 2024
+- All TDS Statements (24Q & 26Q) filed without defaults
+
+**HSN Classification:**
+- 84795000 – Industrial Robots
+- 85176290 – Control Units
+
+## Available AI Commands
+
+Type @ to see available commands:
+
+- **@Generate Employment Contract** - Create comprehensive employment contracts
+- **@File GST Return** - Generate GST return documentation
+- **@Draft Legal Notice** - Create formal legal notices
+- **@Check Compliance Status** - Verify regulatory compliance
+
+*The AI will automatically use the business information above to generate professional, legally compliant documents.*`);
+                setAgentOutput(null);
+                setBlockchainHash(null);
+                setGeneratedDocument(null);
+                setError(null);
+                setAgentStatus("idle");
+              }}
             >
               <Plus className="w-4 h-4 mr-2" />
               New
@@ -220,6 +379,7 @@ Start typing @ to explore commands...`);
               variant="outline"
               size="sm"
               className="border-[#8B4513] text-[#8B4513] hover:bg-[#8B4513] hover:text-white"
+              onClick={downloadDocument}
             >
               <Download className="w-4 h-4 mr-2" />
               Export
@@ -278,14 +438,83 @@ Start typing @ to explore commands...`);
             <Button
               className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
               onClick={() => setShowCommandPalette(true)}
+              disabled={isProcessing}
             >
+              {isProcessing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
               <Sparkles className="w-4 h-4 mr-2" />
+              )}
               Generate
               <span className="ml-2 text-xs opacity-75">Ctrl+Shift+P</span>
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Natural Language Prompt Dialog */}
+      <Dialog open={showPromptDialog} onOpenChange={setShowPromptDialog}>
+        <DialogContent className="sm:max-w-[600px] bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-[#8B4513] flex items-center">
+              <Sparkles className="w-5 h-5 mr-2" />
+              {selectedCommand?.command}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="userPrompt" className="text-sm font-medium text-[#2A2A2A]">
+                Describe what you want to generate
+              </Label>
+              <div className="text-xs text-[#8B7355] mb-2">
+                {selectedCommand?.description}
+              </div>
+              <Textarea
+                id="userPrompt"
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value)}
+                placeholder={getPlaceholderText(selectedCommand?.command)}
+                className="min-h-[120px] border-[#D1C4B8] resize-none"
+                rows={5}
+              />
+              <div className="text-xs text-[#8B7355] mt-2">
+                💡 The AI will use the business context from the editor above along with your specific requirements to generate a professional document.
+              </div>
+            </div>
+            {error && (
+              <div className="text-red-500 text-sm p-2 bg-red-50 rounded">
+                {error}
+              </div>
+            )}
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowPromptDialog(false)}
+                className="border-[#8B4513] text-[#8B4513]"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDocumentGeneration}
+                disabled={isProcessing}
+                className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Generate Document
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Editor Area */}
       <div className="flex h-[calc(100vh-120px)]">
@@ -330,9 +559,19 @@ Start typing @ to explore commands...`);
               {showCommandPalette && (
                 <div className="absolute top-4 left-4 w-80 bg-white border border-[#D1C4B8] rounded-lg shadow-lg z-10">
                   <div className="p-3 border-b border-[#D1C4B8]">
+                    <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Command className="w-4 h-4 text-[#8B4513]" />
                       <span className="text-sm font-medium text-[#2A2A2A]">AI Commands</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowCommandPalette(false)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
@@ -340,7 +579,7 @@ Start typing @ to explore commands...`);
                       <div
                         key={cmd.id}
                         className="p-3 hover:bg-[#F8F3EE] cursor-pointer border-b border-[#D1C4B8] last:border-b-0"
-                        onClick={() => insertCommand(cmd.command)}
+                        onClick={() => insertCommand(cmd)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -351,11 +590,12 @@ Start typing @ to explore commands...`);
                               {cmd.description}
                             </div>
                             <div className="flex flex-wrap gap-1 mt-2">
-                              {cmd.parameters.map((param, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs bg-[#E8DDD1] text-[#8B7355]">
-                                  {param}
+                              <Badge variant="secondary" className="text-xs bg-[#E8DDD1] text-[#8B7355]">
+                                AI-Powered
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs bg-[#E8DDD1] text-[#8B7355]">
+                                Context-Aware
                                 </Badge>
-                              ))}
                             </div>
                           </div>
                           <Sparkles className="w-4 h-4 text-[#8B4513] mt-1" />
@@ -430,7 +670,7 @@ Start typing @ to explore commands...`);
                 <Card className="mt-4 bg-white border-[#D1C4B8] shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8B4513]"></div>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#8B4513]" />
                       <span className="text-sm text-[#8B7355]">AI agent is processing your request...</span>
                     </div>
                   </CardContent>
@@ -438,17 +678,19 @@ Start typing @ to explore commands...`);
               )}
 
               {/* Agent Output Logs */}
-              {selectedCommand && !isProcessing && (
+              {agentOutput && !isProcessing && (
                 <Card className="mt-4 bg-white border-[#D1C4B8] shadow-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2 mb-3">
+                  <CardHeader>
+                    <CardTitle className="text-sm flex items-center space-x-2">
                       <Sparkles className="w-4 h-4 text-[#8B4513]" />
-                      <span className="text-sm font-medium text-[#2A2A2A]">AI Agent Output</span>
-                    </div>
-                    <div className="text-sm text-[#8B7355] space-y-2">
+                      <span className="text-[#2A2A2A]">AI Agent Output</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0">
+                    <div className="text-sm text-[#8B7355] space-y-3">
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="w-4 h-4 text-green-600" />
-                        <span>Command executed: {selectedCommand}</span>
+                        <span>Command executed: {agentOutput.documentType}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <FileCheck className="w-4 h-4 text-blue-600" />
@@ -456,8 +698,49 @@ Start typing @ to explore commands...`);
                       </div>
                       <div className="flex items-center space-x-2">
                         <Hash className="w-4 h-4 text-purple-600" />
-                        <span>Blockchain hash: 0x1234...abcd</span>
+                        <span>Blockchain hash: {agentOutput.blockchainHash}</span>
                       </div>
+                      
+                      {/* Extracted Data Display */}
+                      {agentOutput.extractedData && Object.keys(agentOutput.extractedData).length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-[#D1C4B8]">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Search className="w-4 h-4 text-orange-600" />
+                            <span className="font-medium text-[#2A2A2A]">Extracted Information:</span>
+                          </div>
+                          <div className="bg-[#F8F3EE] p-3 rounded border border-[#D1C4B8] max-h-32 overflow-y-auto">
+                            <div className="text-xs space-y-1">
+                              {Object.entries(agentOutput.extractedData).map(([key, value]) => (
+                                value !== 'NOT_PROVIDED' && (
+                                  <div key={key} className="flex items-start space-x-2">
+                                    <span className="font-medium text-[#8B4513] capitalize min-w-0 flex-shrink-0">
+                                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
+                                    </span>
+                                    <span className="text-[#2A2A2A] break-words">{value as string}</span>
+                                  </div>
+                                )
+                              ))}
+                              {Object.values(agentOutput.extractedData).every(v => v === 'NOT_PROVIDED') && (
+                                <div className="text-[#8B7355] italic">
+                                  No specific details extracted - using business context and defaults
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Error Display */}
+              {error && !isProcessing && (
+                <Card className="mt-4 bg-white border-red-200 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-2">
+                      <AlertCircle className="w-4 h-4 text-red-600" />
+                      <span className="text-sm text-red-600">{error}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -473,9 +756,10 @@ Start typing @ to explore commands...`);
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
               {agentStatus === "idle" && <AlertCircle className="w-4 h-4" />}
-              {agentStatus === "processing" && <Clock className="w-4 h-4 animate-spin" />}
+              {agentStatus === "processing" && <Loader2 className="w-4 h-4 animate-spin" />}
               {agentStatus === "completed" && <CheckCircle className="w-4 h-4 text-green-600" />}
               {agentStatus === "saved" && <FileCheck className="w-4 h-4 text-blue-600" />}
+              {agentStatus === "error" && <AlertCircle className="w-4 h-4 text-red-600" />}
               <span className="capitalize">{agentStatus}</span>
             </div>
             <Separator orientation="vertical" className="h-4" />
@@ -488,11 +772,15 @@ Start typing @ to explore commands...`);
             )}
           </div>
           <div className="flex items-center space-x-4">
+            {blockchainHash && (
+              <>
             <div className="flex items-center space-x-1">
               <Hash className="w-4 h-4" />
-              <span>Hash: 0x1234...abcd</span>
+                  <span>Hash: {blockchainHash}</span>
             </div>
             <Separator orientation="vertical" className="h-4" />
+              </>
+            )}
             <div className="flex items-center space-x-1">
               <Settings className="w-4 h-4" />
               <span>Auto-save enabled</span>
